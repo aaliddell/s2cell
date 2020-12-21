@@ -1,6 +1,10 @@
 s2cell
 ======
 
+Minimal Python `S2 <https://s2geometry.io/>`_
+`cell ID <https://s2geometry.io/devguide/s2cell_hierarchy.html>`_, S2Point and lat/lon conversion
+library.
+
 .. image:: https://github.com/aaliddell/s2cell/workflows/CI/badge.svg
    :alt: CI Status
    :target: https://github.com/aaliddell/s2cell/actions
@@ -14,9 +18,8 @@ s2cell
    :target: https://pypi.org/project/s2cell/
 
 
-Minimal Python `S2 <https://s2geometry.io/>`_
-`cell ID <https://s2geometry.io/devguide/s2cell_hierarchy.html>`_, S2Point and lat/lon conversion
-library.
+Overview
+--------
 
 This library only does conversion between S2 cell ID/token, S2Point and latitude/longitude and was
 written as a method to understand the way the S2 cell system works; hopefully this is useful as a
