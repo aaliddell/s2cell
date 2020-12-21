@@ -24,6 +24,11 @@ def flake8(session):
     session.run('flake8', 's2cell', 'tests', *session.posargs)
 
 @nox.session()
+def pylint(session):
+    session.install('.[dev]')
+    session.run('pylint', 's2cell', *session.posargs)
+
+@nox.session()
 def pydocstyle(session):
     session.install('.[dev]')
     session.run('pydocstyle', 's2cell', *session.posargs)

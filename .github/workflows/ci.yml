@@ -39,6 +39,8 @@ jobs:
         run: pip install nox
       - name: Run flake8
         run: nox -s flake8
+      - name: Run pylint
+        run: nox -s pylint
       - name: Run bandit
         run: nox -s bandit
       - name: Run pydocstyle
