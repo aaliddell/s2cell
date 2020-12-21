@@ -4,7 +4,7 @@ import math
 
 import numpy as np
 
-__all__ = []  # TODO
+__version__ = '0.0.0'
 
 
 #
