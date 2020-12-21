@@ -23,7 +23,7 @@ setuptools.setup(
     long_description_content_type="text/x-rst",
     url='https://github.com/aaliddell/s2cell',
     packages=setuptools.find_packages(),
-    python_requires='>=3.6',
+    python_requires='>=3.5',
     install_requires=[
         'numpy>=1.15,<2',
     ],
