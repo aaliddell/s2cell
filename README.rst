@@ -13,6 +13,7 @@ s2cell
    :alt: PyPI Version
    :target: https://pypi.org/project/s2cell/
 
+
 Minimal Python `S2 <https://s2geometry.io/>`_
 `cell ID <https://s2geometry.io/devguide/s2cell_hierarchy.html>`_, S2Point and lat/lon conversion
 library.
