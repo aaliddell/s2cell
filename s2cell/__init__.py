@@ -69,9 +69,9 @@ def _s2_uv_to_st(component: float) -> float:
     """
     Convert S2 UV to ST.
 
-    This is done using the quadratic projection that is used by default for S2. The C++ and
-    Java S2 libraries use a different definition of the ST cell-space, but the end result in
-    IJ is the same. The below uses the C++ ST definition.
+    This is done using the quadratic projection that is used by default for S2. The C++ and Java S2
+    libraries use a different definition of the ST cell-space, but the end result in IJ is the same.
+    The below uses the C++ ST definition.
 
     See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L317-L320
 
@@ -85,9 +85,9 @@ def _s2_st_to_uv(component: float) -> float:
     """
     Convert S2 ST to UV.
 
-    This is done using the quadratic projection that is used by default for S2. The C++ and
-    Java S2 libraries use a different definition of the ST cell-space, but the end result in
-    IJ is the same. The below uses the C++ ST definition.
+    This is done using the quadratic projection that is used by default for S2. The C++ and Java S2
+    libraries use a different definition of the ST cell-space, but the end result in IJ is the same.
+    The below uses the C++ ST definition.
 
     See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L312-L315
 
@@ -114,6 +114,8 @@ def _s2_si_ti_to_st(component: np.uint64) -> float:
     """
     Convert S2 Si/Ti to ST.
 
+    This converts an integer in range 0 to _S2_MAX_SI_TI into a float in range 0.0 to 1.0.
+
     See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L338-L341
 
     """
@@ -125,10 +127,9 @@ def _s2_init_lookups() -> None:
     Initialise the S2 lookups in global vars _S2_LOOKUP_POS and _S2_LOOKUP_IJ.
 
     This generates 4 variations of a 4 level deep Hilbert curve, one for each swap/invert bit
-    combination. This allows mapping between 8 bits (+2 orientation) of Hilbert curve position
-    and 8 bits (+2 orientation) of I and J, and vice versa. The new orientation bits read from the
-    mapping tell us the base orientation of the curve segments within the next deeper level of
-    sub-cells.
+    combination. This allows mapping between 8 bits (+2 orientation) of Hilbert curve position and 8
+    bits (+2 orientation) of I and J, and vice versa. The new orientation bits read from the mapping
+    tell us the base orientation of the curve segments within the next deeper level of sub-cells.
 
     This implementation differs in structure from the reference implementation, since it is
     iterative rather than recursive. The end result is the same lookup table.
@@ -209,8 +210,8 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     # Populate _S2_LOOKUP_POS on first run.
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109
     #
-    # This table takes 10 bits of I and J and orientation and returns 10 bits of curve position
-    # and new orientation
+    # This table takes 10 bits of I and J and orientation and returns 10 bits of curve position and
+    # new orientation
     if _S2_LOOKUP_POS is None:  # pragma: no cover
         _s2_init_lookups()
 
@@ -233,8 +234,8 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     # Get cube face
     # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L380-L384
     #
-    # The face is determined by the largest XYZ component of the S2Point vector. When the
-    # component is negative, the second set of three faces is used.
+    # The face is determined by the largest XYZ component of the S2Point vector. When the component
+    # is negative, the second set of three faces is used.
     # Largest component -> face:
     # +x -> 0
     # +y -> 1
@@ -250,8 +251,8 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L366-L372
     #
     # The faces are oriented to ensure continuity of curve.
-    # Face -> UV components -> indices with negation (without divisor, which is always the
-    # remaining component (index: face % 3)):
+    # Face -> UV components -> indices with negation (without divisor, which is always the remaining
+    # component (index: face % 3)):
     # 0 -> ( y,  z) -> ( 1,  2)
     # 1 -> (-x,  z) -> (-0,  2)
     # 2 -> (-x, -y) -> (-0, -1) <- -1 here means -1 times the value in index 1, not index -1
@@ -259,8 +260,8 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     # 4 -> ( z, -x) -> ( 2, -0)
     # 5 -> (-y, -x) -> (-1, -0)
     #
-    # For a compiled language, a switch statement on face is preferable as it will be more
-    # easily optimised as a jump table etc; but in Python the indexing method is more concise.
+    # For a compiled language, a switch statement on face is preferable as it will be more easily
+    # optimised as a jump table etc; but in Python the indexing method is more concise.
     #
     # The index selection can be reduced to some bit magic:
     # U: 1 - ((face + 1) >> 1)
@@ -291,18 +292,18 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     #
     # This is done by looking up 8 bits of I and J (4 each) at a time in the lookup table, along
     # with two bits of orientation (swap (1) and invert (2)). This gives back 8 bits of position
-    # along the curve and two new orientation bits for the curve within the sub-cells in the
-    # next step.
+    # along the curve and two new orientation bits for the curve within the sub-cells in the next
+    # step.
     #
     # The swap bit swaps I and J with each other
     # The invert bit inverts the bits of I and J, which means axes are negated
     #
-    # Compared to the standard versions, we check the required number of steps we need to do for
-    # the requested level and don't perform steps that will be completely overwritten in the
-    # truncation below, rather than always doing every step. Each step does 4 bits each of I and
-    # J, which is 4 levels, so the required number of steps is ceil((level + 2) / 4), when level
-    # is > 0. The additional 2 levels added are required to account for the top 3 bits (4 before
-    # right shift) that are occupied by the face bits.
+    # Compared to the standard versions, we check the required number of steps we need to do for the
+    # requested level and don't perform steps that will be completely overwritten in the truncation
+    # below, rather than always doing every step. Each step does 4 bits each of I and J, which is 4
+    # levels, so the required number of steps is ceil((level + 2) / 4), when level is > 0. The
+    # additional 2 levels added are required to account for the top 3 bits (4 before right shift)
+    # that are occupied by the face bits.
     bits = np.uint64(face) & _S2_SWAP_MASK  # iiiijjjjoo. Initially set by by face
     cell_id = np.uint64(face << (_S2_POS_BITS - 1))  # Insert face at most signficant bits
     lookup_mask = np.uint64((1 << _S2_LOOKUP_BITS) - 1)
@@ -324,16 +325,16 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
 
     # Left shift and add trailing bit
     # The trailing bit addition is disabled, as we are overwriting this below in the truncation
-    # anyway. This line is kept as an example of the full method for S2 cell ID creation as is
-    # done in the standard library versions.
+    # anyway. This line is kept as an example of the full method for S2 cell ID creation as is done
+    # in the standard library versions.
     cell_id = (cell_id << np.uint8(1))  # + np.uint64(1)
 
     # Truncate to desired level
-    # This is done by finding the mask of the trailing 1 bit for the specified level, then
-    # zeroing out all bits less significant than this, then finally setting the trailing 1 bit.
-    # This is still necessary to do even after a reduced number of steps `required_steps` above,
-    # since each step contains multiple levels that may need partial overwrite. Additionally, we
-    # need to add the trailing 1 bit, which is not yet set.
+    # This is done by finding the mask of the trailing 1 bit for the specified level, then zeroing
+    # out all bits less significant than this, then finally setting the trailing 1 bit. This is
+    # still necessary to do even after a reduced number of steps `required_steps` above, since each
+    # step contains multiple levels that may need partial overwrite. Additionally, we need to add
+    # the trailing 1 bit, which is not yet set above.
     least_significant_bit_mask = np.uint64(1) << np.uint32(2 * (_S2_MAX_LEVEL - level))
     cell_id = (cell_id & -least_significant_bit_mask) | least_significant_bit_mask
 
@@ -344,8 +345,8 @@ def lat_lon_to_token(lat: float, lon: float, level: int = 30) -> str:
     """
     Convert lat/lon to a S2 token.
 
-    Converts the S2 cell ID to hex and strips any trailing zeros. The 0 cell ID token is
-    represented as 'X' to prevent it being an empty string.
+    Converts the S2 cell ID to hex and strips any trailing zeros. The 0 cell ID token is represented
+    as 'X' to prevent it being an empty string.
 
     It is expected that the lat/lon provided are normalised, with latitude in the range -90 to 90.
 
@@ -366,9 +367,9 @@ def lat_lon_to_token(lat: float, lon: float, level: int = 30) -> str:
     # Get the cell ID for the lat/lon
     cell_id = lat_lon_to_cell_id(lat=lat, lon=lon, level=level)
 
-    # The zero token is encoded as 'X' rather than as a zero-length string. This implementation
-    # has no method of generating the 0 cell ID, so this line is mostly here for consistency
-    # with the reference implementation.
+    # The zero token is encoded as 'X' rather than as a zero-length string. This implementation has
+    # no method of generating the 0 cell ID, so this line is mostly here for consistency with the
+    # reference implementation.
     if cell_id == 0:  # pragma: no cover
         return 'X'
 
@@ -399,47 +400,44 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
 
     # Populate _S2_LOOKUP_IJ on first run.
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109
-    # This table takes 10 bits of curve position and orientation and returns 10 bits of I and J
-    # and new orientation
+    # This table takes 10 bits of curve position and orientation and returns 10 bits of I and J and
+    # new orientation
     if _S2_LOOKUP_IJ is None:  # pragma: no cover
         _s2_init_lookups()
 
     # Extract face + IJ from cell ID
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L312-L367
     #
-    # This is done by looking up 8 bits of curve position at a time in the lookup table, along
-    # with two bits of orientation (swap (1) and invert (2)). This gives back 8 bits of I and J
-    # (4 each) and two new orientation bits for the curve within the sub-cells in the
-    # next step.
+    # This is done by looking up 8 bits of curve position at a time in the lookup table, along with
+    # two bits of orientation (swap (1) and invert (2)). This gives back 8 bits of I and J (4 each)
+    # and two new orientation bits for the curve within the sub-cells in the next step.
     #
     # The swap bit swaps I and J with each other
     # The invert bit inverts the bits of I and J, which means axes are negated
     #
-    # In the first loop (most significant bits), the 3 bits occupied by the face need to be
-    # masked out, since these are not set in the IJ to cell ID during encoding.
+    # In the first loop (most significant bits), the 3 bits occupied by the face need to be masked
+    # out, since these are not set in the IJ to cell ID during encoding.
     #
     # The I and J returned here are of one of the two leaf (level 30) cells that are located
-    # diagonally closest to the cell centre. This happens because repeated ..00.. will select
-    # the 'lower left' (for nominally oriented Hilbert curve segments) of the sub-cells. The
-    # ..10.. arising from the trailing bit, prior to the repeated ..00.. bits, ensures we first
-    # pick the 'upper right' of the cell, then iterate in to lower left until we hit the leaf
-    # cell. However, in the case of the swapped and inverted curve segment (4th sub0curve
-    # segment), the ..10.. will select the 'lower left' and then iterate to the 'upper right'
-    # with each ..00.. following. In that case, we will be offset left and down by one leaf cell
-    # in each of I and J, which needs to be added to have a consistent mapping. This is
-    # detectable by seeing that the final bit of I or J is 1 (i.e we have picked an odd
-    # row/column, which will happen concurrently in both I and J, so we only need to check one),
-    # except in case of level 29 where the logic is inverted and the correction needs to be
-    # applied when we pick an even row/column (i.e I/J ends in 0), since there are no trailing
-    # ..00..
+    # diagonally closest to the cell centre. This happens because repeated ..00.. will select the
+    # 'lower left' (for nominally oriented Hilbert curve segments) of the sub-cells. The ..10..
+    # arising from the trailing bit, prior to the repeated ..00.. bits, ensures we first pick the
+    # 'upper right' of the cell, then iterate in to lower left until we hit the leaf cell. However,
+    # in the case of the swapped and inverted curve segment (4th sub-curve segment), the ..10.. will
+    # select the 'lower left' and then iterate to the 'upper right' with each ..00.. following. In
+    # that case, we will be offset left and down by one leaf cell in each of I and J, which needs to
+    # be added to have a consistent mapping. This is detectable by seeing that the final bit of I or
+    # J is 1 (i.e we have picked an odd row/column, which will happen concurrently in both I and J,
+    # so we only need to check one), except in case of level 29 where the logic is inverted and the
+    # correction needs to be applied when we pick an even row/column (i.e I/J ends in 0), since
+    # there are no trailing ..00..
     #
     # This behaviour can be captured in the expression:
     # apply_correction = not leaf and (i ^ (is level 29)) & 1
     # apply_corerction = not leaf and (i ^ (cell_id >> 2)) & 1
     #
-    # We check for level 29 by looking for the trailing 1 in third LSB, when we already know
-    # that we are not a leaf cell (which could give false positive) by the initial check in the
-    # expression.
+    # We check for level 29 by looking for the trailing 1 in third LSB, when we already know that we
+    # are not a leaf cell (which could give false positive) by the initial check in the expression.
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.h#L503-L529
     #
     face = cell_id >> _S2_POS_BITS
@@ -466,12 +464,12 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
         # Remove I and J bits, leaving just new swap and invert bits for the next round
         bits &= (_S2_SWAP_MASK | _S2_INVERT_MASK)
 
-    # Resolve the centre of the cell. For leaf cells, we add half the leaf cell size. For
-    # non-leaf cells, we currently have one of either two cells diagonally around the cell
-    # centre, as descibed above. The centre_correction_delta is 2x the offset, as we left shift
-    # I and J first. This gives us the values Si and Ti, which are discrete representation of
-    # S and T in range 0 to _S2_MAX_SI_TI. The extra power of 2 over IJ allows for identifying
-    # both the centre and edge of cells, whilst IJ is just the leaf cells.
+    # Resolve the centre of the cell. For leaf cells, we add half the leaf cell size. For non-leaf
+    # cells, we currently have one of either two cells diagonally around the cell centre, as
+    # described above. The centre_correction_delta is 2x the offset, as we left shift I and J first.
+    # This gives us the values Si and Ti, which are discrete representation of S and T in range 0 to
+    # _S2_MAX_SI_TI. The extra power of 2 over IJ allows for identifying both the centre and edge of
+    # cells, whilst IJ is just the leaf cells.
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L57-L65
     is_leaf = bool(cell_id & np.uint64(1))  # Cell is leaf cell when trailing one bit is in LSB
     apply_correction = not is_leaf and ((i ^ (cell_id >> np.uint32(2))) & np.uint64(1))
@@ -512,11 +510,10 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
 
     # Normalise XYZ S2Point vector
     # This section is part of the reference implementation but is not necessary when mapping
-    # straight into lat/lon, since the normalised and unnormalised triangles used to calculate
-    # the angles are geometrically similar. If anything, the normalisation process loses
-    # precision when tested against the reference implementation, albeit not at a level that is
-    # important either way. The code below is left for demonstration of the normalisation
-    # process.
+    # straight into lat/lon, since the normalised and unnormalised triangles used to calculate the
+    # angles are geometrically similar. If anything, the normalisation process loses precision when
+    # tested against the reference implementation, albeit not at a level that is important either
+    # way. The code below is left for demonstration of the normalisation process.
     # norm = math.sqrt(s2_point[0] ** 2 + s2_point[1] ** 2 + s2_point[2] ** 2)
     # s2_point = (s2_point[0] / norm, s2_point[1] / norm, s2_point[2] / norm)
 
