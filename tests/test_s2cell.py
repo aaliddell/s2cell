@@ -36,6 +36,11 @@ def test_cell_id_to_token_compat():
             assert s2cell.cell_id_to_token(int(row['cell_id'])) == row['token']
 
 
+def test_zero_token_to_cell_id():
+    assert s2cell.token_to_cell_id('x') == 0
+    assert s2cell.token_to_cell_id('X') == 0
+
+
 def test_invalid_token_to_cell_id():
     with pytest.raises(TypeError, match=re.escape("Cannot convert S2 token from type: <class 'float'>")):
         s2cell.token_to_cell_id(1.0)

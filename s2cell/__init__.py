@@ -256,6 +256,10 @@ def token_to_cell_id(token: str) -> np.uint64:
     if not isinstance(token, str):
         raise TypeError('Cannot convert S2 token from type: ' + str(type(token)))
 
+    if token in ('x', 'X'):
+        # The zero cell ID is represented as the character 'X' rather than as an empty string
+        return np.uint64(0)
+
     if len(token) > 16:
         raise ValueError('Cannot convert S2 token with length > 16 characters')
 
@@ -263,7 +267,7 @@ def token_to_cell_id(token: str) -> np.uint64:
     token = token + ('0' * (16 - len(token)))
 
     # Convert to cell ID by converting hex to int
-    return int(token, 16)
+    return np.uint64(int(token, 16))
 
 
 #
