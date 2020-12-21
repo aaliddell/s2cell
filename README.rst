@@ -21,10 +21,10 @@ library.
 Overview
 --------
 
-This library only does conversion between S2 cell ID/token, S2Point and latitude/longitude and was
-written as a method to understand the way the S2 cell system works; hopefully this is useful as a
+This library does conversion between S2 cell ID, S2 token and latitude/longitude and was written as
+a method to understand the way the S2 cell system works; hopefully this is useful to others as a
 single-file reference on the process. All steps in the conversion are well commented and written to
-be understandable rather than necessarily fast.
+be understandable and functional rather than necessarily fast.
 
 The library is checked against a test suite generated from the
 `reference C++ implementation <https://github.com/google/s2geometry>`_ to ensure conformity with the

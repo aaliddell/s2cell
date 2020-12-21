@@ -23,7 +23,7 @@ __version__ = '1.0.0'
 
 
 #
-# S2 base constants needed for S2 cell mapping
+# S2 base constants needed for cell mapping
 #
 
 # The maximum level supported within an S2 cell ID. Each level is represented by two bits in the
