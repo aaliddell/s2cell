@@ -59,4 +59,4 @@ def upload_release(session):
     session.run('twine', 'check', 'dist/*')
 
     # Upload to PyPI
-    session.run('twine', 'upload', '-r' , 'testpypi', 'dist/*')  # TODO: remove test repo
+    session.run('twine', 'upload', 'dist/*')
