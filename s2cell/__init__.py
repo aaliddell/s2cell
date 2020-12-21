@@ -1,6 +1,7 @@
 """Minimal Python S2 cell ID, S2Point and lat/lon conversion library."""
 
 import math
+from typing import Tuple, Union
 
 import numpy as np
 
@@ -58,7 +59,6 @@ _S2_POS_TO_IJ = np.array([
 _S2_POS_TO_ORIENTATION_MASK = np.array([
     _S2_SWAP_MASK, 0, 0, _S2_SWAP_MASK | _S2_INVERT_MASK
 ], dtype=np.uint64)
-
 
 
 #
@@ -339,6 +339,7 @@ def lat_lon_to_cell_id(
 
     return cell_id
 
+
 def lat_lon_to_token(lat: float, lon: float, level: int = 30) -> str:
     """
     Convert lat/lon to a S2 token.
@@ -373,6 +374,7 @@ def lat_lon_to_token(lat: float, lon: float, level: int = 30) -> str:
 
     # Convert cell ID to hex and strip any trailing zeros
     return '{:016x}'.format(cell_id).rstrip('0')
+
 
 def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
     cell_id: Union[int, np.uint64]
@@ -523,7 +525,8 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
     lat_rad = math.atan2(s2_point[2], math.sqrt(s2_point[0] ** 2 + s2_point[1] ** 2))
     lon_rad = math.atan2(s2_point[1], s2_point[0])
 
-    return (math.degrees(lat_rad), lon=math.degrees(lon_rad))
+    return (math.degrees(lat_rad), math.degrees(lon_rad))
+
 
 def token_to_lat_lon(token: str) -> Tuple[float, float]:
     """
