@@ -373,3 +373,185 @@ def lat_lon_to_token(lat: float, lon: float, level: int = 30) -> str:
 
     # Convert cell ID to hex and strip any trailing zeros
     return '{:016x}'.format(cell_id).rstrip('0')
+
+def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
+    cell_id: Union[int, np.uint64]
+) -> Tuple[float, float]:
+    """
+    Convert S2 cell ID to lat/lon.
+
+    Args:
+        cell_id: The S2 cell ID integer.
+
+    Returns:
+        The lat/lon (in degrees) tuple generated from the S2 cell ID.
+
+    Raises:
+        TypeError: If the cell_id is not int or np.uint64.
+
+    """
+    # Check type
+    if not isinstance(cell_id, (int, np.uint64)):
+        raise TypeError('Cannot decode S2 cell ID from type: ' + str(type(cell_id)))
+    cell_id = np.uint64(cell_id)
+
+    # Populate _S2_LOOKUP_IJ on first run.
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109
+    # This table takes 10 bits of curve position and orientation and returns 10 bits of I and J
+    # and new orientation
+    if _S2_LOOKUP_IJ is None:  # pragma: no cover
+        _s2_init_lookups()
+
+    # Extract face + IJ from cell ID
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L312-L367
+    #
+    # This is done by looking up 8 bits of curve position at a time in the lookup table, along
+    # with two bits of orientation (swap (1) and invert (2)). This gives back 8 bits of I and J
+    # (4 each) and two new orientation bits for the curve within the sub-cells in the
+    # next step.
+    #
+    # The swap bit swaps I and J with each other
+    # The invert bit inverts the bits of I and J, which means axes are negated
+    #
+    # In the first loop (most significant bits), the 3 bits occupied by the face need to be
+    # masked out, since these are not set in the IJ to cell ID during encoding.
+    #
+    # The I and J returned here are of one of the two leaf (level 30) cells that are located
+    # diagonally closest to the cell centre. This happens because repeated ..00.. will select
+    # the 'lower left' (for nominally oriented Hilbert curve segments) of the sub-cells. The
+    # ..10.. arising from the trailing bit, prior to the repeated ..00.. bits, ensures we first
+    # pick the 'upper right' of the cell, then iterate in to lower left until we hit the leaf
+    # cell. However, in the case of the swapped and inverted curve segment (4th sub0curve
+    # segment), the ..10.. will select the 'lower left' and then iterate to the 'upper right'
+    # with each ..00.. following. In that case, we will be offset left and down by one leaf cell
+    # in each of I and J, which needs to be added to have a consistent mapping. This is
+    # detectable by seeing that the final bit of I or J is 1 (i.e we have picked an odd
+    # row/column, which will happen concurrently in both I and J, so we only need to check one),
+    # except in case of level 29 where the logic is inverted and the correction needs to be
+    # applied when we pick an even row/column (i.e I/J ends in 0), since there are no trailing
+    # ..00..
+    #
+    # This behaviour can be captured in the expression:
+    # apply_correction = not leaf and (i ^ (is level 29)) & 1
+    # apply_corerction = not leaf and (i ^ (cell_id >> 2)) & 1
+    #
+    # We check for level 29 by looking for the trailing 1 in third LSB, when we already know
+    # that we are not a leaf cell (which could give false positive) by the initial check in the
+    # expression.
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.h#L503-L529
+    #
+    face = cell_id >> _S2_POS_BITS
+    bits = face & _S2_SWAP_MASK  # ppppppppoo. Initially set by by face
+    lookup_mask = np.uint64((1 << _S2_LOOKUP_BITS) - 1)
+    i = np.uint64(0)
+    j = np.uint64(0)
+    for k in range(7, -1, -1):
+        # Pull out 8 bits of cell ID, except in first loop where we pull out only 4
+        n_bits = (_S2_MAX_LEVEL - 7 * _S2_LOOKUP_BITS) if k == 7 else _S2_LOOKUP_BITS
+        extract_mask = np.uint64((1 << (2 * n_bits)) - 1)  # 8 (or 4) one bits
+        bits += (
+            (cell_id >> np.uint32(k * 2 * _S2_LOOKUP_BITS + 1)) & extract_mask
+        ) << np.uint32(2)
+
+        # Map bits from ppppppppoo to iiiijjjjoo
+        bits = _S2_LOOKUP_IJ[bits]
+
+        # Extract I and J bits
+        offset = np.uint32(k * _S2_LOOKUP_BITS)
+        i += (bits >> np.uint32(_S2_LOOKUP_BITS + 2)) << offset  # Don't need lookup mask here
+        j += ((bits >> np.uint32(2)) & lookup_mask) << offset
+
+        # Remove I and J bits, leaving just new swap and invert bits for the next round
+        bits &= (_S2_SWAP_MASK | _S2_INVERT_MASK)
+
+    # Resolve the centre of the cell. For leaf cells, we add half the leaf cell size. For
+    # non-leaf cells, we currently have one of either two cells diagonally around the cell
+    # centre, as descibed above. The centre_correction_delta is 2x the offset, as we left shift
+    # I and J first. This gives us the values Si and Ti, which are discrete representation of
+    # S and T in range 0 to _S2_MAX_SI_TI. The extra power of 2 over IJ allows for identifying
+    # both the centre and edge of cells, whilst IJ is just the leaf cells.
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L57-L65
+    is_leaf = bool(cell_id & np.uint64(1))  # Cell is leaf cell when trailing one bit is in LSB
+    apply_correction = not is_leaf and ((i ^ (cell_id >> np.uint32(2))) & np.uint64(1))
+    centre_correction_delta = np.uint64(1 if is_leaf else (2 if apply_correction else 0))
+    si = (i << np.uint32(1)) + centre_correction_delta  # pylint: disable=invalid-name
+    ti = (j << np.uint32(1)) + centre_correction_delta  # pylint: disable=invalid-name
+
+    # Convert integer si/ti to double ST
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L338-L341
+    st = (_s2_si_ti_to_st(si), _s2_si_ti_to_st(ti))  # pylint: disable=invalid-name
+
+    # Project cell-space ST to cube-space UV
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L312-L315
+    uv = (_s2_st_to_uv(st[0]), _s2_st_to_uv(st[1]))  # pylint: disable=invalid-name
+
+    # Convert face + UV to S2Point XYZ
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L348-L357
+    #
+    # Face -> XYZ components -> indices with negation:
+    # 0    -> ( 1,  u,  v)   -> ( 2,  0,  1)
+    # 1    -> (-u,  1,  v)   -> (-0,  2,  1)
+    # 2    -> (-u, -v,  1)   -> (-0, -1,  2)
+    # 3    -> (-1, -v, -u)   -> (-2, -1, -0) <- -1 here means -1 times the value in index 1,
+    # 4    -> ( v, -1, -u)   -> ( 1, -2, -0)    not index -1
+    # 5    -> ( v,  u, -1)   -> ( 1,  0, -2)
+    if face == 0:
+        s2_point = (1, uv[0], uv[1])
+    elif face == 1:
+        s2_point = (-uv[0], 1, uv[1])
+    elif face == 2:
+        s2_point = (-uv[0], -uv[1], 1)
+    elif face == 3:
+        s2_point = (-1, -uv[1], -uv[0])
+    elif face == 4:
+        s2_point = (uv[1], -1, -uv[0])
+    else:
+        s2_point = (uv[1], uv[0], -1)
+
+    # Normalise XYZ S2Point vector
+    # This section is part of the reference implementation but is not necessary when mapping
+    # straight into lat/lon, since the normalised and unnormalised triangles used to calculate
+    # the angles are geometrically similar. If anything, the normalisation process loses
+    # precision when tested against the reference implementation, albeit not at a level that is
+    # important either way. The code below is left for demonstration of the normalisation
+    # process.
+    # norm = math.sqrt(s2_point[0] ** 2 + s2_point[1] ** 2 + s2_point[2] ** 2)
+    # s2_point = (s2_point[0] / norm, s2_point[1] / norm, s2_point[2] / norm)
+
+    # Map into lat/lon
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2latlng.h#L196-L205
+    lat_rad = math.atan2(s2_point[2], math.sqrt(s2_point[0] ** 2 + s2_point[1] ** 2))
+    lon_rad = math.atan2(s2_point[1], s2_point[0])
+
+    return (math.degrees(lat_rad), lon=math.degrees(lon_rad))
+
+def token_to_lat_lon(token: str) -> Tuple[float, float]:
+    """
+    Convert S2 token to lat/lon.
+
+    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L222-L239
+
+    Args:
+        token: The S2 token string. Can be upper or lower case hex string.
+
+    Returns:
+        The lat/lon (in degrees) tuple generated from the S2 token.
+
+    Raises:
+        TypeError: If the token is not str.
+        ValueError: If the token length is over 16.
+
+    """
+    # Check input
+    if not isinstance(token, str):
+        raise TypeError('Cannot decode S2 token from type: ' + str(type(token)))
+
+    if len(token) > 16:
+        raise ValueError('Cannot decode S2 token with length > 16 characters')
+
+    # Add stripped zeros
+    token = token + ('0' * (16 - len(token)))
+
+    # Convert to cell ID by converting hex to int and decode to lat/lon
+    cell_id = int(token, 16)
+    return cell_id_to_lat_lon(cell_id)
