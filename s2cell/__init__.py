@@ -112,7 +112,7 @@ def _s2_st_to_ij(component: float) -> np.uint64:
 
 def _s2_si_ti_to_st(component: np.uint64) -> float:
     """
-    Convert S2 si/ti to ST.
+    Convert S2 Si/Ti to ST.
 
     See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L338-L341
 
@@ -177,3 +177,199 @@ def _s2_init_lookups() -> None:
                 # Write lookups
                 _S2_LOOKUP_POS[ij | base_orientation] = pos | orientation
                 _S2_LOOKUP_IJ[pos | base_orientation] = ij | orientation
+
+
+#
+# Public functions
+#
+
+def lat_lon_to_cell_id(
+        lat: float, lon: float, level: int = 30
+) -> np.uint64:  # pylint: disable=too-many-locals
+    """
+    Convert lat/lon to a S2 cell ID.
+
+    It is expected that the lat/lon provided are normalised, with latitude in the range -90 to 90.
+
+    Args:
+        lat: The latitude to convert, in degrees.
+        lon: The longitude to convert, in degrees.
+        level: The level of the cell ID to generate, from 0 up to 30.
+
+    Returns:
+        The S2 cell ID for the lat/lon location.
+
+    Raises:
+        ValueError: When level is not an integer, is < 0 or is > 30.
+
+    """
+    if not isinstance(level, int) or level < 0 or level > _S2_MAX_LEVEL:
+        raise ValueError('S2 level must be integer >= 0 and <= 30')
+
+    # Populate _S2_LOOKUP_POS on first run.
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109
+    #
+    # This table takes 10 bits of I and J and orientation and returns 10 bits of curve position
+    # and new orientation
+    if _S2_LOOKUP_POS is None:  # pragma: no cover
+        _s2_init_lookups()
+
+    # Reuse constant expressions
+    lat_rad = math.radians(lat)
+    lon_rad = math.radians(lon)
+    sin_lat_rad = math.sin(lat_rad)
+    cos_lat_rad = math.cos(lat_rad)
+    sin_lon_rad = math.sin(lon_rad)
+    cos_lon_rad = math.cos(lon_rad)
+
+    # Convert to S2Point
+    # This is effectively the unit non-geodetic ECEF vector
+    s2_point = (
+        cos_lat_rad * cos_lon_rad,  # X
+        cos_lat_rad * sin_lon_rad,  # Y
+        sin_lat_rad                 # Z
+    )
+
+    # Get cube face
+    # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L380-L384
+    #
+    # The face is determined by the largest XYZ component of the S2Point vector. When the
+    # component is negative, the second set of three faces is used.
+    # Largest component -> face:
+    # +x -> 0
+    # +y -> 1
+    # +z -> 2
+    # -x -> 3
+    # -y -> 4
+    # -z -> 5
+    face = int(np.argmax(np.abs(s2_point)))  # Largest absolute component
+    if s2_point[face] < 0.0:
+        face += 3
+
+    # Convert face + XYZ to cube-space face + UV
+    # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L366-L372
+    #
+    # The faces are oriented to ensure continuity of curve.
+    # Face -> UV components -> indices with negation (without divisor, which is always the
+    # remaining component (index: face % 3)):
+    # 0 -> ( y,  z) -> ( 1,  2)
+    # 1 -> (-x,  z) -> (-0,  2)
+    # 2 -> (-x, -y) -> (-0, -1) <- -1 here means -1 times the value in index 1, not index -1
+    # 3 -> ( z,  y) -> ( 2,  1)
+    # 4 -> ( z, -x) -> ( 2, -0)
+    # 5 -> (-y, -x) -> (-1, -0)
+    #
+    # For a compiled language, a switch statement on face is preferable as it will be more
+    # easily optimised as a jump table etc; but in Python the indexing method is more concise.
+    #
+    # The index selection can be reduced to some bit magic:
+    # U: 1 - ((face + 1) >> 1)
+    # V: 2 - (face >> 1)
+    #
+    # The negation of the the two components is then selected:
+    # U: (face in [1, 2, 5]) ? -1: 1
+    # V: (face in [2, 4, 5])) ? -1: 1
+    uv = (  # pylint: disable=invalid-name
+        s2_point[1 - ((face + 1) >> 1)] / s2_point[face % 3],  # U
+        s2_point[2 - (face >> 1)] / s2_point[face % 3]         # V
+    )
+    if face in (1, 2, 5):
+        uv = (-uv[0], uv[1])  # Negate U  # pylint: disable=invalid-name
+    if face in (2, 4, 5):
+        uv = (uv[0], -uv[1])  # Negate V  # pylint: disable=invalid-name
+
+    # Project cube-space UV to cell-space ST
+    # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L317-L320
+    st = (_s2_uv_to_st(uv[0]), _s2_uv_to_st(uv[1]))  # pylint: disable=invalid-name
+
+    # Convert ST to IJ integers
+    # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L333-L336
+    ij = (_s2_st_to_ij(st[0]), _s2_st_to_ij(st[1]))  # pylint: disable=invalid-name
+
+    # Convert face + IJ to cell ID
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L256-L298
+    #
+    # This is done by looking up 8 bits of I and J (4 each) at a time in the lookup table, along
+    # with two bits of orientation (swap (1) and invert (2)). This gives back 8 bits of position
+    # along the curve and two new orientation bits for the curve within the sub-cells in the
+    # next step.
+    #
+    # The swap bit swaps I and J with each other
+    # The invert bit inverts the bits of I and J, which means axes are negated
+    #
+    # Compared to the standard versions, we check the required number of steps we need to do for
+    # the requested level and don't perform steps that will be completely overwritten in the
+    # truncation below, rather than always doing every step. Each step does 4 bits each of I and
+    # J, which is 4 levels, so the required number of steps is ceil((level + 2) / 4), when level
+    # is > 0. The additional 2 levels added are required to account for the top 3 bits (4 before
+    # right shift) that are occupied by the face bits.
+    bits = np.uint64(face) & _S2_SWAP_MASK  # iiiijjjjoo. Initially set by by face
+    cell_id = np.uint64(face << (_S2_POS_BITS - 1))  # Insert face at most signficant bits
+    lookup_mask = np.uint64((1 << _S2_LOOKUP_BITS) - 1)
+    required_steps = math.ceil((level + 2) / 4) if level > 0 else 0
+    for k in range(7, 7 - required_steps, -1):
+        # Grab 4 bits of each of I and J
+        offset = np.uint32(k * _S2_LOOKUP_BITS)
+        bits += ((ij[0] >> offset) & lookup_mask) << np.uint32(_S2_LOOKUP_BITS + 2)
+        bits += ((ij[1] >> offset) & lookup_mask) << np.uint32(2)
+
+        # Map bits from iiiijjjjoo to ppppppppoo
+        bits = _S2_LOOKUP_POS[bits]
+
+        # Insert position bits to cell ID
+        cell_id |= (bits >> np.uint32(2)) << np.uint32(k * 2 * _S2_LOOKUP_BITS)
+
+        # Remove position bits, leaving just new swap and invert bits for the next round
+        bits &= (_S2_SWAP_MASK | _S2_INVERT_MASK)
+
+    # Left shift and add trailing bit
+    # The trailing bit addition is disabled, as we are overwriting this below in the truncation
+    # anyway. This line is kept as an example of the full method for S2 cell ID creation as is
+    # done in the standard library versions.
+    cell_id = (cell_id << np.uint8(1))  # + np.uint64(1)
+
+    # Truncate to desired level
+    # This is done by finding the mask of the trailing 1 bit for the specified level, then
+    # zeroing out all bits less significant than this, then finally setting the trailing 1 bit.
+    # This is still necessary to do even after a reduced number of steps `required_steps` above,
+    # since each step contains multiple levels that may need partial overwrite. Additionally, we
+    # need to add the trailing 1 bit, which is not yet set.
+    least_significant_bit_mask = np.uint64(1) << np.uint32(2 * (_S2_MAX_LEVEL - level))
+    cell_id = (cell_id & -least_significant_bit_mask) | least_significant_bit_mask
+
+    return cell_id
+
+def lat_lon_to_token(lat: float, lon: float, level: int = 30) -> str:
+    """
+    Convert lat/lon to a S2 token.
+
+    Converts the S2 cell ID to hex and strips any trailing zeros. The 0 cell ID token is
+    represented as 'X' to prevent it being an empty string.
+
+    It is expected that the lat/lon provided are normalised, with latitude in the range -90 to 90.
+
+    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L204-L220
+
+    Args:
+        lat: The latitude to convert, in degrees.
+        lon: The longitude to convert, in degrees.
+        level: The level of the cell ID to generate, from 0 up to 30.
+
+    Returns:
+        The S2 token string for the lat/lon location.
+
+    Raises:
+        ValueError: When level is not an integer, is < 0 or is > 30.
+
+    """
+    # Get the cell ID for the lat/lon
+    cell_id = lat_lon_to_cell_id(lat=lat, lon=lon, level=level)
+
+    # The zero token is encoded as 'X' rather than as a zero-length string. This implementation
+    # has no method of generating the 0 cell ID, so this line is mostly here for consistency
+    # with the reference implementation.
+    if cell_id == 0:  # pragma: no cover
+        return 'X'
+
+    # Convert cell ID to hex and strip any trailing zeros
+    return '{:016x}'.format(cell_id).rstrip('0')
