@@ -2,7 +2,7 @@ s2cell
 ======
 
 Minimal Python `S2 <https://s2geometry.io/>`_
-`cell ID <https://s2geometry.io/devguide/s2cell_hierarchy.html>`_, S2Point and lat/lon conversion
+`cell ID <https://s2geometry.io/devguide/s2cell_hierarchy.html>`_, S2 token and lat/lon conversion
 library.
 
 .. image:: https://github.com/aaliddell/s2cell/workflows/CI/badge.svg

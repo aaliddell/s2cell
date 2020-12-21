@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Minimal Python S2 cell ID, S2Point and lat/lon conversion library."""
+"""Minimal Python S2 cell ID, S2 token and lat/lon conversion library."""
 
 import math
 from typing import Tuple, Union
