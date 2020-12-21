@@ -3,6 +3,7 @@ import nox
 
 nox.options.error_on_external_run = True
 nox.options.reuse_existing_virtualenvs = True
+nox.options.sessions = ['bandit', 'coverage', 'flake8', 'pylint', 'pydocstyle']
 
 
 @nox.session()
@@ -42,3 +43,20 @@ def test(session):
 def build_wheel(session):
     session.install('wheel')
     session.run('python', 'setup.py', 'bdist_wheel')
+
+@nox.session()
+def upload_release(session):
+    # Add requirements for building wheel and uploading to PyPI
+    session.install('wheel', 'twine')
+
+    # Clear out old dist files if they exist
+    session.run('rm', '-rf', 'dist', external=True)
+
+    # Build sdist and wheel
+    session.run('python', 'setup.py', 'sdist', 'bdist_wheel')
+
+    # Check description with twine
+    session.run('twine', 'check', 'dist/*')
+
+    # Upload to PyPI
+    session.run('twine', 'upload', '-r' , 'testpypi', 'dist/*')  # TODO: remove test repo
