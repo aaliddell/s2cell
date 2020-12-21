@@ -70,7 +70,7 @@ Useful S2 Links
   implementation.
 - `google/s2-geometry-library-java <https://github.com/google/s2-geometry-library-java>`_: The
   reference Java implementation.
-- `sidewalklabs/s2sphere <https://github.com/sidewalklabs/s2sphere>`: A pure-Python S2
+- `sidewalklabs/s2sphere <https://github.com/sidewalklabs/s2sphere>`_: A pure-Python S2
   implementation.
 
 If you have another S2 related link that may be useful here, please open an Issue or PR.
