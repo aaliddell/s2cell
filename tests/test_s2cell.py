@@ -17,6 +17,7 @@ import pathlib
 import re
 import sys
 
+import numpy as np
 import pytest
 import s2cell
 
@@ -95,6 +96,9 @@ def test_cell_id_to_lat_lon_invalid():
     with pytest.raises(TypeError, match=re.escape("Cannot decode S2 cell ID from type: <class 'float'>")):
         s2cell.cell_id_to_lat_lon(1.0)
 
+    with pytest.raises(ValueError, match=re.escape("Cannot decode S2 cell ID with invalid face: 6")):
+        s2cell.cell_id_to_lat_lon(int(0b110 << s2cell._S2_POS_BITS))
+
 
 def test_cell_id_to_lat_lon_compat():
     decode_file = pathlib.Path(__file__).parent / 's2_decode_corpus.csv'
@@ -116,6 +120,9 @@ def test_token_to_lat_lon_invalid():
 
     with pytest.raises(ValueError, match=re.escape('Cannot decode S2 token with length > 16 characters')):
         s2cell.token_to_lat_lon('a' * 17)
+
+    with pytest.raises(ValueError, match=re.escape("Cannot decode S2 cell ID with invalid face: 6")):
+        s2cell.token_to_lat_lon('{:016x}'.format(np.uint64(0b110 << s2cell._S2_POS_BITS)))
 
 
 def test_token_to_lat_lon_compat():

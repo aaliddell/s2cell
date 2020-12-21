@@ -406,6 +406,7 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
 
     Raises:
         TypeError: If the cell_id is not int or np.uint64.
+        ValueError: If the cell_id has invalid face bits.
 
     """
     # Check type
@@ -520,8 +521,10 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
         s2_point = (-1, -uv[1], -uv[0])
     elif face == 4:
         s2_point = (uv[1], -1, -uv[0])
-    else:
+    elif face == 5:
         s2_point = (uv[1], uv[0], -1)
+    else:
+        raise ValueError('Cannot decode S2 cell ID with invalid face: ' + str(face))
 
     # Normalise XYZ S2Point vector
     # This section is part of the reference implementation but is not necessary when mapping
@@ -555,6 +558,7 @@ def token_to_lat_lon(token: str) -> Tuple[float, float]:
     Raises:
         TypeError: If the token is not str.
         ValueError: If the token length is over 16.
+        ValueError: If the token has invalid face bits.
 
     """
     # Check input
