@@ -1,6 +1,7 @@
 import csv
 import pathlib
 import re
+import sys
 
 import pytest
 import s2cell
@@ -85,8 +86,14 @@ def test_cell_id_to_lat_lon_compat():
     decode_file = pathlib.Path(__file__).parent / 's2_decode_corpus.csv'
     with decode_file.open() as f:
         for row in csv.DictReader(f):
-            ll = s2cell.cell_id_to_lat_lon(int(row['cell_id']))
-            assert ll == (float(row['lat']), float(row['lon']))
+            ll_tuple = s2cell.cell_id_to_lat_lon(int(row['cell_id']))
+            expected_tuple = (float(row['lat']), float(row['lon']))
+
+            # MacOS has slightly different rounding performance
+            if sys.platform == 'darwin':
+                assert ll_tuple == pytest.approx(expected_tuple, abs=1e-12, rel=0.0)
+            else:
+                assert ll_tuple == expected_tuple
 
 
 def test_token_to_lat_lon_invalid():
@@ -101,5 +108,11 @@ def test_token_to_lat_lon_compat():
     decode_file = pathlib.Path(__file__).parent / 's2_decode_corpus.csv'
     with decode_file.open() as f:
         for row in csv.DictReader(f):
-            ll = s2cell.token_to_lat_lon(row['token'])
-            assert ll == (float(row['lat']), float(row['lon']))
+            ll_tuple = s2cell.token_to_lat_lon(row['token'])
+            expected_tuple = (float(row['lat']), float(row['lon']))
+
+            # MacOS has slightly different rounding performance
+            if sys.platform == 'darwin':
+                assert ll_tuple == pytest.approx(expected_tuple, abs=1e-12, rel=0.0)
+            else:
+                assert ll_tuple == expected_tuple
