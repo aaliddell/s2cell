@@ -108,4 +108,5 @@ If you have another S2 related link that may be useful here, please open an Issu
 License
 -------
 
-This project is released under the Apache 2.0 License.
+This project is released under the same license as the reference C++ S2 Geometry implementation,
+namely the Apache 2.0 License.
