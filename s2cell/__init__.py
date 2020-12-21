@@ -149,7 +149,7 @@ def _s2_init_lookups() -> None:
             # Walk the 256 possible positions within a level 4 curve. There is probably a smarter
             # way of doing this iteratively that reuses work at each level. e.g. 4 nested for loops?
             for pos in np.arange(4 ** 4, dtype=np.uint64):
-                ij = np.uint64(0)  # Has pattern iiiijjjj, not ijijijij
+                ij = np.uint64(0)  # Has pattern iiiijjjj, not ijijijij  # pylint: disable=invalid-name
                 orientation = np.uint64(base_orientation)
 
                 # Walk the pairs of bits of pos, from most significant, getting IJ and orientation
@@ -161,7 +161,7 @@ def _s2_init_lookups() -> None:
                     # Get the I and J for the sub-cell index. These need to be spread into iiiijjjj
                     # by inserting as bit positions 4 and 0
                     ij_bits = _S2_POS_TO_IJ[orientation][bit_pair]
-                    ij = (
+                    ij = (  # pylint: disable=invalid-name
                         (ij << np.uint64(1))  # Free up position 4 and 0 from old IJ
                         | ((ij_bits & np.uint32(2)) << np.uint32(3))  # I bit in position 4
                         | (ij_bits & np.uint32(1))  # J bit in position 0
@@ -171,7 +171,7 @@ def _s2_init_lookups() -> None:
                     orientation = orientation ^ _S2_POS_TO_ORIENTATION_MASK[bit_pair]
 
                 # Shift IJ and position to allow orientation bits in LSBs of lookup
-                ij <<= np.uint32(2)
+                ij <<= np.uint32(2)  # pylint: disable=invalid-name
                 pos <<= np.uint32(2)
 
                 # Write lookups
@@ -183,9 +183,9 @@ def _s2_init_lookups() -> None:
 # Public functions
 #
 
-def lat_lon_to_cell_id(
+def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
         lat: float, lon: float, level: int = 30
-) -> np.uint64:  # pylint: disable=too-many-locals
+) -> np.uint64:
     """
     Convert lat/lon to a S2 cell ID.
 
