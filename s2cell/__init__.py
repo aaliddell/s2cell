@@ -505,12 +505,12 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L348-L357
     #
     # Face -> XYZ components -> indices with negation:
-    # 0    -> ( 1,  u,  v)   -> ( 2,  0,  1)
-    # 1    -> (-u,  1,  v)   -> (-0,  2,  1)
-    # 2    -> (-u, -v,  1)   -> (-0, -1,  2)
-    # 3    -> (-1, -v, -u)   -> (-2, -1, -0) <- -1 here means -1 times the value in index 1,
-    # 4    -> ( v, -1, -u)   -> ( 1, -2, -0)    not index -1
-    # 5    -> ( v,  u, -1)   -> ( 1,  0, -2)
+    # 0    -> ( 1,  u,  v)   -> ( /,  0,  1)
+    # 1    -> (-u,  1,  v)   -> (-0,  /,  1)
+    # 2    -> (-u, -v,  1)   -> (-0, -1,  /)
+    # 3    -> (-1, -v, -u)   -> (-/, -1, -0) <- -1 here means -1 times the value in index 1,
+    # 4    -> ( v, -1, -u)   -> ( 1, -/, -0)    not index -1
+    # 5    -> ( v,  u, -1)   -> ( 1,  0, -/)
     if face == 0:
         s2_point = (1, uv[0], uv[1])
     elif face == 1:
