@@ -84,6 +84,13 @@ functions:
 The lat/lon returned will be the centre of the cell at the level available in the provided cell ID
 or token.
 
+There are also a few other useful functions for inspecting or converting a cell ID/token:
+
+.. code-block:: python3
+
+   s2cell.cell_id_to_token(3383781119341101056)  # -> '2ef59b'
+   s2cell.token_to_cell_id('3')                  # -> 3458764513820540928
+
 
 Useful S2 Links
 ---------------

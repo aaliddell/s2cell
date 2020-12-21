@@ -196,7 +196,78 @@ def _s2_init_lookups() -> None:
 
 
 #
-# Public functions
+# Cell ID <-> Token translation functions
+#
+
+def cell_id_to_token(cell_id: Union[int, np.uint64]) -> str:
+    """
+    Convert S2 cell ID to a S2 token.
+
+    Converts the S2 cell ID to hex and strips any trailing zeros. The 0 cell ID token is represented
+    as 'X' to prevent it being an empty string.
+
+    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L204-L220
+
+    Args:
+        cell_id: The S2 cell ID integer.
+
+    Returns:
+        The S2 token string for the S2 cell ID.
+
+    Raises:
+        TypeError: If the cell_id is not int or np.uint64.
+
+    """
+    # Check type
+    if not isinstance(cell_id, (int, np.uint64)):
+        raise TypeError('Cannot convert S2 cell ID from type: ' + str(type(cell_id)))
+    cell_id = np.uint64(cell_id)
+
+    # The zero token is encoded as 'X' rather than as a zero-length string. This implementation has
+    # no method of generating the 0 cell ID, so this line is mostly here for consistency with the
+    # reference implementation.
+    if cell_id == 0:  # pragma: no cover
+        return 'X'
+
+    # Convert cell ID to hex and strip any trailing zeros
+    return '{:016x}'.format(cell_id).rstrip('0')
+
+
+def token_to_cell_id(token: str) -> np.uint64:
+    """
+    Convert S2 token to S2 cell ID.
+
+    Restores the stripped 0 characters from the token and converts the hex string to integer.
+
+    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L222-L239
+
+    Args:
+        token: The S2 token string. Can be upper or lower case hex string.
+
+    Returns:
+       The S2 cell ID for the S2 token.
+
+    Raises:
+        TypeError: If the token is not str.
+        ValueError: If the token length is over 16.
+
+    """
+    # Check input
+    if not isinstance(token, str):
+        raise TypeError('Cannot convert S2 token from type: ' + str(type(token)))
+
+    if len(token) > 16:
+        raise ValueError('Cannot convert S2 token with length > 16 characters')
+
+    # Add stripped zeros
+    token = token + ('0' * (16 - len(token)))
+
+    # Convert to cell ID by converting hex to int
+    return int(token, 16)
+
+
+#
+# Encode functions
 #
 
 def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
@@ -379,18 +450,13 @@ def lat_lon_to_token(lat: float, lon: float, level: int = 30) -> str:
         ValueError: When level is not an integer, is < 0 or is > 30.
 
     """
-    # Get the cell ID for the lat/lon
-    cell_id = lat_lon_to_cell_id(lat=lat, lon=lon, level=level)
+    # Generate cell ID and convert to token
+    return cell_id_to_token(lat_lon_to_cell_id(lat=lat, lon=lon, level=level))
 
-    # The zero token is encoded as 'X' rather than as a zero-length string. This implementation has
-    # no method of generating the 0 cell ID, so this line is mostly here for consistency with the
-    # reference implementation.
-    if cell_id == 0:  # pragma: no cover
-        return 'X'
 
-    # Convert cell ID to hex and strip any trailing zeros
-    return '{:016x}'.format(cell_id).rstrip('0')
-
+#
+# Decode functions
+#
 
 def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
     cell_id: Union[int, np.uint64]
@@ -561,16 +627,5 @@ def token_to_lat_lon(token: str) -> Tuple[float, float]:
         ValueError: If the token has invalid face bits.
 
     """
-    # Check input
-    if not isinstance(token, str):
-        raise TypeError('Cannot decode S2 token from type: ' + str(type(token)))
-
-    if len(token) > 16:
-        raise ValueError('Cannot decode S2 token with length > 16 characters')
-
-    # Add stripped zeros
-    token = token + ('0' * (16 - len(token)))
-
-    # Convert to cell ID by converting hex to int and decode to lat/lon
-    cell_id = int(token, 16)
-    return cell_id_to_lat_lon(cell_id)
+    # Convert to cell ID and decode to lat/lon
+    return cell_id_to_lat_lon(token_to_cell_id(token))

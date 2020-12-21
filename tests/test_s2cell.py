@@ -23,6 +23,32 @@ import pytest
 import s2cell
 
 
+def test_invalid_cell_id_to_token():
+    with pytest.raises(TypeError, match=re.escape("Cannot convert S2 cell ID from type: <class 'float'>")):
+        s2cell.cell_id_to_token(1.0)
+
+
+def test_cell_id_to_token_compat():
+    # Check against generated S2 tests
+    encode_file = pathlib.Path(__file__).parent / 's2_encode_corpus.csv.gz'
+    with gzip.open(encode_file, 'rt') as f:
+        for row in csv.DictReader(f):
+            assert s2cell.cell_id_to_token(int(row['cell_id'])) == row['token']
+
+
+def test_invalid_token_to_cell_id():
+    with pytest.raises(TypeError, match=re.escape("Cannot convert S2 token from type: <class 'float'>")):
+        s2cell.token_to_cell_id(1.0)
+
+
+def test_token_to_cell_id_compat():
+    # Check against generated S2 tests
+    encode_file = pathlib.Path(__file__).parent / 's2_encode_corpus.csv.gz'
+    with gzip.open(encode_file, 'rt') as f:
+        for row in csv.DictReader(f):
+            assert s2cell.token_to_cell_id(row['token']) == int(row['cell_id'])
+
+
 @pytest.mark.parametrize('lat, lon, level, expected', [
     (0, 0, 0, 1152921504606846976),
     (0, 0, 30, 1152921504606846977),
@@ -116,10 +142,10 @@ def test_cell_id_to_lat_lon_compat():
 
 
 def test_token_to_lat_lon_invalid():
-    with pytest.raises(TypeError, match=re.escape("Cannot decode S2 token from type: <class 'float'>")):
+    with pytest.raises(TypeError, match=re.escape("Cannot convert S2 token from type: <class 'float'>")):
         s2cell.token_to_lat_lon(1.0)
 
-    with pytest.raises(ValueError, match=re.escape('Cannot decode S2 token with length > 16 characters')):
+    with pytest.raises(ValueError, match=re.escape('Cannot convert S2 token with length > 16 characters')):
         s2cell.token_to_lat_lon('a' * 17)
 
     with pytest.raises(ValueError, match=re.escape("Cannot decode S2 cell ID with invalid face: 6")):
