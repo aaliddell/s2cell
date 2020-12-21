@@ -57,8 +57,8 @@ other Python package manager:
 Usage
 -----
 
-Conversion from lat/lon (in degrees) to a cell ID or token can be done with the following two
-functions:
+The library is designed to be minimal and purely functional. Conversion from lat/lon (in degrees) to
+a cell ID or token can be done with the following two functions:
 
 .. code-block:: python3
 
@@ -88,9 +88,11 @@ There are also a few other useful functions for inspecting or converting a cell 
 
 .. code-block:: python3
 
+   # Conversion
    s2cell.cell_id_to_token(3383781119341101056)  # -> '2ef59b'
    s2cell.token_to_cell_id('3')                  # -> 3458764513820540928
 
+   # Level extraction
    s2cell.cell_id_to_level(3383781119341101056)  # -> 10
    s2cell.token_to_level('3')                    # -> 0
 
