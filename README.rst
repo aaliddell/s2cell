@@ -46,7 +46,7 @@ Installation
 This package can be installed from `PyPI <https://pypi.org/project/s2cell/>`_ with pip or any
 other Python package manager:
 
-.. code-block::
+.. code-block:: bash
 
    pip install s2cell
 
@@ -54,7 +54,32 @@ other Python package manager:
 Usage
 -----
 
-TODO
+Conversion from lat/lon (in degrees) to a cell ID or token can be done with the following two
+functions:
+
+.. code-block:: python3
+
+   s2cell.lat_lon_to_cell_id(-10.490091, 105.641318)  # -> 3383782026967071427
+   s2cell.lat_lon_to_token(-10.490091, 105.641318)    # -> '2ef59bd352b93ac3'
+
+By default, these conversions will give you a level 30 leaf-cell as output. If you require a lower
+precision level, you can specify this:
+
+.. code-block:: python3
+
+   s2cell.lat_lon_to_cell_id(-10.490091, 105.641318, 10)  # -> 3383781119341101056
+   s2cell.lat_lon_to_token(-10.490091, 105.641318, 0)     # -> '3'
+
+Conversion from a cell ID or token to lat/lon (in degrees) can be done with the following two
+functions:
+
+.. code-block:: python3
+
+   s2cell.cell_id_to_lat_lon(3383781119341101056)  # -> (-10.452552407574101, 105.6412526632361)
+   s2cell.token_to_lat_lon('3')                    # -> (0.0, 90.0)
+
+The lat/lon returned will be the centre of the cell at the level available in the provided cell ID
+or token.
 
 
 Useful S2 Links
