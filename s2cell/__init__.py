@@ -629,3 +629,71 @@ def token_to_lat_lon(token: str) -> Tuple[float, float]:
     """
     # Convert to cell ID and decode to lat/lon
     return cell_id_to_lat_lon(token_to_cell_id(token))
+
+
+#
+# Level extraction
+#
+
+def cell_id_to_level(cell_id: Union[int, np.uint64]) -> int:
+    """
+    Get the level for a S2 cell ID.
+
+    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.h#L543-L551
+
+    Args:
+        cell_id: The S2 cell ID integer.
+
+    Returns:
+        The level of the S2 cell ID.
+
+    Raises:
+        TypeError: If the cell_id is not int or np.uint64.
+        ValueError: If the cell_id is 0.
+
+    """
+    # Check input
+    if not isinstance(cell_id, (int, np.uint64)):
+        raise TypeError('Cannot decode S2 cell ID from type: ' + str(type(cell_id)))
+    cell_id = np.uint64(cell_id)
+
+    if cell_id == 0:
+        # The cell ID 0 has no level
+        raise ValueError('Cannot decode invalid S2 cell ID: 0')
+
+    # Find the position of the lowest set one bit, which will be the trailing one bit. The level is
+    # given by the max level (30) minus the floored division by two of the position of the lowest
+    # set bit.
+    #
+    # The position of the lowest set bit is found using 'count trailing zeros', which would be
+    # equivalent to the C++20 function std::countr_zero() or the ctz instruction.
+    lsb_pos = 0
+    while cell_id != 0:  # pragma: no branch
+        if cell_id & np.uint64(1):
+            break
+        lsb_pos += 1
+        cell_id >>= np.uint64(1)
+
+    return int(_S2_MAX_LEVEL - (lsb_pos >> 1))
+
+
+def token_to_level(token: str) -> int:
+    """
+    Get the level for a S2 token.
+
+    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.h#L543-L551
+
+    Args:
+        token: The S2 token string. Can be upper or lower case hex string.
+
+    Returns:
+        The level of the S2 token.
+
+    Raises:
+        TypeError: If the token is not str.
+        ValueError: If the token length is over 16.
+        ValueError: If the token as cell ID is 0.
+
+    """
+    # Convert to cell ID and get the level for that
+    return cell_id_to_level(token_to_cell_id(token))

@@ -91,6 +91,9 @@ There are also a few other useful functions for inspecting or converting a cell 
    s2cell.cell_id_to_token(3383781119341101056)  # -> '2ef59b'
    s2cell.token_to_cell_id('3')                  # -> 3458764513820540928
 
+   s2cell.cell_id_to_level(3383781119341101056)  # -> 10
+   s2cell.token_to_level('3')                    # -> 0
+
 
 Useful S2 Links
 ---------------

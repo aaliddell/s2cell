@@ -138,3 +138,38 @@ def test_token_to_lat_lon_compat():
                 assert ll_tuple == pytest.approx(expected_tuple, abs=1e-12, rel=0.0)
             else:
                 assert ll_tuple == expected_tuple
+
+
+def test_invalid_cell_id_to_level():
+    with pytest.raises(TypeError, match=re.escape("Cannot decode S2 cell ID from type: <class 'float'>")):
+        s2cell.cell_id_to_level(1.0)
+
+    with pytest.raises(ValueError, match=re.escape("Cannot decode invalid S2 cell ID: 0")):
+        s2cell.cell_id_to_level(0)
+
+
+def test_cell_id_to_level():
+    # Check against generated S2 tests
+    encode_file = pathlib.Path(__file__).parent / 's2_encode_corpus.csv.gz'
+    with gzip.open(str(encode_file), 'rt') as f:
+        for row in csv.DictReader(f):
+            assert s2cell.cell_id_to_level(int(row['cell_id'])) == int(row['level'])
+
+
+def test_invalid_token_to_level():
+    with pytest.raises(TypeError, match=re.escape("Cannot convert S2 token from type: <class 'float'>")):
+        s2cell.token_to_level(1.0)
+
+    with pytest.raises(ValueError, match=re.escape('Cannot convert S2 token with length > 16 characters')):
+        s2cell.token_to_level('a' * 17)
+
+    with pytest.raises(ValueError, match=re.escape("Cannot decode invalid S2 cell ID: 0")):
+        s2cell.token_to_level('')
+
+
+def test_token_to_level():
+    # Check against generated S2 tests
+    encode_file = pathlib.Path(__file__).parent / 's2_encode_corpus.csv.gz'
+    with gzip.open(str(encode_file), 'rt') as f:
+        for row in csv.DictReader(f):
+            assert s2cell.token_to_level(row['token']) == int(row['level'])
