@@ -69,3 +69,28 @@ def test_lat_lon_to_token_compat():
             assert s2cell.lat_lon_to_token(
                 float(row['lat']), float(row['lon']), int(row['level'])
             ) == row['token']
+
+def test_cell_id_to_lat_lon_invalid():
+    with pytest.raises(TypeError, match=re.escape("Cannot decode S2 cell ID from type: <class 'float'>")):
+        s2cell.cell_id_to_lat_lon(1.0)
+
+def test_cell_id_to_lat_lon_compat():
+    decode_file = pathlib.Path(__file__).parent / 's2_decode_corpus.csv'
+    with decode_file.open() as f:
+        for row in csv.DictReader(f):
+            ll = s2cell.cell_id_to_lat_lon(int(row['cell_id']))
+            assert ll == (float(row['lat']), float(row['lon']))
+
+def test_token_to_lat_lon_invalid():
+    with pytest.raises(TypeError, match=re.escape("Cannot decode S2 token from type: <class 'float'>")):
+        s2cell.token_to_lat_lon(1.0)
+
+    with pytest.raises(ValueError, match=re.escape('Cannot decode S2 token with length > 16 characters')):
+        s2cell.token_to_lat_lon('a' * 17)
+
+def test_token_to_lat_lon_compat():
+    decode_file = pathlib.Path(__file__).parent / 's2_decode_corpus.csv'
+    with decode_file.open() as f:
+        for row in csv.DictReader(f):
+            ll = s2cell.token_to_lat_lon(row['token'])
+            assert ll == (float(row['lat']), float(row['lon']))
