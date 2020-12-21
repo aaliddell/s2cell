@@ -69,7 +69,8 @@ _S2_POS_TO_IJ = np.array([
     [3, 1, 0, 2],  # 3: Swap and invert bits set
 ], dtype=np.uint64)
 
-# Lookup for the orientation update mask of one of the four sub-cells within a higher level cell
+# Lookup for the orientation update mask of one of the four sub-cells within a higher level cell.
+# This mask is XOR'ed with the current orientation to get the sub-cell orientation.
 _S2_POS_TO_ORIENTATION_MASK = np.array([
     _S2_SWAP_MASK, 0, 0, _S2_SWAP_MASK | _S2_INVERT_MASK
 ], dtype=np.uint64)
