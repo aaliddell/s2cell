@@ -28,7 +28,7 @@
 //
 int main(int argc, char **argv) {
     // Config
-    int steps = 30;
+    int steps = 60;
 
     // Open files
     std::ofstream encode_file{}, decode_file{};

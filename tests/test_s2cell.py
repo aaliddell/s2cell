@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import csv
+import gzip
 import pathlib
 import re
 import sys
@@ -49,8 +50,8 @@ def test_invalid_lat_lon_to_cell_id():
 
 def test_lat_lon_to_cell_id_compat():
     # Check against generated S2 tests
-    encode_file = pathlib.Path(__file__).parent / 's2_encode_corpus.csv'
-    with encode_file.open() as f:
+    encode_file = pathlib.Path(__file__).parent / 's2_encode_corpus.csv.gz'
+    with gzip.open(encode_file, 'rt') as f:
         for row in csv.DictReader(f):
             assert s2cell.lat_lon_to_cell_id(
                 float(row['lat']), float(row['lon']), int(row['level'])
@@ -84,8 +85,8 @@ def test_invalid_lat_lon_to_token():
 
 def test_lat_lon_to_token_compat():
     # Check against generated S2 tests
-    encode_file = pathlib.Path(__file__).parent / 's2_encode_corpus.csv'
-    with encode_file.open() as f:
+    encode_file = pathlib.Path(__file__).parent / 's2_encode_corpus.csv.gz'
+    with gzip.open(encode_file, 'rt') as f:
         for row in csv.DictReader(f):
             assert s2cell.lat_lon_to_token(
                 float(row['lat']), float(row['lon']), int(row['level'])
@@ -101,8 +102,8 @@ def test_cell_id_to_lat_lon_invalid():
 
 
 def test_cell_id_to_lat_lon_compat():
-    decode_file = pathlib.Path(__file__).parent / 's2_decode_corpus.csv'
-    with decode_file.open() as f:
+    decode_file = pathlib.Path(__file__).parent / 's2_decode_corpus.csv.gz'
+    with gzip.open(decode_file, 'rt') as f:
         for row in csv.DictReader(f):
             ll_tuple = s2cell.cell_id_to_lat_lon(int(row['cell_id']))
             expected_tuple = (float(row['lat']), float(row['lon']))
@@ -126,8 +127,8 @@ def test_token_to_lat_lon_invalid():
 
 
 def test_token_to_lat_lon_compat():
-    decode_file = pathlib.Path(__file__).parent / 's2_decode_corpus.csv'
-    with decode_file.open() as f:
+    decode_file = pathlib.Path(__file__).parent / 's2_decode_corpus.csv.gz'
+    with gzip.open(decode_file, 'rt') as f:
         for row in csv.DictReader(f):
             ll_tuple = s2cell.token_to_lat_lon(row['token'])
             expected_tuple = (float(row['lat']), float(row['lon']))

@@ -101,6 +101,7 @@ Useful S2 Links
   reference Java implementation.
 - `sidewalklabs/s2sphere <https://github.com/sidewalklabs/s2sphere>`_: A pure-Python S2
   implementation.
+- `golang/geo <https://github.com/golang/geo>`_: A Go implementation of S2.
 
 If you have another S2 related link that may be useful here, please open an Issue or PR.
 
