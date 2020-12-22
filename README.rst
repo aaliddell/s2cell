@@ -38,12 +38,12 @@ using the `Python extension included
 <https://github.com/google/s2geometry/tree/master/src/python>`__ in the s2geometry repository or the
 pure-Python `s2sphere <https://pypi.org/project/s2sphere/>`__ implementation.
 
-Issues and PRs are very welcome to improve the descriptions or correct any misunderstandings of the
-S2 cell system. Please note that this library strives to be an easy to read reference rather than
-aiming for peak performance (it is in Python after all), so PRs which reduce readability of the
-implementation (such as for Python specific speed optimisations) are generally discouraged. However,
-if you have optimisations that are applicable to S2 implementations across many langauges and can be
-described easily, please do consider making a PR.
+Issues and PRs are very welcome to improve the implementation, descriptions or to correct any
+misunderstandings of the S2 cell system. Please note that this library strives to be an easy to read
+reference rather than aiming for peak performance (it is in Python after all), so PRs which reduce
+readability of the implementation (such as for Python specific speed optimisations) are generally
+discouraged. However, if you have optimisations that are applicable to S2 implementations across
+many langauges and can be described easily, please do consider making a PR.
 
 
 Installation
