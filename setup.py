@@ -38,6 +38,8 @@ setuptools.setup(
             'pytest-cov~=2.10',
             'pytest-instafail~=0.4.2',
             'pytest-xdist~=2.1',
+            'Sphinx~=3.4.0',
+            'sphinx-redactor-theme==0.0.1',
         ],
     },
     classifiers=[

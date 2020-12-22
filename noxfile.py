@@ -3,7 +3,7 @@ import nox
 
 nox.options.error_on_external_run = True
 nox.options.reuse_existing_virtualenvs = True
-nox.options.sessions = ['bandit', 'coverage', 'flake8', 'pylint', 'pydocstyle']
+nox.options.sessions = ['bandit', 'coverage', 'docs', 'flake8', 'pylint', 'pydocstyle']
 
 
 @nox.session()
@@ -43,6 +43,24 @@ def test(session):
 def build_wheel(session):
     session.install('wheel')
     session.run('python', 'setup.py', 'bdist_wheel')
+
+@nox.session()
+def docs(session):
+    session.install('.[dev]')
+    session.run(
+        'sphinx-apidoc', '--no-toc', '--force', '--separate', '-o', 'docs/source/api', 's2cell'
+    )
+    session.run(
+        'python', '-m', 'sphinx',
+        '-c', 'docs/',
+        '-a', # Update all output files
+        '-E', # Do not reuse environment from previous run
+        '-T', # Show full trace on error
+        '-W', # Treat warnings as errors
+        '--keep-going', # When using -W, only exit after all warnings shown
+        '-j', 'auto', # Generate in parallel
+        'docs/source', 'docs/build',
+    )
 
 @nox.session()
 def upload_release(session):
