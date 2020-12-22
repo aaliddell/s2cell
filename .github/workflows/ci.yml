@@ -66,9 +66,11 @@ jobs:
       - name: Commit and push docs
         run: |
           env
+          shopt -s dotglob  # Ensure dot files are copied over, such as .nojekyll
           mkdir /tmp/gh-pages
           cp -r docs/build/* /tmp/gh-pages
           git checkout gh-pages
+          rm -rf *  # Clean branch
           cp -r /tmp/gh-pages/* .
           rm -rf **/__pycache__
           git add .
