@@ -28,7 +28,7 @@ setuptools.setup(
         'Source Code': 'https://github.com/aaliddell/s2cell',
     },
     packages=setuptools.find_packages(),
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     install_requires=[
         'numpy>=1.15,<2',
     ],
@@ -39,7 +39,7 @@ setuptools.setup(
             'nox~=2020.8.22',
             'pydocstyle~=5.1',
             'pylint~=2.6.0',
-            'pytest~=6.2.0',
+            'pytest~=6.2.1',
             'pytest-cov~=2.10',
             'pytest-instafail~=0.4.2',
             'pytest-xdist~=2.2.0',
