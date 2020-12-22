@@ -20,8 +20,13 @@ setuptools.setup(
     author_email='s2cell@aliddell.com',
     description='Minimal Python S2 cell ID, S2 token and lat/lon conversion library',
     long_description=long_description,
-    long_description_content_type="text/x-rst",
-    url='https://github.com/aaliddell/s2cell',
+    long_description_content_type='text/x-rst',
+    url='https://docs.s2cell.aliddell.com',
+    download_url="https://pypi.python.org/pypi/s2cell",
+    project_urls={
+        'Documentation': 'https://docs.s2cell.aliddell.com',
+        'Source Code': 'https://github.com/aaliddell/s2cell',
+    },
     packages=setuptools.find_packages(),
     python_requires='>=3.5',
     install_requires=[

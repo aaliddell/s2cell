@@ -5,6 +5,7 @@ Minimal Python `S2 <https://s2geometry.io/>`_
 `cell ID <https://s2geometry.io/devguide/s2cell_hierarchy.html>`_, S2 token and lat/lon conversion
 library.
 
+
 .. image:: https://github.com/aaliddell/s2cell/workflows/CI/badge.svg
    :alt: CI Status
    :target: https://github.com/aaliddell/s2cell/actions
@@ -56,6 +57,8 @@ other Python package manager:
 
 Usage
 -----
+
+Full docs are available `here <https://docs.s2cell.aliddell.com>`_.
 
 The library is designed to be minimal and purely functional. Conversion from lat/lon (in degrees) to
 a cell ID or token can be done with the following two functions:
