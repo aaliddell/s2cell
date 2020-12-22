@@ -70,7 +70,7 @@ jobs:
           cp -r docs/build/* /tmp/gh-pages
           git checkout gh-pages
           cp -r /tmp/gh-pages/* .
-          rm -rf __pycache__
+          rm -rf **/__pycache__
           git add .
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
