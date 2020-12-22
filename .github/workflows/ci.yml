@@ -70,7 +70,8 @@ jobs:
           cp -r docs/build/* /tmp/gh-pages
           git checkout gh-pages
           cp -r /tmp/gh-pages/* .
+          git add .
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git commit -am "Update docs to ${GITHUB_SHA} from ${GITHUB_REF}"
+          git commit --allow-empty --message "Update docs to ${GITHUB_SHA} from ${GITHUB_REF}"
           git push
