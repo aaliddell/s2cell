@@ -1,11 +1,11 @@
 s2cell
 ======
 
-Minimal Python `S2 <https://s2geometry.io/>`_
-`cell ID <https://s2geometry.io/devguide/s2cell_hierarchy.html>`_, S2 token and lat/lon conversion
+Minimal Python `S2 <https://s2geometry.io/>`__
+`cell ID <https://s2geometry.io/devguide/s2cell_hierarchy.html>`__, S2 token and lat/lon conversion
 library.
 
-`Docs <https://docs.s2cell.aliddell.com>`_ | `PyPI <https://pypi.org/project/s2cell>`_ | `GitHub <https://github.com/aaliddell/s2cell>`_
+`Docs <https://docs.s2cell.aliddell.com>`__ | `PyPI <https://pypi.org/project/s2cell>`__ | `GitHub <https://github.com/aaliddell/s2cell>`__
 
 
 .. image:: https://github.com/aaliddell/s2cell/workflows/CI/badge.svg
@@ -30,13 +30,13 @@ single-file reference on the process. All steps in the conversion are well comme
 be understandable and functional rather than necessarily fast.
 
 The library is checked against a test suite generated from the
-`reference C++ implementation <https://github.com/google/s2geometry>`_ to ensure conformity with the
+`reference C++ implementation <https://github.com/google/s2geometry>`__ to ensure conformity with the
 standard.
 
 Should you need more complete S2 functionality or a fast C-based implementation, please consider
-using the `Python extension included <https://github.com/google/s2geometry/tree/master/src/python>`_
-in the s2geometry repository or the pure-Python `s2sphere <https://pypi.org/project/s2sphere/>`_
-implementation.
+using the `Python extension included
+<https://github.com/google/s2geometry/tree/master/src/python>`__ in the s2geometry repository or the
+pure-Python `s2sphere <https://pypi.org/project/s2sphere/>`__ implementation.
 
 Issues and PRs are very welcome to improve the descriptions or correct any misunderstandings of the
 S2 cell system. Please note that this library strives to be an easy to read reference rather than
@@ -49,7 +49,7 @@ described easily, please do consider making a PR.
 Installation
 ------------
 
-This package can be installed from `PyPI <https://pypi.org/project/s2cell/>`_ with pip or any
+This package can be installed from `PyPI <https://pypi.org/project/s2cell/>`__ with pip or any
 other Python package manager:
 
 .. code-block:: bash
@@ -61,8 +61,8 @@ Usage
 -----
 
 The full documentation, including the API Reference, is available at
-`docs.s2cell.aliddell.com <https://docs.s2cell.aliddell.com>`_. Below is a quick start guide for the
-most common uses.
+`docs.s2cell.aliddell.com <https://docs.s2cell.aliddell.com>`__. Below is a quick start guide for
+the most common uses.
 
 The library is designed to be minimal, predicatable and purely functional. Conversion from lat/lon
 (in degrees) to a cell ID or token can be done with the following two functions:
@@ -107,20 +107,20 @@ There are also a few other useful functions for inspecting or converting a cell 
 Useful S2 Links
 ---------------
 
-- `S2 Geometry <https://s2geometry.io/>`_: The S2 Geometry homepage.
-- `S2 Cells <https://s2geometry.io/devguide/s2cell_hierarchy>`_: Reference S2 documentation on the
+- `S2 Geometry <https://s2geometry.io/>`__: The S2 Geometry homepage.
+- `S2 Cells <https://s2geometry.io/devguide/s2cell_hierarchy>`__: Reference S2 documentation on the
   S2 cell system.
-- `Earth Cube <https://s2geometry.io/resources/earthcube>`_: Description of the face cell mapping
+- `Earth Cube <https://s2geometry.io/resources/earthcube>`__: Description of the face cell mapping
   in the S2 cell system.
-- `S2 Cell Statistics <https://s2geometry.io/resources/s2cell_statistics>`_: Details on the sizes of
-  S2 cells at each level.
-- `google/s2geometry <https://github.com/google/s2geometry>`_: The reference C++ and Python
+- `S2 Cell Statistics <https://s2geometry.io/resources/s2cell_statistics>`__: Details on the sizes
+  of S2 cells at each level.
+- `google/s2geometry <https://github.com/google/s2geometry>`__: The reference C++ and Python
   implementation.
-- `google/s2-geometry-library-java <https://github.com/google/s2-geometry-library-java>`_: The
+- `google/s2-geometry-library-java <https://github.com/google/s2-geometry-library-java>`__: The
   reference Java implementation.
-- `sidewalklabs/s2sphere <https://github.com/sidewalklabs/s2sphere>`_: A pure-Python S2
+- `sidewalklabs/s2sphere <https://github.com/sidewalklabs/s2sphere>`__: A pure-Python S2
   implementation.
-- `golang/geo <https://github.com/golang/geo>`_: A Go implementation of S2.
+- `golang/geo <https://github.com/golang/geo>`__: A Go implementation of S2.
 
 If you have another S2 related link that may be useful here, please open an Issue or PR.
 
