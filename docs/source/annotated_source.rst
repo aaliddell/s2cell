@@ -8,5 +8,4 @@ The full source of the library is included below.
 
 .. literalinclude:: ../../s2cell/__init__.py
    :language: python
-   :linenos:
    :lines: 25-
