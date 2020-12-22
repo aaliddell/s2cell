@@ -65,12 +65,12 @@ jobs:
         run: nox -s docs
       - name: Commit and push docs
         run: |
-          shopt -s dotglob  # Ensure dot files are copied over, such as .nojekyll
           mkdir /tmp/gh-pages
           cp -r docs/build/* /tmp/gh-pages
           git checkout gh-pages
           git rm -r .  # Clean branch
           cp -r /tmp/gh-pages/* .
+          touch .nojekyll
           rm -rf __pycache__ **/__pycache__
           git add .
           git config --global user.name "${GITHUB_ACTOR}"
