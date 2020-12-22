@@ -63,7 +63,9 @@ jobs:
         run: nox -s docs
       - name: Commit and push docs
         run: |
-          cp -r docs/build/* /tmp/gh-pages/
+          env
+          mkdir /tmp/gh-pages
+          cp -r docs/build/* /tmp/gh-pages
           git checkout gh-pages
           cp -r /tmp/gh-pages/* .
           git config --global user.name 'Adam Liddell'
