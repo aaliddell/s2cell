@@ -1,7 +1,9 @@
 name: CI
 
 on:
-  push: ~
+  push:
+    branches-ignore:
+      - 'gh-pages'
   schedule:
     - cron: '0 10 * * SAT'
 
@@ -34,7 +36,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.7
+          python-version: 3.8
       - name: Install nox
         run: pip install nox
       - name: Run flake8
@@ -45,3 +47,26 @@ jobs:
         run: nox -s bandit
       - name: Run pydocstyle
         run: nox -s pydocstyle
+
+  docs:
+    name: Build and push docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install nox
+        run: pip install nox
+      - name: Build docs
+        run: nox -s docs
+      - name: Commit and push docs
+        run: |
+          cp -r docs/build/* /tmp/gh-pages/
+          git checkout gh-pages
+          cp -r /tmp/gh-pages/* .
+          git config --global user.name 'Adam Liddell'
+          git config --global user.email 'aaliddell@users.noreply.github.com'
+          git commit -am "Update docs to ${GITHUB_SHA} from ${GITHUB_REF}"
+          git push

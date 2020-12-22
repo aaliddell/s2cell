@@ -7,7 +7,7 @@ on:
 
 jobs:
   upload_release:
-    name: Build and Upload Release to PyPI
+    name: Build and upload release to PyPI
     runs-on: ubuntu-latest
 
     steps:
@@ -20,7 +20,7 @@ jobs:
       - name: Install nox
         run: pip install nox
 
-      - name: Build and Upload to PyPI
+      - name: Build and upload to PyPI
         run: nox -s upload_release
         env:
           TWINE_USERNAME: __token__
