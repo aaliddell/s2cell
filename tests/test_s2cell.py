@@ -102,7 +102,7 @@ def test_invalid_cell_id_to_lat_lon():
     with pytest.raises(TypeError, match=re.escape("Cannot decode S2 cell ID from type: <class 'float'>")):
         s2cell.cell_id_to_lat_lon(1.0)
 
-    with pytest.raises(ValueError, match=re.escape("Cannot decode S2 cell ID with invalid face: 6")):
+    with pytest.raises(ValueError, match=re.escape("Cannot convert UV to XYZ with invalid face: 6")):
         s2cell.cell_id_to_lat_lon(int(0b110 << s2cell._S2_POS_BITS))
 
 
@@ -127,7 +127,7 @@ def test_invalid_token_to_lat_lon():
     with pytest.raises(ValueError, match=re.escape('Cannot convert S2 token with length > 16 characters')):
         s2cell.token_to_lat_lon('a' * 17)
 
-    with pytest.raises(ValueError, match=re.escape("Cannot decode S2 cell ID with invalid face: 6")):
+    with pytest.raises(ValueError, match=re.escape("Cannot convert UV to XYZ with invalid face: 6")):
         s2cell.token_to_lat_lon('{:016x}'.format(np.uint64(0b110 << s2cell._S2_POS_BITS)))
 
 

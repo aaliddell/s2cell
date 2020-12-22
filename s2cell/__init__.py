@@ -137,6 +137,50 @@ def _s2_si_ti_to_st(component: np.uint64) -> float:
     return (1.0 / _S2_MAX_SI_TI) * component
 
 
+def _s2_face_uv_to_xyz(
+        face: Union[int, np.uint64], uv: Tuple[float, float]
+) -> Tuple[float, float, float]:
+    """
+    Convert face + UV to S2Point XYZ.
+
+    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L348-L357
+
+    Args:
+        face: The S2 face for the input point.
+        uv: The S2 face UV coordinates.
+
+    Returns:
+        The unnormalised S2Point XYZ.
+
+    Raises:
+        ValueError: If the face is not valid in range 0-5.
+
+    """
+    # Face -> XYZ components -> indices with negation:
+    # 0    -> ( 1,  u,  v)   -> ( /,  0,  1)
+    # 1    -> (-u,  1,  v)   -> (-0,  /,  1)
+    # 2    -> (-u, -v,  1)   -> (-0, -1,  /)
+    # 3    -> (-1, -v, -u)   -> (-/, -1, -0) <- -1 here means -1 times the value in index 1,
+    # 4    -> ( v, -1, -u)   -> ( 1, -/, -0)    not index -1
+    # 5    -> ( v,  u, -1)   -> ( 1,  0, -/)
+    if face == 0:
+        s2_point = (1, uv[0], uv[1])
+    elif face == 1:
+        s2_point = (-uv[0], 1, uv[1])
+    elif face == 2:
+        s2_point = (-uv[0], -uv[1], 1)
+    elif face == 3:
+        s2_point = (-1, -uv[1], -uv[0])
+    elif face == 4:
+        s2_point = (uv[1], -1, -uv[0])
+    elif face == 5:
+        s2_point = (uv[1], uv[0], -1)
+    else:
+        raise ValueError('Cannot convert UV to XYZ with invalid face: ' + str(face))
+
+    return s2_point
+
+
 def _s2_init_lookups() -> None:
     """
     Initialise the S2 lookups in global vars _S2_LOOKUP_POS and _S2_LOOKUP_IJ.
@@ -573,28 +617,7 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
 
     # Convert face + UV to S2Point XYZ
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L348-L357
-    #
-    # Face -> XYZ components -> indices with negation:
-    # 0    -> ( 1,  u,  v)   -> ( /,  0,  1)
-    # 1    -> (-u,  1,  v)   -> (-0,  /,  1)
-    # 2    -> (-u, -v,  1)   -> (-0, -1,  /)
-    # 3    -> (-1, -v, -u)   -> (-/, -1, -0) <- -1 here means -1 times the value in index 1,
-    # 4    -> ( v, -1, -u)   -> ( 1, -/, -0)    not index -1
-    # 5    -> ( v,  u, -1)   -> ( 1,  0, -/)
-    if face == 0:
-        s2_point = (1, uv[0], uv[1])
-    elif face == 1:
-        s2_point = (-uv[0], 1, uv[1])
-    elif face == 2:
-        s2_point = (-uv[0], -uv[1], 1)
-    elif face == 3:
-        s2_point = (-1, -uv[1], -uv[0])
-    elif face == 4:
-        s2_point = (uv[1], -1, -uv[0])
-    elif face == 5:
-        s2_point = (uv[1], uv[0], -1)
-    else:
-        raise ValueError('Cannot decode S2 cell ID with invalid face: ' + str(face))
+    s2_point = _s2_face_uv_to_xyz(face, uv)
 
     # Normalise XYZ S2Point vector
     # This section is part of the reference implementation but is not necessary when mapping
