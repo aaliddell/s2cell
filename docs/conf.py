@@ -30,6 +30,9 @@ exclude_patterns = ['.ipynb_checkpoints']
 # Code highlighting
 pygments_style = 'default'
 
+# Enable figure numbering
+numfig = True
+
 
 # -- Options for HTML output -------------------------------------------------
 
