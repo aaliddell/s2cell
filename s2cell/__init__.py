@@ -271,7 +271,7 @@ def cell_id_to_token(cell_id: Union[int, np.uint64]) -> str:
     if cell_id == 0:
         return 'X'
 
-    # Convert cell ID to hex and strip any trailing zeros
+    # Convert cell ID to 16 character hex string and strip any implicit trailing zeros
     return '{:016x}'.format(cell_id).rstrip('0')
 
 
@@ -298,14 +298,15 @@ def token_to_cell_id(token: str) -> np.uint64:
     if not isinstance(token, str):
         raise TypeError('Cannot convert S2 token from type: ' + str(type(token)))
 
-    if token in ('x', 'X'):
-        # The zero cell ID is represented as the character 'X' rather than as an empty string
-        return np.uint64(0)
-
     if len(token) > 16:
         raise ValueError('Cannot convert S2 token with length > 16 characters')
 
-    # Add stripped zeros
+    # Check for the zero cell ID represented by the character 'x' or 'X' rather than as the empty
+    # string
+    if token in ('x', 'X'):
+        return np.uint64(0)
+
+    # Add stripped implicit zeros to create the full 16 character hex string
     token = token + ('0' * (16 - len(token)))
 
     # Convert to cell ID by converting hex to int
