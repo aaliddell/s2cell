@@ -38,8 +38,8 @@ The library is checked against a test suite generated from the
 `reference C++ implementation <https://github.com/google/s2geometry>`__ to ensure conformity with the
 standard.
 
-Should you need more complete S2 functionality or a fast C-based implementation, please consider
-using the `Python extension included
+Should you need more complete S2 Geometry functionality or a fast C-based implementation, please
+consider using the `Python extension included
 <https://github.com/google/s2geometry/tree/master/src/python>`__ in the s2geometry repository or the
 pure-Python `s2sphere <https://pypi.org/project/s2sphere/>`__ implementation.
 
@@ -171,6 +171,10 @@ Users of S2 in general, not just of this library.
   Solr.
 - `BigQuery <https://cloud.google.com/bigquery/docs/reference/standard-sql/geography_functions>`__:
   Used to implement the BigQuery geography functions.
+- `InfluxDB <https://docs.influxdata.com/influxdb/cloud/query-data/flux/geo/shape-geo-data/#generate-s2-cell-id-tokens>`__:
+  Used to implement the `Geo` package.
+- `S2 Users Mailing List <https://groups.google.com/g/s2geometry-io?pli=1>`__: The Google Groups
+  mailing list for S2 users and developers.
 - `MongoDB <https://docs.mongodb.com/manual/core/2dsphere/>`__: Used to implement the ``2dsphere``
   indexing.
 
