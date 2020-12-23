@@ -43,6 +43,11 @@ a:hover, .site-content a:hover .literal {
     color: black;
 }
 
+/* Colour table headings */
+th {
+    background-color: #de6b00;
+}
+
 /* Colour footer background and text */
 footer.site-footer {
     background-color: #de6b00;
