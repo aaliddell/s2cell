@@ -1,5 +1,5 @@
-.. image:: _static/logo-200.png
-   :alt: CI Status
+.. image:: https://docs.s2cell.aliddell.com/_static/logo-200.png
+   :alt: s2cell logo
 
 s2cell
 ======
