@@ -100,9 +100,11 @@ There are also a few other useful functions for inspecting or converting a cell 
 
 .. code-block:: python3
 
-   # Conversion
+   # Conversion between cell ID and token
    s2cell.cell_id_to_token(3383781119341101056)  # -> '2ef59b'
    s2cell.token_to_cell_id('3')                  # -> 3458764513820540928
+
+.. code-block:: python3
 
    # Level extraction
    s2cell.cell_id_to_level(3383781119341101056)  # -> 10
