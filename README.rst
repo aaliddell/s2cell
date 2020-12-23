@@ -1,3 +1,6 @@
+.. image:: _static/logo-200.png
+   :alt: CI Status
+
 s2cell
 ======
 

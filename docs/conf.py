@@ -5,6 +5,7 @@ project = 's2cell'
 copyright = '2020, Adam Liddell'
 author = 'Adam Liddell'
 release = s2cell.__version__
+version = release
 
 
 # -- General configuration ---------------------------------------------------
@@ -39,6 +40,10 @@ import sphinx_redactor_theme
 html_theme = 'sphinx_redactor_theme'
 html_theme_path = [sphinx_redactor_theme.get_html_theme_path()]
 
+# Logo and favicon
+html_logo = 'source/_static/logo-200.png'
+html_favicon = 'source/_static/logo-64.png'
+
 # Base URL for docs
 # Used to generate CNAME file
 html_baseurl = 'https://docs.s2cell.aliddell.com'
@@ -46,19 +51,23 @@ html_baseurl = 'https://docs.s2cell.aliddell.com'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
+html_static_path = ['source/_static']
 
 # Theme options
 html_theme_options = {
-    'display_version': False,
+    'display_version': True,
 }
 
 # Disable footer
 html_show_sphinx = False
 
+# Template overrides
+templates_path = ['_templates']
+
 # Add CSS files
 html_css_files = [
     'pygments.css',  # Manually add pygments.css, since sphinx_redactor_theme does not
+    'customise.css',
 ]
 
 
