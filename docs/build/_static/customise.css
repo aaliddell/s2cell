@@ -1,0 +1,63 @@
+/* Fix line height of headings */
+h1, h2, h3, h4, h5, .site-content .topic-title, .toctree-wrapper .caption, .auto-toc .caption {
+ overflow: auto;
+ line-height: normal;
+}
+
+/* Reduce horizontal padding in left sidebar */
+section.site-sidebar {
+    padding-left: 4%;
+    padding-right: 4%;
+}
+
+/* Centre align logo and title in sidebar and reduce its size when too big */
+a.branding-link {
+    color: black;
+    font-size: 200%;
+    font-weight: bold;
+    padding: 0;
+    text-align: center;
+}
+
+img.logo {
+    max-width: 100%;
+}
+
+/* Increase font size in sidebar */
+section.site-nav {
+    font-size: 100%;
+}
+
+/* Colour search box outline */
+.site-searchform [type="text"]:focus {
+    box-shadow: none;
+    border-color: #de6b00;
+}
+
+/* Colour links */
+a, .site-content a .literal {
+    color: #de6b00;
+}
+
+a:hover, .site-content a:hover .literal {
+    color: black;
+}
+
+/* Colour footer background and text */
+footer.site-footer {
+    background-color: #de6b00;
+}
+
+footer.site-footer > div > div > p {
+    color: white;
+}
+
+/* Hide prev/next buttons */
+.btn--primary {
+    display: none;
+}
+
+/* Hide unusable scroll bars on code blocks */
+div.highlight {
+    overflow-y: clip;
+}

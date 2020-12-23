@@ -13,11 +13,16 @@
     
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
+    <link rel="stylesheet" href="_static/customise.css" type="text/css" />
+    
     
     <link rel="index" title="Index" href="genindex.html"/>
     <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="s2cell 1.1.0 documentation" href="#"/>
-    <link rel="next" title="s2cell package" href="api/s2cell.html"/> 
+    <link rel="top" title="s2cell 1.1.1 documentation" href="#"/>
+    <link rel="next" title="s2cell package" href="api/s2cell.html"/>
+    <link rel="shortcut icon" href="_static/logo-64.png"/>
+     
+
 </head>
 
 <body role="document">
@@ -35,9 +40,17 @@
 
     <a href="#" class="branding-link">
     
-        s2cell
     
     
+        <img src="_static/logo-200.png" class="logo" />
+    
+    
+        
+        
+            <span class="branding-link__version">
+                1.1.1
+            </span>
+        
     
     </a>
 
@@ -58,6 +71,7 @@
         <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/s2cell.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="annotated_source.html">Annotated Source</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 
@@ -95,11 +109,13 @@
         <section class="site-content">
             <div class="container">
                 
-  <div class="section" id="s2cell">
+  <img alt="s2cell logo" src="https://docs.s2cell.aliddell.com/_static/logo-200.png" />
+<div class="section" id="s2cell">
 <h1>s2cell<a class="headerlink" href="#s2cell" title="Permalink to this headline">¶</a></h1>
 <p>Minimal Python <a class="reference external" href="https://s2geometry.io/">S2</a>
 <a class="reference external" href="https://s2geometry.io/devguide/s2cell_hierarchy.html">cell ID</a>, S2 token and lat/lon conversion
 library.</p>
+<p><a class="reference external" href="https://docs.s2cell.aliddell.com">Docs</a> | <a class="reference external" href="https://pypi.org/project/s2cell">PyPI</a> | <a class="reference external" href="https://github.com/aaliddell/s2cell">GitHub</a></p>
 <a class="reference external image-reference" href="https://github.com/aaliddell/s2cell/actions"><img alt="CI Status" src="https://github.com/aaliddell/s2cell/workflows/CI/badge.svg" /></a>
 <a class="reference external image-reference" href="https://github.com/aaliddell/s2cell"><img alt="License" src="https://img.shields.io/github/license/aaliddell/s2cell" /></a>
 <a class="reference external image-reference" href="https://pypi.org/project/s2cell/"><img alt="PyPI Version" src="https://img.shields.io/pypi/v/s2cell" /></a>
@@ -107,21 +123,22 @@ library.</p>
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p>This library does conversion between S2 cell ID, S2 token and latitude/longitude and was written as
 a method to understand the way the S2 cell system works; hopefully this is useful to others as a
-single-file reference on the process. All steps in the conversion are well commented and written to
-be understandable and functional rather than necessarily fast.</p>
+single-file reference on the process, where tracing the relevant parts from the reference C++
+implementation can be somewhat daunting. All steps in the conversions are well commented and written
+to be understandable and functional rather than strictly fast, although little is different from the
+reference implementation.</p>
 <p>The library is checked against a test suite generated from the
 <a class="reference external" href="https://github.com/google/s2geometry">reference C++ implementation</a> to ensure conformity with the
 standard.</p>
 <p>Should you need more complete S2 functionality or a fast C-based implementation, please consider
-using the <a class="reference external" href="https://github.com/google/s2geometry/tree/master/src/python">Python extension included</a>
-in the s2geometry repository or the pure-Python <a class="reference external" href="https://pypi.org/project/s2sphere/">s2sphere</a>
-implementation.</p>
-<p>Issues and PRs are very welcome to improve the descriptions or correct any misunderstandings of the
-S2 cell system. Please note that this library strives to be an easy to read reference rather than
-aiming for peak performance (it is in Python after all), so PRs which reduce readability of the
-implementation (such as for Python specific speed optimisations) are generally discouraged. However,
-if you have optimisations that are applicable to S2 implementations across many langauges and can be
-described easily, please do consider making a PR.</p>
+using the <a class="reference external" href="https://github.com/google/s2geometry/tree/master/src/python">Python extension included</a> in the s2geometry repository or the
+pure-Python <a class="reference external" href="https://pypi.org/project/s2sphere/">s2sphere</a> implementation.</p>
+<p>Issues and PRs are very welcome to improve the implementation, descriptions or to correct any
+misunderstandings of the S2 cell system. Please note that this library strives to be an easy to read
+reference rather than aiming for peak performance (it is in Python after all), so PRs which reduce
+readability of the implementation (such as for Python specific speed optimisations) are generally
+discouraged. However, if you have optimisations that are applicable to S2 implementations across
+many langauges and can be described easily, please do consider making a PR.</p>
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
@@ -133,9 +150,11 @@ other Python package manager:</p>
 </div>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
-<p>Full docs are available <a class="reference external" href="https://docs.s2cell.aliddell.com">here</a>.</p>
-<p>The library is designed to be minimal and purely functional. Conversion from lat/lon (in degrees) to
-a cell ID or token can be done with the following two functions:</p>
+<p>The full documentation, including the API Reference, is available at
+<a class="reference external" href="https://docs.s2cell.aliddell.com">docs.s2cell.aliddell.com</a>. Below is a quick start guide for
+the most common uses.</p>
+<p>The library is designed to be minimal, predictable and purely functional. Conversion from lat/lon
+(in degrees) to a cell ID or token can be done with the following two functions:</p>
 <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">s2cell</span><span class="o">.</span><span class="n">lat_lon_to_cell_id</span><span class="p">(</span><span class="o">-</span><span class="mf">10.490091</span><span class="p">,</span> <span class="mf">105.641318</span><span class="p">)</span>  <span class="c1"># -&gt; 3383782026967071427</span>
 <span class="n">s2cell</span><span class="o">.</span><span class="n">lat_lon_to_token</span><span class="p">(</span><span class="o">-</span><span class="mf">10.490091</span><span class="p">,</span> <span class="mf">105.641318</span><span class="p">)</span>    <span class="c1"># -&gt; &#39;2ef59bd352b93ac3&#39;</span>
 </pre></div>
@@ -167,14 +186,37 @@ or token.</p>
 </div>
 <div class="section" id="useful-s2-links">
 <h2>Useful S2 Links<a class="headerlink" href="#useful-s2-links" title="Permalink to this headline">¶</a></h2>
+<p>Your micro ‘Awesome S2’ list. If you have another S2 related link that may be useful here, please
+<a class="reference external" href="https://github.com/aaliddell/s2cell/issues/new">open an Issue</a> or PR.</p>
+<div class="section" id="concepts">
+<h3>Concepts<a class="headerlink" href="#concepts" title="Permalink to this headline">¶</a></h3>
+<p>Core concepts of S2 and the S2 cell system.</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://s2geometry.io/">S2 Geometry</a>: The S2 Geometry homepage.</p></li>
 <li><p><a class="reference external" href="https://s2geometry.io/devguide/s2cell_hierarchy">S2 Cells</a>: Reference S2 documentation on the
 S2 cell system.</p></li>
 <li><p><a class="reference external" href="https://s2geometry.io/resources/earthcube">Earth Cube</a>: Description of the face cell mapping
 in the S2 cell system.</p></li>
-<li><p><a class="reference external" href="https://s2geometry.io/resources/s2cell_statistics">S2 Cell Statistics</a>: Details on the sizes of
-S2 cells at each level.</p></li>
+<li><p><a class="reference external" href="https://s2geometry.io/resources/s2cell_statistics">S2 Cell Statistics</a>: Details on the sizes
+of S2 cells at each level.</p></li>
+<li><p><a class="reference external" href="https://docs.google.com/presentation/d/1Hl4KapfAENAOf4gv-pSngKwvS_jwNVHRPZTTDzXXn6Q/view">Geometry on the Sphere</a>:
+Presentation on the core concepts of the S2 cell hierarchy.</p></li>
+</ul>
+</div>
+<div class="section" id="visualisations">
+<h3>Visualisations<a class="headerlink" href="#visualisations" title="Permalink to this headline">¶</a></h3>
+<p>Mapping and visualisation tools for S2 cells.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://s2.sidewalklabs.com/regioncoverer/">Region Coverer</a>: Interactive S2 cell covering
+calculator.</p></li>
+<li><p><a class="reference external" href="http://s2.sidewalklabs.com/planetaryview/">Planetary View</a>: Interactive 3D globe view of the
+S2 cell cube mapping.</p></li>
+</ul>
+</div>
+<div class="section" id="implementations">
+<h3>Implementations<a class="headerlink" href="#implementations" title="Permalink to this headline">¶</a></h3>
+<p>Reference and third-party implementations of S2 in various languages.</p>
+<ul class="simple">
 <li><p><a class="reference external" href="https://github.com/google/s2geometry">google/s2geometry</a>: The reference C++ and Python
 implementation.</p></li>
 <li><p><a class="reference external" href="https://github.com/google/s2-geometry-library-java">google/s2-geometry-library-java</a>: The
@@ -182,8 +224,25 @@ reference Java implementation.</p></li>
 <li><p><a class="reference external" href="https://github.com/sidewalklabs/s2sphere">sidewalklabs/s2sphere</a>: A pure-Python S2
 implementation.</p></li>
 <li><p><a class="reference external" href="https://github.com/golang/geo">golang/geo</a>: A Go implementation of S2.</p></li>
+<li><p><a class="reference external" href="https://github.com/radarlabs/s2">radarlabs/s2</a>: NodeJS, Javascript and TypeScript bindings for
+the reference C++ implementation.</p></li>
+<li><p><a class="reference external" href="https://github.com/mapbox/node-s2">mapbox/node-s2</a>: NodeJS/Javascript bindings for the
+reference C++ implementation.</p></li>
+<li><p><a class="reference external" href="https://github.com/r-spatial/s2/">r-spatial/s2</a>: R bindings for the reference implementation.</p></li>
 </ul>
-<p>If you have another S2 related link that may be useful here, please open an Issue or PR.</p>
+</div>
+<div class="section" id="users">
+<h3>Users<a class="headerlink" href="#users" title="Permalink to this headline">¶</a></h3>
+<p>Users of S2 in general, not just of this library.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://lucene.apache.org/">Apache Lucene</a>: Used to implement spatial indexing for Apache
+Solr.</p></li>
+<li><p><a class="reference external" href="https://cloud.google.com/bigquery/docs/reference/standard-sql/geography_functions">BigQuery</a>:
+Used to implement the BigQuery geography functions.</p></li>
+<li><p><a class="reference external" href="https://docs.mongodb.com/manual/core/2dsphere/">MongoDB</a>: Used to implement the <code class="docutils literal notranslate"><span class="pre">2dsphere</span></code>
+indexing.</p></li>
+</ul>
+</div>
 </div>
 <div class="section" id="license">
 <h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
@@ -245,7 +304,7 @@ namely the Apache 2.0 License.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'',
-            VERSION:'1.1.0',
+            VERSION:'1.1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="utf-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <title>Annotated Source</title>
+    
+
+    <link rel="stylesheet" href="_static/css/redactor.css" type="text/css" />
+    
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <link rel="stylesheet" href="_static/customise.css" type="text/css" />
+    
+    
+    <link rel="index" title="Index" href="genindex.html"/>
+    <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="s2cell 1.1.1 documentation" href="index.html"/>
+    <link rel="next" title="Changelog" href="changelog.html"/>
+    <link rel="prev" title="s2cell package" href="api/s2cell.html"/>
+    <link rel="shortcut icon" href="_static/logo-64.png"/>
+     
+
+</head>
+
+<body role="document">
+     
+
+    
+<a href="#" id="js-navigation-toggle" class="navigation-toggle">
+    <i class="mdi mdi-menu"></i><i class="mdi mdi-close"></i>
+</a>
+
+<section class="site-sidebar">
+
+<nav>
+
+
+    <a href="index.html" class="branding-link">
+    
+    
+    
+        <img src="_static/logo-200.png" class="logo" />
+    
+    
+        
+        
+            <span class="branding-link__version">
+                1.1.1
+            </span>
+        
+    
+    </a>
+
+    
+<section role="search">
+    <form action="search.html" method="get" class="site-searchform">
+        <input type="text" name="q" placeholder="Search docs" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+</section>
+
+
+
+    <section class="site-nav">
+    
+    
+        <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/s2cell.html">API Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Annotated Source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+    
+    </section>
+
+</nav>
+
+</section>
+
+    <main class="site-main" role="main">
+        
+
+
+
+
+
+
+
+
+
+
+
+<nav class="site-breadcrumbs">
+    <ul>
+    
+        <li>
+            <a href="index.html">Docs</a> /
+        </li>
+        
+        <li class="site-breadcrumbs__leaf">Annotated Source</li>
+    
+    </ul>
+</nav>
+        <section class="site-content">
+            <div class="container">
+                
+  <div class="section" id="annotated-source">
+<h1>Annotated Source<a class="headerlink" href="#annotated-source" title="Permalink to this headline">¶</a></h1>
+<p>The single source file for the library contains many comments on the inner workings of the S2 cell
+system that are useful for understanding the steps to convert from one representation to another.
+The full source of the library is included below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#</span>
+<span class="c1"># S2 base constants needed for cell mapping</span>
+<span class="c1">#</span>
+
+<span class="c1"># The maximum level supported within an S2 cell ID. Each level is represented by two bits in the</span>
+<span class="c1"># final cell ID</span>
+<span class="n">_S2_MAX_LEVEL</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+
+<span class="c1"># The maximum value within the I and J bits of an S2 cell ID</span>
+<span class="n">_S2_MAX_SIZE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">_S2_MAX_LEVEL</span>
+
+<span class="c1"># The number of bits in a S2 cell ID used for specifying the base face</span>
+<span class="n">_S2_FACE_BITS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># The number of bits in a S2 cell ID used for specifying the position along the Hilbert curve</span>
+<span class="n">_S2_POS_BITS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">_S2_MAX_LEVEL</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># The maximum value of the Si/Ti integers used when mapping from IJ to ST. This is twice the max</span>
+<span class="c1"># value of I and J, since Si/Ti allow referencing both the centre and edge of a leaf cell</span>
+<span class="n">_S2_MAX_SI_TI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">_S2_MAX_LEVEL</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Mask that specifies the swap orientation bit for the Hilbert curve</span>
+<span class="n">_S2_SWAP_MASK</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Mask that specifies the invert orientation bit for the Hilbert curve</span>
+<span class="n">_S2_INVERT_MASK</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># The number of bits per I and J in the lookup tables</span>
+<span class="n">_S2_LOOKUP_BITS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># Lookup table for mapping 10 bits of IJ + orientation to 10 bits of Hilbert curve position +</span>
+<span class="c1"># orientation. Populated later by _s2_init_lookups</span>
+<span class="n">_S2_LOOKUP_POS</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1"># Lookup table for mapping 10 bits of Hilbert curve position + orientation to 10 bits of IJ +</span>
+<span class="c1"># orientation. Populated later by _s2_init_lookups</span>
+<span class="n">_S2_LOOKUP_IJ</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1"># Lookup table of two bits of IJ from two bits of curve position, based also on the current curve</span>
+<span class="c1"># orientation from the swap and invert bits</span>
+<span class="n">_S2_POS_TO_IJ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>  <span class="c1"># 0: Normal order, no swap or invert</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>  <span class="c1"># 1: Swap bit set, swap I and J bits</span>
+    <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>  <span class="c1"># 2: Invert bit set, invert bits</span>
+    <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>  <span class="c1"># 3: Swap and invert bits set</span>
+<span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+
+<span class="c1"># Lookup for the orientation update mask of one of the four sub-cells within a higher level cell.</span>
+<span class="c1"># This mask is XOR&#39;ed with the current orientation to get the sub-cell orientation.</span>
+<span class="n">_S2_POS_TO_ORIENTATION_MASK</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+    <span class="n">_S2_SWAP_MASK</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">_S2_SWAP_MASK</span> <span class="o">|</span> <span class="n">_S2_INVERT_MASK</span>
+<span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># S2 helper functions</span>
+<span class="c1">#</span>
+
+<span class="k">def</span> <span class="nf">_s2_uv_to_st</span><span class="p">(</span><span class="n">component</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert S2 UV to ST.</span>
+
+<span class="sd">    This is done using the quadratic projection that is used by default for S2. The C++ and Java S2</span>
+<span class="sd">    libraries use a different definition of the ST cell-space, but the end result in IJ is the same.</span>
+<span class="sd">    The below uses the C++ ST definition.</span>
+
+<span class="sd">    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L317-L320</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">component</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">component</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">component</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_s2_st_to_uv</span><span class="p">(</span><span class="n">component</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert S2 ST to UV.</span>
+
+<span class="sd">    This is done using the quadratic projection that is used by default for S2. The C++ and Java S2</span>
+<span class="sd">    libraries use a different definition of the ST cell-space, but the end result in IJ is the same.</span>
+<span class="sd">    The below uses the C++ ST definition.</span>
+
+<span class="sd">    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L312-L315</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">component</span> <span class="o">&gt;=</span> <span class="mf">0.5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">component</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">component</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_s2_st_to_ij</span><span class="p">(</span><span class="n">component</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert S2 ST to IJ.</span>
+
+<span class="sd">    The mapping here differs between C++ and Java versions, but the combination of</span>
+<span class="sd">    _st_to_ij(_uv_to_st(val)) is the same for both. The below uses the C++ ST definition.</span>
+
+<span class="sd">    See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L333-L336</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">_S2_MAX_SIZE</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">_S2_MAX_SIZE</span> <span class="o">*</span> <span class="n">component</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">))))</span>
+
+
+<span class="k">def</span> <span class="nf">_s2_si_ti_to_st</span><span class="p">(</span><span class="n">component</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert S2 Si/Ti to ST.</span>
+
+<span class="sd">    This converts an integer in range 0 to _S2_MAX_SI_TI into a float in range 0.0 to 1.0.</span>
+
+<span class="sd">    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L338-L341</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">_S2_MAX_SI_TI</span><span class="p">)</span> <span class="o">*</span> <span class="n">component</span>
+
+
+<span class="k">def</span> <span class="nf">_s2_face_uv_to_xyz</span><span class="p">(</span>  <span class="c1"># pylint: disable=invalid-name</span>
+        <span class="n">face</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">],</span> <span class="n">uv</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert face + UV to S2Point XYZ.</span>
+
+<span class="sd">    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L348-L357</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        face: The S2 face for the input point.</span>
+<span class="sd">        uv: The S2 face UV coordinates.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The unnormalised S2Point XYZ.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the face is not valid in range 0-5.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Face -&gt; XYZ components -&gt; indices with negation:</span>
+    <span class="c1"># 0    -&gt; ( 1,  u,  v)   -&gt; ( /,  0,  1)</span>
+    <span class="c1"># 1    -&gt; (-u,  1,  v)   -&gt; (-0,  /,  1)</span>
+    <span class="c1"># 2    -&gt; (-u, -v,  1)   -&gt; (-0, -1,  /)</span>
+    <span class="c1"># 3    -&gt; (-1, -v, -u)   -&gt; (-/, -1, -0) &lt;- -1 here means -1 times the value in index 1,</span>
+    <span class="c1"># 4    -&gt; ( v, -1, -u)   -&gt; ( 1, -/, -0)    not index -1</span>
+    <span class="c1"># 5    -&gt; ( v,  u, -1)   -&gt; ( 1,  0, -/)</span>
+    <span class="k">if</span> <span class="n">face</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">s2_point</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">uv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">face</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">s2_point</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">uv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">uv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">face</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">s2_point</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">uv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">uv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">face</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">s2_point</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">uv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">uv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">face</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">s2_point</span> <span class="o">=</span> <span class="p">(</span><span class="n">uv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">uv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">face</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">s2_point</span> <span class="o">=</span> <span class="p">(</span><span class="n">uv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot convert UV to XYZ with invalid face: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">face</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">s2_point</span>
+
+
+<span class="k">def</span> <span class="nf">_s2_init_lookups</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialise the S2 lookups in global vars _S2_LOOKUP_POS and _S2_LOOKUP_IJ.</span>
+
+<span class="sd">    This generates 4 variations of a 4 level deep Hilbert curve, one for each swap/invert bit</span>
+<span class="sd">    combination. This allows mapping between 8 bits (+2 orientation) of Hilbert curve position and 8</span>
+<span class="sd">    bits (+2 orientation) of I and J, and vice versa. The new orientation bits read from the mapping</span>
+<span class="sd">    tell us the base orientation of the curve segments within the next deeper level of sub-cells.</span>
+
+<span class="sd">    This implementation differs in structure from the reference implementation, since it is</span>
+<span class="sd">    iterative rather than recursive. The end result is the same lookup table.</span>
+
+<span class="sd">    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_S2_LOOKUP_POS</span><span class="p">,</span> <span class="n">_S2_LOOKUP_IJ</span>  <span class="c1"># pylint: disable=global-statement</span>
+    <span class="k">if</span> <span class="n">_S2_LOOKUP_POS</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">_S2_LOOKUP_IJ</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no branch</span>
+        <span class="n">lookup_length</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">_S2_LOOKUP_BITS</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">_S2_LOOKUP_POS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">lookup_length</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+        <span class="n">_S2_LOOKUP_IJ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">lookup_length</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+
+        <span class="c1"># Generate lookups for each of the base orientations given by the swap and invert bits</span>
+        <span class="k">for</span> <span class="n">base_orientation</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="n">_S2_SWAP_MASK</span><span class="p">,</span> <span class="n">_S2_INVERT_MASK</span><span class="p">,</span> <span class="n">_S2_SWAP_MASK</span> <span class="o">|</span> <span class="n">_S2_INVERT_MASK</span>  <span class="c1"># 0-4 effectively</span>
+        <span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">):</span>
+            <span class="c1"># Walk the 256 possible positions within a level 4 curve. There is probably a smarter</span>
+            <span class="c1"># way of doing this iteratively that reuses work at each level. e.g. 4 nested for loops?</span>
+            <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4</span> <span class="o">**</span> <span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">):</span>
+                <span class="n">ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Has pattern iiiijjjj, not ijijijij  # pylint: disable=invalid-name</span>
+                <span class="n">orientation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">base_orientation</span><span class="p">)</span>
+
+                <span class="c1"># Walk the pairs of bits of pos, from most significant, getting IJ and orientation</span>
+                <span class="c1"># as we go</span>
+                <span class="k">for</span> <span class="n">bit_pair_offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+                    <span class="c1"># Bit pair is effectively the sub-cell index</span>
+                    <span class="n">bit_pair</span> <span class="o">=</span> <span class="p">(</span><span class="n">pos</span> <span class="o">&gt;&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">((</span><span class="mi">3</span> <span class="o">-</span> <span class="n">bit_pair_offset</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">))</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mb">0b11</span><span class="p">)</span>
+
+                    <span class="c1"># Get the I and J for the sub-cell index. These need to be spread into iiiijjjj</span>
+                    <span class="c1"># by inserting as bit positions 4 and 0</span>
+                    <span class="n">ij_bits</span> <span class="o">=</span> <span class="n">_S2_POS_TO_IJ</span><span class="p">[</span><span class="n">orientation</span><span class="p">][</span><span class="n">bit_pair</span><span class="p">]</span>
+                    <span class="n">ij</span> <span class="o">=</span> <span class="p">(</span>  <span class="c1"># pylint: disable=invalid-name</span>
+                        <span class="p">(</span><span class="n">ij</span> <span class="o">&lt;&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>  <span class="c1"># Free up position 4 and 0 from old IJ</span>
+                        <span class="o">|</span> <span class="p">((</span><span class="n">ij_bits</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="o">&lt;&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>  <span class="c1"># I bit in position 4</span>
+                        <span class="o">|</span> <span class="p">(</span><span class="n">ij_bits</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>  <span class="c1"># J bit in position 0</span>
+                    <span class="p">)</span>
+
+                    <span class="c1"># Update the orientation with the new sub-cell orientation</span>
+                    <span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span> <span class="o">^</span> <span class="n">_S2_POS_TO_ORIENTATION_MASK</span><span class="p">[</span><span class="n">bit_pair</span><span class="p">]</span>
+
+                <span class="c1"># Shift IJ and position to allow orientation bits in LSBs of lookup</span>
+                <span class="n">ij</span> <span class="o">&lt;&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># pylint: disable=invalid-name</span>
+                <span class="n">pos</span> <span class="o">&lt;&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+                <span class="c1"># Write lookups</span>
+                <span class="n">_S2_LOOKUP_POS</span><span class="p">[</span><span class="n">ij</span> <span class="o">|</span> <span class="n">base_orientation</span><span class="p">]</span> <span class="o">=</span> <span class="n">pos</span> <span class="o">|</span> <span class="n">orientation</span>
+                <span class="n">_S2_LOOKUP_IJ</span><span class="p">[</span><span class="n">pos</span> <span class="o">|</span> <span class="n">base_orientation</span><span class="p">]</span> <span class="o">=</span> <span class="n">ij</span> <span class="o">|</span> <span class="n">orientation</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># Cell ID &lt;-&gt; Token translation functions</span>
+<span class="c1">#</span>
+
+<span class="k">def</span> <span class="nf">cell_id_to_token</span><span class="p">(</span><span class="n">cell_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert S2 cell ID to a S2 token.</span>
+
+<span class="sd">    Converts the S2 cell ID to hex and strips any trailing zeros. The 0 cell ID token is represented</span>
+<span class="sd">    as &#39;X&#39; to prevent it being an empty string.</span>
+
+<span class="sd">    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L204-L220</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cell_id: The S2 cell ID integer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The S2 token string for the S2 cell ID.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If the cell_id is not int or np.uint64.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check type</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell_id</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot convert S2 cell ID from type: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)))</span>
+    <span class="n">cell_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)</span>
+
+    <span class="c1"># The zero token is encoded as &#39;X&#39; rather than as a zero-length string. This implementation has</span>
+    <span class="c1"># no method of generating the 0 cell ID, so this line is mostly here for consistency with the</span>
+    <span class="c1"># reference implementation.</span>
+    <span class="k">if</span> <span class="n">cell_id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">return</span> <span class="s1">&#39;X&#39;</span>
+
+    <span class="c1"># Convert cell ID to hex and strip any trailing zeros</span>
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{:016x}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">token_to_cell_id</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert S2 token to S2 cell ID.</span>
+
+<span class="sd">    Restores the stripped 0 characters from the token and converts the hex string to integer.</span>
+
+<span class="sd">    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L222-L239</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        token: The S2 token string. Can be upper or lower case hex string.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">       The S2 cell ID for the S2 token.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If the token is not str.</span>
+<span class="sd">        ValueError: If the token length is over 16.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check input</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot convert S2 token from type: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">token</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">):</span>
+        <span class="c1"># The zero cell ID is represented as the character &#39;X&#39; rather than as an empty string</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">16</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot convert S2 token with length &gt; 16 characters&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Add stripped zeros</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">token</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;0&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="mi">16</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)))</span>
+
+    <span class="c1"># Convert to cell ID by converting hex to int</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># Encode functions</span>
+<span class="c1">#</span>
+
+<span class="k">def</span> <span class="nf">lat_lon_to_cell_id</span><span class="p">(</span>  <span class="c1"># pylint: disable=too-many-locals</span>
+        <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert lat/lon to a S2 cell ID.</span>
+
+<span class="sd">    It is expected that the lat/lon provided are normalised, with latitude in the range -90 to 90.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lat: The latitude to convert, in degrees.</span>
+<span class="sd">        lon: The longitude to convert, in degrees.</span>
+<span class="sd">        level: The level of the cell ID to generate, from 0 up to 30.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The S2 cell ID for the lat/lon location.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: When level is not an integer, is &lt; 0 or is &gt; 30.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">level</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">level</span> <span class="o">&gt;</span> <span class="n">_S2_MAX_LEVEL</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;S2 level must be integer &gt;= 0 and &lt;= 30&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Populate _S2_LOOKUP_POS on first run.</span>
+    <span class="c1"># See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109</span>
+    <span class="c1">#</span>
+    <span class="c1"># This table takes 10 bits of I and J and orientation and returns 10 bits of curve position and</span>
+    <span class="c1"># new orientation</span>
+    <span class="k">if</span> <span class="n">_S2_LOOKUP_POS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="n">_s2_init_lookups</span><span class="p">()</span>
+
+    <span class="c1"># Reuse constant expressions</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">lon_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">sin_lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+    <span class="n">cos_lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+    <span class="n">sin_lon_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lon_rad</span><span class="p">)</span>
+    <span class="n">cos_lon_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lon_rad</span><span class="p">)</span>
+
+    <span class="c1"># Convert to S2Point</span>
+    <span class="c1"># This is effectively the unit non-geodetic ECEF vector</span>
+    <span class="n">s2_point</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">cos_lat_rad</span> <span class="o">*</span> <span class="n">cos_lon_rad</span><span class="p">,</span>  <span class="c1"># X</span>
+        <span class="n">cos_lat_rad</span> <span class="o">*</span> <span class="n">sin_lon_rad</span><span class="p">,</span>  <span class="c1"># Y</span>
+        <span class="n">sin_lat_rad</span>                 <span class="c1"># Z</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Get cube face</span>
+    <span class="c1"># See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L380-L384</span>
+    <span class="c1">#</span>
+    <span class="c1"># The face is determined by the largest XYZ component of the S2Point vector. When the component</span>
+    <span class="c1"># is negative, the second set of three faces is used.</span>
+    <span class="c1"># Largest component -&gt; face:</span>
+    <span class="c1"># +x -&gt; 0</span>
+    <span class="c1"># +y -&gt; 1</span>
+    <span class="c1"># +z -&gt; 2</span>
+    <span class="c1"># -x -&gt; 3</span>
+    <span class="c1"># -y -&gt; 4</span>
+    <span class="c1"># -z -&gt; 5</span>
+    <span class="n">face</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">s2_point</span><span class="p">)))</span>  <span class="c1"># Largest absolute component</span>
+    <span class="k">if</span> <span class="n">s2_point</span><span class="p">[</span><span class="n">face</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">face</span> <span class="o">+=</span> <span class="mi">3</span>
+
+    <span class="c1"># Convert face + XYZ to cube-space face + UV</span>
+    <span class="c1"># See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L366-L372</span>
+    <span class="c1">#</span>
+    <span class="c1"># The faces are oriented to ensure continuity of curve.</span>
+    <span class="c1"># Face -&gt; UV components -&gt; indices with negation (without divisor, which is always the remaining</span>
+    <span class="c1"># component (index: face % 3)):</span>
+    <span class="c1"># 0 -&gt; ( y,  z) -&gt; ( 1,  2)</span>
+    <span class="c1"># 1 -&gt; (-x,  z) -&gt; (-0,  2)</span>
+    <span class="c1"># 2 -&gt; (-x, -y) -&gt; (-0, -1) &lt;- -1 here means -1 times the value in index 1, not index -1</span>
+    <span class="c1"># 3 -&gt; ( z,  y) -&gt; ( 2,  1)</span>
+    <span class="c1"># 4 -&gt; ( z, -x) -&gt; ( 2, -0)</span>
+    <span class="c1"># 5 -&gt; (-y, -x) -&gt; (-1, -0)</span>
+    <span class="c1">#</span>
+    <span class="c1"># For a compiled language, a switch statement on face is preferable as it will be more easily</span>
+    <span class="c1"># optimised as a jump table etc; but in Python the indexing method is more concise.</span>
+    <span class="c1">#</span>
+    <span class="c1"># The index selection can be reduced to some bit magic:</span>
+    <span class="c1"># U: 1 - ((face + 1) &gt;&gt; 1)</span>
+    <span class="c1"># V: 2 - (face &gt;&gt; 1)</span>
+    <span class="c1">#</span>
+    <span class="c1"># The negation of the the two components is then selected:</span>
+    <span class="c1"># U: (face in [1, 2, 5]) ? -1: 1</span>
+    <span class="c1"># V: (face in [2, 4, 5])) ? -1: 1</span>
+    <span class="n">uv</span> <span class="o">=</span> <span class="p">(</span>  <span class="c1"># pylint: disable=invalid-name</span>
+        <span class="n">s2_point</span><span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="p">((</span><span class="n">face</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">/</span> <span class="n">s2_point</span><span class="p">[</span><span class="n">face</span> <span class="o">%</span> <span class="mi">3</span><span class="p">],</span>  <span class="c1"># U</span>
+        <span class="n">s2_point</span><span class="p">[</span><span class="mi">2</span> <span class="o">-</span> <span class="p">(</span><span class="n">face</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">/</span> <span class="n">s2_point</span><span class="p">[</span><span class="n">face</span> <span class="o">%</span> <span class="mi">3</span><span class="p">]</span>         <span class="c1"># V</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">face</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
+        <span class="n">uv</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">uv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># Negate U  # pylint: disable=invalid-name</span>
+    <span class="k">if</span> <span class="n">face</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
+        <span class="n">uv</span> <span class="o">=</span> <span class="p">(</span><span class="n">uv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">uv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># Negate V  # pylint: disable=invalid-name</span>
+
+    <span class="c1"># Project cube-space UV to cell-space ST</span>
+    <span class="c1"># See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L317-L320</span>
+    <span class="n">st</span> <span class="o">=</span> <span class="p">(</span><span class="n">_s2_uv_to_st</span><span class="p">(</span><span class="n">uv</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">_s2_uv_to_st</span><span class="p">(</span><span class="n">uv</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>  <span class="c1"># pylint: disable=invalid-name</span>
+
+    <span class="c1"># Convert ST to IJ integers</span>
+    <span class="c1"># See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L333-L336</span>
+    <span class="n">ij</span> <span class="o">=</span> <span class="p">(</span><span class="n">_s2_st_to_ij</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">_s2_st_to_ij</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>  <span class="c1"># pylint: disable=invalid-name</span>
+
+    <span class="c1"># Convert face + IJ to cell ID</span>
+    <span class="c1"># See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L256-L298</span>
+    <span class="c1">#</span>
+    <span class="c1"># This is done by looking up 8 bits of I and J (4 each) at a time in the lookup table, along</span>
+    <span class="c1"># with two bits of orientation (swap (1) and invert (2)). This gives back 8 bits of position</span>
+    <span class="c1"># along the curve and two new orientation bits for the curve within the sub-cells in the next</span>
+    <span class="c1"># step.</span>
+    <span class="c1">#</span>
+    <span class="c1"># The swap bit swaps I and J with each other</span>
+    <span class="c1"># The invert bit inverts the bits of I and J, which means axes are negated</span>
+    <span class="c1">#</span>
+    <span class="c1"># Compared to the standard versions, we check the required number of steps we need to do for the</span>
+    <span class="c1"># requested level and don&#39;t perform steps that will be completely overwritten in the truncation</span>
+    <span class="c1"># below, rather than always doing every step. Each step does 4 bits each of I and J, which is 4</span>
+    <span class="c1"># levels, so the required number of steps is ceil((level + 2) / 4), when level is &gt; 0. The</span>
+    <span class="c1"># additional 2 levels added are required to account for the top 3 bits (4 before right shift)</span>
+    <span class="c1"># that are occupied by the face bits.</span>
+    <span class="n">bits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">face</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">_S2_SWAP_MASK</span>  <span class="c1"># iiiijjjjoo. Initially set by by face</span>
+    <span class="n">cell_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">face</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">_S2_POS_BITS</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1"># Insert face at most signficant bits</span>
+    <span class="n">lookup_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">_S2_LOOKUP_BITS</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">required_steps</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">level</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span> <span class="k">if</span> <span class="n">level</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span> <span class="o">-</span> <span class="n">required_steps</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># Grab 4 bits of each of I and J</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">_S2_LOOKUP_BITS</span><span class="p">)</span>
+        <span class="n">bits</span> <span class="o">+=</span> <span class="p">((</span><span class="n">ij</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="n">offset</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">lookup_mask</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="n">_S2_LOOKUP_BITS</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">bits</span> <span class="o">+=</span> <span class="p">((</span><span class="n">ij</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="n">offset</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">lookup_mask</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Map bits from iiiijjjjoo to ppppppppoo</span>
+        <span class="n">bits</span> <span class="o">=</span> <span class="n">_S2_LOOKUP_POS</span><span class="p">[</span><span class="n">bits</span><span class="p">]</span>
+
+        <span class="c1"># Insert position bits to cell ID</span>
+        <span class="n">cell_id</span> <span class="o">|=</span> <span class="p">(</span><span class="n">bits</span> <span class="o">&gt;&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="o">&lt;&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">_S2_LOOKUP_BITS</span><span class="p">)</span>
+
+        <span class="c1"># Remove position bits, leaving just new swap and invert bits for the next round</span>
+        <span class="n">bits</span> <span class="o">&amp;=</span> <span class="p">(</span><span class="n">_S2_SWAP_MASK</span> <span class="o">|</span> <span class="n">_S2_INVERT_MASK</span><span class="p">)</span>
+
+    <span class="c1"># Left shift and add trailing bit</span>
+    <span class="c1"># The trailing bit addition is disabled, as we are overwriting this below in the truncation</span>
+    <span class="c1"># anyway. This line is kept as an example of the full method for S2 cell ID creation as is done</span>
+    <span class="c1"># in the standard library versions.</span>
+    <span class="n">cell_id</span> <span class="o">=</span> <span class="p">(</span><span class="n">cell_id</span> <span class="o">&lt;&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>  <span class="c1"># + np.uint64(1)</span>
+
+    <span class="c1"># Truncate to desired level</span>
+    <span class="c1"># This is done by finding the mask of the trailing 1 bit for the specified level, then zeroing</span>
+    <span class="c1"># out all bits less significant than this, then finally setting the trailing 1 bit. This is</span>
+    <span class="c1"># still necessary to do even after a reduced number of steps `required_steps` above, since each</span>
+    <span class="c1"># step contains multiple levels that may need partial overwrite. Additionally, we need to add</span>
+    <span class="c1"># the trailing 1 bit, which is not yet set above.</span>
+    <span class="n">least_significant_bit_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">_S2_MAX_LEVEL</span> <span class="o">-</span> <span class="n">level</span><span class="p">))</span>
+    <span class="n">cell_id</span> <span class="o">=</span> <span class="p">(</span><span class="n">cell_id</span> <span class="o">&amp;</span> <span class="o">-</span><span class="n">least_significant_bit_mask</span><span class="p">)</span> <span class="o">|</span> <span class="n">least_significant_bit_mask</span>
+
+    <span class="k">return</span> <span class="n">cell_id</span>
+
+
+<span class="k">def</span> <span class="nf">lat_lon_to_token</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert lat/lon to a S2 token.</span>
+
+<span class="sd">    Converts the S2 cell ID to hex and strips any trailing zeros. The 0 cell ID token is represented</span>
+<span class="sd">    as &#39;X&#39; to prevent it being an empty string.</span>
+
+<span class="sd">    It is expected that the lat/lon provided are normalised, with latitude in the range -90 to 90.</span>
+
+<span class="sd">    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L204-L220</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lat: The latitude to convert, in degrees.</span>
+<span class="sd">        lon: The longitude to convert, in degrees.</span>
+<span class="sd">        level: The level of the cell ID to generate, from 0 up to 30.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The S2 token string for the lat/lon location.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: When level is not an integer, is &lt; 0 or is &gt; 30.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Generate cell ID and convert to token</span>
+    <span class="k">return</span> <span class="n">cell_id_to_token</span><span class="p">(</span><span class="n">lat_lon_to_cell_id</span><span class="p">(</span><span class="n">lat</span><span class="o">=</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="o">=</span><span class="n">lon</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">))</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># Decode functions</span>
+<span class="c1">#</span>
+
+<span class="k">def</span> <span class="nf">cell_id_to_lat_lon</span><span class="p">(</span>  <span class="c1"># pylint: disable=too-many-locals</span>
+    <span class="n">cell_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert S2 cell ID to lat/lon.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cell_id: The S2 cell ID integer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The lat/lon (in degrees) tuple generated from the S2 cell ID.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If the cell_id is not int or np.uint64.</span>
+<span class="sd">        ValueError: If the cell_id has invalid face bits.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check type</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell_id</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot decode S2 cell ID from type: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)))</span>
+    <span class="n">cell_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)</span>
+
+    <span class="c1"># Populate _S2_LOOKUP_IJ on first run.</span>
+    <span class="c1"># See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109</span>
+    <span class="c1"># This table takes 10 bits of curve position and orientation and returns 10 bits of I and J and</span>
+    <span class="c1"># new orientation</span>
+    <span class="k">if</span> <span class="n">_S2_LOOKUP_IJ</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="n">_s2_init_lookups</span><span class="p">()</span>
+
+    <span class="c1"># Extract face + IJ from cell ID</span>
+    <span class="c1"># See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L312-L367</span>
+    <span class="c1">#</span>
+    <span class="c1"># This is done by looking up 8 bits of curve position at a time in the lookup table, along with</span>
+    <span class="c1"># two bits of orientation (swap (1) and invert (2)). This gives back 8 bits of I and J (4 each)</span>
+    <span class="c1"># and two new orientation bits for the curve within the sub-cells in the next step.</span>
+    <span class="c1">#</span>
+    <span class="c1"># The swap bit swaps I and J with each other</span>
+    <span class="c1"># The invert bit inverts the bits of I and J, which means axes are negated</span>
+    <span class="c1">#</span>
+    <span class="c1"># In the first loop (most significant bits), the 3 bits occupied by the face need to be masked</span>
+    <span class="c1"># out, since these are not set in the IJ to cell ID during encoding.</span>
+    <span class="c1">#</span>
+    <span class="c1"># The I and J returned here are of one of the two leaf (level 30) cells that are located</span>
+    <span class="c1"># diagonally closest to the cell centre. This happens because repeated ..00.. will select the</span>
+    <span class="c1"># &#39;lower left&#39; (for nominally oriented Hilbert curve segments) of the sub-cells. The ..10..</span>
+    <span class="c1"># arising from the trailing bit, prior to the repeated ..00.. bits, ensures we first pick the</span>
+    <span class="c1"># &#39;upper right&#39; of the cell, then iterate in to lower left until we hit the leaf cell. However,</span>
+    <span class="c1"># in the case of the swapped and inverted curve segment (4th sub-curve segment), the ..10.. will</span>
+    <span class="c1"># select the &#39;lower left&#39; and then iterate to the &#39;upper right&#39; with each ..00.. following. In</span>
+    <span class="c1"># that case, we will be offset left and down by one leaf cell in each of I and J, which needs to</span>
+    <span class="c1"># be added to have a consistent mapping. This is detectable by seeing that the final bit of I or</span>
+    <span class="c1"># J is 1 (i.e we have picked an odd row/column, which will happen concurrently in both I and J,</span>
+    <span class="c1"># so we only need to check one), except in case of level 29 where the logic is inverted and the</span>
+    <span class="c1"># correction needs to be applied when we pick an even row/column (i.e I/J ends in 0), since</span>
+    <span class="c1"># there are no trailing ..00..</span>
+    <span class="c1">#</span>
+    <span class="c1"># This behaviour can be captured in the expression:</span>
+    <span class="c1"># apply_correction = not leaf and (i ^ (is level 29)) &amp; 1</span>
+    <span class="c1"># apply_corerction = not leaf and (i ^ (cell_id &gt;&gt; 2)) &amp; 1</span>
+    <span class="c1">#</span>
+    <span class="c1"># We check for level 29 by looking for the trailing 1 in third LSB, when we already know that we</span>
+    <span class="c1"># are not a leaf cell (which could give false positive) by the initial check in the expression.</span>
+    <span class="c1"># See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.h#L503-L529</span>
+    <span class="c1">#</span>
+    <span class="n">face</span> <span class="o">=</span> <span class="n">cell_id</span> <span class="o">&gt;&gt;</span> <span class="n">_S2_POS_BITS</span>
+    <span class="n">bits</span> <span class="o">=</span> <span class="n">face</span> <span class="o">&amp;</span> <span class="n">_S2_SWAP_MASK</span>  <span class="c1"># ppppppppoo. Initially set by by face</span>
+    <span class="n">lookup_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">_S2_LOOKUP_BITS</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># Pull out 8 bits of cell ID, except in first loop where we pull out only 4</span>
+        <span class="n">n_bits</span> <span class="o">=</span> <span class="p">(</span><span class="n">_S2_MAX_LEVEL</span> <span class="o">-</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">_S2_LOOKUP_BITS</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">7</span> <span class="k">else</span> <span class="n">_S2_LOOKUP_BITS</span>
+        <span class="n">extract_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n_bits</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># 8 (or 4) one bits</span>
+        <span class="n">bits</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">cell_id</span> <span class="o">&gt;&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">_S2_LOOKUP_BITS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">&amp;</span> <span class="n">extract_mask</span>
+        <span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Map bits from ppppppppoo to iiiijjjjoo</span>
+        <span class="n">bits</span> <span class="o">=</span> <span class="n">_S2_LOOKUP_IJ</span><span class="p">[</span><span class="n">bits</span><span class="p">]</span>
+
+        <span class="c1"># Extract I and J bits</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">_S2_LOOKUP_BITS</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="p">(</span><span class="n">bits</span> <span class="o">&gt;&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="n">_S2_LOOKUP_BITS</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span> <span class="o">&lt;&lt;</span> <span class="n">offset</span>  <span class="c1"># Don&#39;t need lookup mask here</span>
+        <span class="n">j</span> <span class="o">+=</span> <span class="p">((</span><span class="n">bits</span> <span class="o">&gt;&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="o">&amp;</span> <span class="n">lookup_mask</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">offset</span>
+
+        <span class="c1"># Remove I and J bits, leaving just new swap and invert bits for the next round</span>
+        <span class="n">bits</span> <span class="o">&amp;=</span> <span class="p">(</span><span class="n">_S2_SWAP_MASK</span> <span class="o">|</span> <span class="n">_S2_INVERT_MASK</span><span class="p">)</span>
+
+    <span class="c1"># Resolve the centre of the cell. For leaf cells, we add half the leaf cell size. For non-leaf</span>
+    <span class="c1"># cells, we currently have one of either two cells diagonally around the cell centre, as</span>
+    <span class="c1"># described above. The centre_correction_delta is 2x the offset, as we left shift I and J first.</span>
+    <span class="c1"># This gives us the values Si and Ti, which are discrete representation of S and T in range 0 to</span>
+    <span class="c1"># _S2_MAX_SI_TI. The extra power of 2 over IJ allows for identifying both the centre and edge of</span>
+    <span class="c1"># cells, whilst IJ is just the leaf cells.</span>
+    <span class="c1"># See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L57-L65</span>
+    <span class="n">is_leaf</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">cell_id</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>  <span class="c1"># Cell is leaf cell when trailing one bit is in LSB</span>
+    <span class="n">apply_correction</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">is_leaf</span> <span class="ow">and</span> <span class="p">((</span><span class="n">i</span> <span class="o">^</span> <span class="p">(</span><span class="n">cell_id</span> <span class="o">&gt;&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">centre_correction_delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">is_leaf</span> <span class="k">else</span> <span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="n">apply_correction</span> <span class="k">else</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">si</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="n">centre_correction_delta</span>  <span class="c1"># pylint: disable=invalid-name</span>
+    <span class="n">ti</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="n">centre_correction_delta</span>  <span class="c1"># pylint: disable=invalid-name</span>
+
+    <span class="c1"># Convert integer si/ti to double ST</span>
+    <span class="c1"># See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L338-L341</span>
+    <span class="n">st</span> <span class="o">=</span> <span class="p">(</span><span class="n">_s2_si_ti_to_st</span><span class="p">(</span><span class="n">si</span><span class="p">),</span> <span class="n">_s2_si_ti_to_st</span><span class="p">(</span><span class="n">ti</span><span class="p">))</span>  <span class="c1"># pylint: disable=invalid-name</span>
+
+    <span class="c1"># Project cell-space ST to cube-space UV</span>
+    <span class="c1"># See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L312-L315</span>
+    <span class="n">uv</span> <span class="o">=</span> <span class="p">(</span><span class="n">_s2_st_to_uv</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">_s2_st_to_uv</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>  <span class="c1"># pylint: disable=invalid-name</span>
+
+    <span class="c1"># Convert face + UV to S2Point XYZ</span>
+    <span class="c1"># See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L348-L357</span>
+    <span class="n">s2_point</span> <span class="o">=</span> <span class="n">_s2_face_uv_to_xyz</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">uv</span><span class="p">)</span>
+
+    <span class="c1"># Normalise XYZ S2Point vector</span>
+    <span class="c1"># This section is part of the reference implementation but is not necessary when mapping</span>
+    <span class="c1"># straight into lat/lon, since the normalised and unnormalised triangles used to calculate the</span>
+    <span class="c1"># angles are geometrically similar. If anything, the normalisation process loses precision when</span>
+    <span class="c1"># tested against the reference implementation, albeit not at a level that is important either</span>
+    <span class="c1"># way. The code below is left for demonstration of the normalisation process.</span>
+    <span class="c1"># norm = math.sqrt(s2_point[0] ** 2 + s2_point[1] ** 2 + s2_point[2] ** 2)</span>
+    <span class="c1"># s2_point = (s2_point[0] / norm, s2_point[1] / norm, s2_point[2] / norm)</span>
+
+    <span class="c1"># Map into lat/lon</span>
+    <span class="c1"># See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2latlng.h#L196-L205</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">s2_point</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s2_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">s2_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">lon_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">s2_point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">s2_point</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">lon_rad</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">token_to_lat_lon</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert S2 token to lat/lon.</span>
+
+<span class="sd">    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L222-L239</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        token: The S2 token string. Can be upper or lower case hex string.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The lat/lon (in degrees) tuple generated from the S2 token.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If the token is not str.</span>
+<span class="sd">        ValueError: If the token length is over 16.</span>
+<span class="sd">        ValueError: If the token has invalid face bits.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert to cell ID and decode to lat/lon</span>
+    <span class="k">return</span> <span class="n">cell_id_to_lat_lon</span><span class="p">(</span><span class="n">token_to_cell_id</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># Level extraction</span>
+<span class="c1">#</span>
+
+<span class="k">def</span> <span class="nf">cell_id_to_level</span><span class="p">(</span><span class="n">cell_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the level for a S2 cell ID.</span>
+
+<span class="sd">    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.h#L543-L551</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cell_id: The S2 cell ID integer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The level of the S2 cell ID.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If the cell_id is not int or np.uint64.</span>
+<span class="sd">        ValueError: If the cell_id is 0.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check input</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell_id</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot decode S2 cell ID from type: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)))</span>
+    <span class="n">cell_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cell_id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># The cell ID 0 has no level</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot decode invalid S2 cell ID: 0&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Find the position of the lowest set one bit, which will be the trailing one bit. The level is</span>
+    <span class="c1"># given by the max level (30) minus the floored division by two of the position of the lowest</span>
+    <span class="c1"># set bit.</span>
+    <span class="c1">#</span>
+    <span class="c1"># The position of the lowest set bit is found using &#39;count trailing zeros&#39;, which would be</span>
+    <span class="c1"># equivalent to the C++20 function std::countr_zero() or the ctz instruction.</span>
+    <span class="n">lsb_pos</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">cell_id</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># pragma: no branch</span>
+        <span class="k">if</span> <span class="n">cell_id</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">break</span>
+        <span class="n">lsb_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">cell_id</span> <span class="o">&gt;&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">_S2_MAX_LEVEL</span> <span class="o">-</span> <span class="p">(</span><span class="n">lsb_pos</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">token_to_level</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the level for a S2 token.</span>
+
+<span class="sd">    See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.h#L543-L551</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        token: The S2 token string. Can be upper or lower case hex string.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The level of the S2 token.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If the token is not str.</span>
+<span class="sd">        ValueError: If the token length is over 16.</span>
+<span class="sd">        ValueError: If the token as cell ID is 0.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert to cell ID and get the level for that</span>
+    <span class="k">return</span> <span class="n">cell_id_to_level</span><span class="p">(</span><span class="n">token_to_cell_id</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+
+
+            </div>
+
+        </section>
+
+        
+            <nav class="site-bottom-navigation" role="navigation">
+            
+                <a href="changelog.html" class="btn btn--primary btn--next right"
+                    title="Changelog" accesskey="n">
+                    Next
+                </a>
+            
+            
+                <a href="api/s2cell.html" class="btn btn--primary btn--prev"
+                    title="s2cell package" accesskey="p">
+                    Previous
+                </a>
+            
+            </nav>
+        
+
+        
+            <div class="source-link">
+            
+                
+                    <a href="_sources/annotated_source.rst.txt" rel="nofollow">
+                        <i class="mdi mdi-code-tags"></i>
+                        View page source
+                    </a>
+                
+            
+            </div>
+        
+
+
+
+    </main>
+
+    <footer class="site-footer">
+<div class="container">
+
+    <div role="contentinfo">
+        <p>
+                &copy; Copyright 2020, Adam Liddell.
+        </p>
+    </div> 
+
+</div>
+</footer>
+
+    
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'',
+            VERSION:'1.1.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/js/theme-min.js"></script> 
+</body>
+</html>
