@@ -1,7 +1,7 @@
 /* Fix line height of headings */
 h1, h2, h3, h4, h5, .site-content .topic-title, .toctree-wrapper .caption, .auto-toc .caption {
- overflow: auto;
- line-height: normal;
+    overflow: auto;
+    line-height: normal;
 }
 
 /* Reduce horizontal padding in left sidebar */
