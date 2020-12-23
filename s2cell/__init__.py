@@ -137,7 +137,7 @@ def _s2_si_ti_to_st(component: np.uint64) -> float:
     return (1.0 / _S2_MAX_SI_TI) * component
 
 
-def _s2_face_uv_to_xyz(
+def _s2_face_uv_to_xyz(  # pylint: disable=invalid-name
         face: Union[int, np.uint64], uv: Tuple[float, float]
 ) -> Tuple[float, float, float]:
     """
