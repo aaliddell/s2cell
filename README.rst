@@ -29,8 +29,10 @@ Overview
 
 This library does conversion between S2 cell ID, S2 token and latitude/longitude and was written as
 a method to understand the way the S2 cell system works; hopefully this is useful to others as a
-single-file reference on the process. All steps in the conversion are well commented and written to
-be understandable and functional rather than necessarily fast.
+single-file reference on the process, where tracing the relevant parts from the reference C++
+implementation can be somewhat daunting. All steps in the conversions are well commented and written
+to be understandable and functional rather than strictly fast, although little is different from the
+reference implementation.
 
 The library is checked against a test suite generated from the
 `reference C++ implementation <https://github.com/google/s2geometry>`__ to ensure conformity with the
@@ -67,7 +69,7 @@ The full documentation, including the API Reference, is available at
 `docs.s2cell.aliddell.com <https://docs.s2cell.aliddell.com>`__. Below is a quick start guide for
 the most common uses.
 
-The library is designed to be minimal, predicatable and purely functional. Conversion from lat/lon
+The library is designed to be minimal, predictable and purely functional. Conversion from lat/lon
 (in degrees) to a cell ID or token can be done with the following two functions:
 
 .. code-block:: python3
@@ -110,6 +112,15 @@ There are also a few other useful functions for inspecting or converting a cell 
 Useful S2 Links
 ---------------
 
+Your micro 'Awesome S2' list. If you have another S2 related link that may be useful here, please
+`open an Issue <https://github.com/aaliddell/s2cell/issues/new>`__ or PR.
+
+
+Concepts
+********
+
+Core concepts of S2 and the S2 cell system.
+
 - `S2 Geometry <https://s2geometry.io/>`__: The S2 Geometry homepage.
 - `S2 Cells <https://s2geometry.io/devguide/s2cell_hierarchy>`__: Reference S2 documentation on the
   S2 cell system.
@@ -117,6 +128,26 @@ Useful S2 Links
   in the S2 cell system.
 - `S2 Cell Statistics <https://s2geometry.io/resources/s2cell_statistics>`__: Details on the sizes
   of S2 cells at each level.
+- `Geometry on the Sphere <https://docs.google.com/presentation/d/1Hl4KapfAENAOf4gv-pSngKwvS_jwNVHRPZTTDzXXn6Q/view>`__:
+  Presentation on the core concepts of the S2 cell hierarchy.
+
+
+Visualisations
+**************
+
+Mapping and visualisation tools for S2 cells.
+
+- `Region Coverer <http://s2.sidewalklabs.com/regioncoverer/>`__: Interactive S2 cell covering
+  calculator.
+- `Planetary View  <http://s2.sidewalklabs.com/planetaryview/>`__: Interactive 3D globe view of the
+  S2 cell cube mapping.
+
+
+Implementations
+***************
+
+Reference and third-party implementations of S2 in various languages.
+
 - `google/s2geometry <https://github.com/google/s2geometry>`__: The reference C++ and Python
   implementation.
 - `google/s2-geometry-library-java <https://github.com/google/s2-geometry-library-java>`__: The
@@ -124,8 +155,24 @@ Useful S2 Links
 - `sidewalklabs/s2sphere <https://github.com/sidewalklabs/s2sphere>`__: A pure-Python S2
   implementation.
 - `golang/geo <https://github.com/golang/geo>`__: A Go implementation of S2.
+- `radarlabs/s2 <https://github.com/radarlabs/s2>`__: NodeJS, Javascript and TypeScript bindings for
+  the reference C++ implementation.
+- `mapbox/node-s2 <https://github.com/mapbox/node-s2>`__: NodeJS/Javascript bindings for the
+  reference C++ implementation.
+- `r-spatial/s2 <https://github.com/r-spatial/s2/>`__: R bindings for the reference implementation.
 
-If you have another S2 related link that may be useful here, please open an Issue or PR.
+
+Users
+*****
+
+Users of S2 in general, not just of this library.
+
+- `Apache Lucene <https://lucene.apache.org/>`__: Used to implement spatial indexing for Apache
+  Solr.
+- `BigQuery <https://cloud.google.com/bigquery/docs/reference/standard-sql/geography_functions>`__:
+  Used to implement the BigQuery geography functions.
+- `MongoDB <https://docs.mongodb.com/manual/core/2dsphere/>`__: Used to implement the ``2dsphere``
+  indexing.
 
 
 License
