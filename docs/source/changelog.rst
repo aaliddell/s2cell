@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.1.1
+-----
+
+- Extracted ``_s2_face_uv_to_xyz()`` to a separate function
+- Added documentation
+- Updated dependencies
+- Removed Python 3.5 support
+
+
 1.1.0
 -----
 
