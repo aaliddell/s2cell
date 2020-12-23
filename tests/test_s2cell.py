@@ -23,6 +23,10 @@ import pytest
 import s2cell
 
 
+def test_zero_cell_id_to_token():
+    assert s2cell.cell_id_to_token(0) == 'X'
+
+
 def test_invalid_cell_id_to_token():
     with pytest.raises(TypeError, match=re.escape("Cannot convert S2 cell ID from type: <class 'float'>")):
         s2cell.cell_id_to_token(1.0)

@@ -267,10 +267,8 @@ def cell_id_to_token(cell_id: Union[int, np.uint64]) -> str:
         raise TypeError('Cannot convert S2 cell ID from type: ' + str(type(cell_id)))
     cell_id = np.uint64(cell_id)
 
-    # The zero token is encoded as 'X' rather than as a zero-length string. This implementation has
-    # no method of generating the 0 cell ID, so this line is mostly here for consistency with the
-    # reference implementation.
-    if cell_id == 0:  # pragma: no cover
+    # The zero token is encoded as 'X' rather than as a zero-length string
+    if cell_id == 0:
         return 'X'
 
     # Convert cell ID to hex and strip any trailing zeros
@@ -659,7 +657,7 @@ def token_to_lat_lon(token: str) -> Tuple[float, float]:
 
 
 #
-# Level extraction
+# Level extraction functions
 #
 
 def cell_id_to_level(cell_id: Union[int, np.uint64]) -> int:
