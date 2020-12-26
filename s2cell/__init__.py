@@ -438,7 +438,7 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     # additional 2 levels added are required to account for the top 3 bits (4 before right shift)
     # that are occupied by the face bits.
     bits = np.uint64(face) & _S2_SWAP_MASK  # iiiijjjjoo. Initially set by by face
-    cell_id = np.uint64(face << (_S2_POS_BITS - 1))  # Insert face at most signficant bits
+    cell_id = np.uint64(face << (_S2_POS_BITS - 1))  # Insert face at second most signficant bits
     lookup_mask = np.uint64((1 << _S2_LOOKUP_BITS) - 1)
     required_steps = math.ceil((level + 2) / 4) if level > 0 else 0
     for k in range(7, 7 - required_steps, -1):
