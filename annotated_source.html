@@ -22,6 +22,7 @@
     <link rel="next" title="Changelog" href="changelog.html"/>
     <link rel="prev" title="s2cell package" href="api/s2cell.html"/>
     <link rel="shortcut icon" href="_static/logo-64.png"/>
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "52ee346c580548d7ab0cfb7f837ba106"}'></script>
      
 
 </head>
@@ -43,7 +44,7 @@
     
     
     
-        <img src="_static/logo-200.png" class="logo" />
+        <img src="_static/logo.min.svg" class="logo" />
     
     
         
@@ -71,6 +72,7 @@
     
         <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="useful_s2_links.html">Useful S2 Links</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/s2cell.html">API Reference</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Annotated Source</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
@@ -215,7 +217,9 @@ The full source of the library is included below.</p>
 <span class="sd">    See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L333-L336</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">_S2_MAX_SIZE</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">_S2_MAX_SIZE</span> <span class="o">*</span> <span class="n">component</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">))))</span>
+    <span class="c1"># The reference implementation does round(_S2_MAX_SIZE * component - 0.5), which is equivalent</span>
+    <span class="c1"># to math.floor(_S2_MAX_SIZE * component)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">_S2_MAX_SIZE</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">_S2_MAX_SIZE</span> <span class="o">*</span> <span class="n">component</span><span class="p">))))</span>
 
 
 <span class="k">def</span> <span class="nf">_s2_si_ti_to_st</span><span class="p">(</span><span class="n">component</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -360,13 +364,11 @@ The full source of the library is included below.</p>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot convert S2 cell ID from type: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)))</span>
     <span class="n">cell_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)</span>
 
-    <span class="c1"># The zero token is encoded as &#39;X&#39; rather than as a zero-length string. This implementation has</span>
-    <span class="c1"># no method of generating the 0 cell ID, so this line is mostly here for consistency with the</span>
-    <span class="c1"># reference implementation.</span>
-    <span class="k">if</span> <span class="n">cell_id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="c1"># The zero token is encoded as &#39;X&#39; rather than as a zero-length string</span>
+    <span class="k">if</span> <span class="n">cell_id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="s1">&#39;X&#39;</span>
 
-    <span class="c1"># Convert cell ID to hex and strip any trailing zeros</span>
+    <span class="c1"># Convert cell ID to 16 character hex string and strip any implicit trailing zeros</span>
     <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{:016x}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">)</span>
 
 
@@ -393,14 +395,15 @@ The full source of the library is included below.</p>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot convert S2 token from type: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">token</span><span class="p">)))</span>
 
-    <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">):</span>
-        <span class="c1"># The zero cell ID is represented as the character &#39;X&#39; rather than as an empty string</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">16</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot convert S2 token with length &gt; 16 characters&#39;</span><span class="p">)</span>
 
-    <span class="c1"># Add stripped zeros</span>
+    <span class="c1"># Check for the zero cell ID represented by the character &#39;x&#39; or &#39;X&#39; rather than as the empty</span>
+    <span class="c1"># string</span>
+    <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Add stripped implicit zeros to create the full 16 character hex string</span>
     <span class="n">token</span> <span class="o">=</span> <span class="n">token</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;0&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="mi">16</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)))</span>
 
     <span class="c1"># Convert to cell ID by converting hex to int</span>
@@ -532,7 +535,7 @@ The full source of the library is included below.</p>
     <span class="c1"># additional 2 levels added are required to account for the top 3 bits (4 before right shift)</span>
     <span class="c1"># that are occupied by the face bits.</span>
     <span class="n">bits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">face</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">_S2_SWAP_MASK</span>  <span class="c1"># iiiijjjjoo. Initially set by by face</span>
-    <span class="n">cell_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">face</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">_S2_POS_BITS</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1"># Insert face at most signficant bits</span>
+    <span class="n">cell_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">face</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">_S2_POS_BITS</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1"># Insert face at second most signficant bits</span>
     <span class="n">lookup_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">_S2_LOOKUP_BITS</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">required_steps</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">level</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span> <span class="k">if</span> <span class="n">level</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span> <span class="o">-</span> <span class="n">required_steps</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
@@ -752,7 +755,7 @@ The full source of the library is included below.</p>
 
 
 <span class="c1">#</span>
-<span class="c1"># Level extraction</span>
+<span class="c1"># Level extraction functions</span>
 <span class="c1">#</span>
 
 <span class="k">def</span> <span class="nf">cell_id_to_level</span><span class="p">(</span><span class="n">cell_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>

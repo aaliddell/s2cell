@@ -1,7 +1,7 @@
 /* Fix line height of headings */
 h1, h2, h3, h4, h5, .site-content .topic-title, .toctree-wrapper .caption, .auto-toc .caption {
- overflow: auto;
- line-height: normal;
+    overflow: auto;
+    line-height: normal;
 }
 
 /* Reduce horizontal padding in left sidebar */
@@ -41,6 +41,11 @@ a, .site-content a .literal {
 
 a:hover, .site-content a:hover .literal {
     color: black;
+}
+
+/* Colour table headings */
+th {
+    background-color: #de6b00;
 }
 
 /* Colour footer background and text */
