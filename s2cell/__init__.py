@@ -122,7 +122,9 @@ def _s2_st_to_ij(component: float) -> np.uint64:
     See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L333-L336
 
     """
-    return np.uint64(max(0, min(_S2_MAX_SIZE - 1, round(_S2_MAX_SIZE * component - 0.5))))
+    # The reference implementation does round(_S2_MAX_SIZE * component - 0.5), which is equivalent
+    # to math.floor(_S2_MAX_SIZE * component)
+    return np.uint64(max(0, min(_S2_MAX_SIZE - 1, math.floor(_S2_MAX_SIZE * component))))
 
 
 def _s2_si_ti_to_st(component: np.uint64) -> float:
