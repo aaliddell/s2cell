@@ -1,4 +1,6 @@
-.. image:: https://docs.s2cell.aliddell.com/_static/logo-200.png
+.. image:: https://docs.s2cell.aliddell.com/_static/logo.min.svg
+   :width: 200
+   :height: 200
    :alt: s2cell logo
 
 s2cell

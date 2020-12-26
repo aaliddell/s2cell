@@ -44,7 +44,7 @@ html_theme = 'sphinx_redactor_theme'
 html_theme_path = [sphinx_redactor_theme.get_html_theme_path()]
 
 # Logo and favicon
-html_logo = 'source/_static/logo-200.png'
+html_logo = 'source/_static/logo.min.svg'
 html_favicon = 'source/_static/logo-64.png'
 
 # Base URL for docs
