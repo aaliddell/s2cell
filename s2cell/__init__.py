@@ -206,7 +206,7 @@ def _s2_init_lookups() -> None:
 
         # Generate lookups for each of the base orientations given by the swap and invert bits
         for base_orientation in np.array([
-            0, _S2_SWAP_MASK, _S2_INVERT_MASK, _S2_SWAP_MASK | _S2_INVERT_MASK  # 0-4 effectively
+            0, _S2_SWAP_MASK, _S2_INVERT_MASK, _S2_SWAP_MASK | _S2_INVERT_MASK  # 0-3 effectively
         ], dtype=np.uint64):
             # Walk the 256 possible positions within a level 4 curve. There is probably a smarter
             # way of doing this iteratively that reuses work at each level. e.g. 4 nested for loops?
