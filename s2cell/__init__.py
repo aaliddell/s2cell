@@ -15,6 +15,7 @@
 """Minimal Python S2 cell ID, S2 token and lat/lon conversion library."""
 
 import math
+import re
 from typing import Tuple, Union
 
 import numpy as np
@@ -680,9 +681,6 @@ def token_to_canonical_token(token: str) -> str:
     Returns:
         The canonicalised S2 token.
 
-    Raises:
-        ValueError: If the provided S2 token is not valid.
-
     """
     # Convert token to lower case.
     # Note that 'X' below will be returned upper case
@@ -695,12 +693,78 @@ def token_to_canonical_token(token: str) -> str:
     token = token.rstrip('0')
 
     # If empty string or 'x', return 'X' token
-    if token == '' or token == 'x':
+    if token in ('', 'x'):
         token = 'X'
 
-    # TODO: validate token
-
     return token
+
+
+#
+# Validation
+#
+
+def cell_id_is_valid(cell_id: Union[int, np.uint64]) -> bool:
+    """
+    Check that a S2 cell ID is valid.
+
+    Looks for valid face bits and a trailing 1 bit in one of the correct locations.
+
+    Args:
+        cell_id: The S2 cell integer to validate.
+
+    Returns:
+        True if the cell ID is valid, False otherwise.
+
+    Raises:
+        TypeError: If the cell_id is not int or np.uint64.
+
+    """
+    # Check input
+    if not isinstance(cell_id, (int, np.uint64)):
+        raise TypeError('Cannot decode S2 cell ID from type: ' + str(type(cell_id)))
+    cell_id = np.uint64(cell_id)
+
+    # Check face bits
+    if (cell_id >> _S2_POS_BITS) > 5:
+        return False
+
+    # Check trailing 1 bit is in one of the even bit positions allowed for the 30 levels, using the
+    # mask: 0b0001010101010101010101010101010101010101010101010101010101010101 = 0x1555555555555555
+    lowest_set_bit = cell_id & (~cell_id + np.uint64(1))
+    if not lowest_set_bit & np.uint64(0x1555555555555555):
+        return False
+
+    return True  # Checks have passed, cell ID must be valid
+
+
+def token_is_valid(token: str) -> bool:
+    """
+    Check that a S2 token is valid.
+
+    Looks for valid characters, then checks that the contained S2 cell ID is also valid. Note that
+    the '', 'x' and 'X' tokens are considered invalid, since the cell IDs they represent are
+    invalid.
+
+    Args:
+        token: The S2 token string to validate.
+
+    Returns:
+        True if the token is valid, False otherwise.
+
+    Raises:
+        TypeError: If the token is not str.
+
+    """
+    # Check input
+    if not isinstance(token, str):
+        raise TypeError('Cannot check S2 token with type: ' + str(type(token)))
+
+    # First check string with regex
+    if not re.match(r'^[0-9a-fA-f]{1,16}$', token):
+        return False
+
+    # Check the contained cell ID is valid
+    return cell_id_is_valid(token_to_cell_id(token))
 
 
 #

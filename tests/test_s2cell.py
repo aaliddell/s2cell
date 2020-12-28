@@ -165,6 +165,33 @@ def test_token_to_canonical_token(token, expected):
     assert s2cell.token_to_canonical_token(token) == expected
 
 
+@pytest.mark.parametrize('cell_id, is_valid', [
+    (0b1111010101010101010101010101010101010101010101010101010101010101, False),  # Invalid face
+    (0, False),
+] + [
+    (1 << even_number, True) for even_number in range(0, s2cell._S2_POS_BITS, 2)
+] + [
+    (1 << odd_number, False) for odd_number in range(1, s2cell._S2_POS_BITS, 2)
+])
+def test_cell_id_is_valid(cell_id, is_valid):
+    assert s2cell.cell_id_is_valid(cell_id) == is_valid
+
+
+@pytest.mark.parametrize('token, is_valid', [
+    ('', False),  # Invalid cell ID
+    ('x', False),  # Invalid cell ID
+    ('X', False),  # Invalid cell ID
+    ('2ef', True),
+    ('2EF', True),
+    ('2ef0000000000000', True),
+    ('2ef00000000000000', False),  # Too long
+    ('2efinvalid', False),  # Invalid characters
+    ('2efx', False),  # Incorrect use of X
+])
+def test_token_is_valid(token, is_valid):
+    assert s2cell.token_is_valid(token) == is_valid
+
+
 def test_invalid_cell_id_to_level():
     with pytest.raises(TypeError, match=re.escape("Cannot decode S2 cell ID from type: <class 'float'>")):
         s2cell.cell_id_to_level(1.0)
