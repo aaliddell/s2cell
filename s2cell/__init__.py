@@ -442,7 +442,7 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     # that are occupied by the face bits.
     bits = np.uint64(face) & _S2_SWAP_MASK  # iiiijjjjoo. Initially set by by face
     cell_id = np.uint64(face << (_S2_POS_BITS - 1))  # Insert face at second most signficant bits
-    lookup_mask = np.uint64((1 << _S2_LOOKUP_BITS) - 1)
+    lookup_mask = np.uint64((1 << _S2_LOOKUP_BITS) - 1)  # Mask of 4 one bits: 0b1111
     required_steps = math.ceil((level + 2) / 4) if level > 0 else 0
     for k in range(7, 7 - required_steps, -1):
         # Grab 4 bits of each of I and J
@@ -450,14 +450,14 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
         bits += ((ij[0] >> offset) & lookup_mask) << np.uint32(_S2_LOOKUP_BITS + 2)
         bits += ((ij[1] >> offset) & lookup_mask) << np.uint32(2)
 
-        # Map bits from iiiijjjjoo to ppppppppoo
+        # Map bits from iiiijjjjoo to ppppppppoo using lookup table
         bits = _S2_LOOKUP_POS[bits]
 
-        # Insert position bits to cell ID
+        # Insert position bits into cell ID
         cell_id |= (bits >> np.uint32(2)) << np.uint32(k * 2 * _S2_LOOKUP_BITS)
 
         # Remove position bits, leaving just new swap and invert bits for the next round
-        bits &= (_S2_SWAP_MASK | _S2_INVERT_MASK)
+        bits &= _S2_SWAP_MASK | _S2_INVERT_MASK  # Mask: 0b11
 
     # Left shift and add trailing bit
     # The trailing bit addition is disabled, as we are overwriting this below in the truncation
@@ -554,27 +554,31 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
     # diagonally closest to the cell centre. This happens because repeated ..00.. will select the
     # 'lower left' (for nominally oriented Hilbert curve segments) of the sub-cells. The ..10..
     # arising from the trailing bit, prior to the repeated ..00.. bits, ensures we first pick the
-    # 'upper right' of the cell, then iterate in to lower left until we hit the leaf cell. However,
-    # in the case of the swapped and inverted curve segment (4th sub-curve segment), the ..10.. will
-    # select the 'lower left' and then iterate to the 'upper right' with each ..00.. following. In
-    # that case, we will be offset left and down by one leaf cell in each of I and J, which needs to
-    # be added to have a consistent mapping. This is detectable by seeing that the final bit of I or
-    # J is 1 (i.e we have picked an odd row/column, which will happen concurrently in both I and J,
-    # so we only need to check one), except in case of level 29 where the logic is inverted and the
-    # correction needs to be applied when we pick an even row/column (i.e I/J ends in 0), since
-    # there are no trailing ..00..
+    # 'upper right' of the cell, then iterate in to lower left until we hit the leaf cell. This means
+    # we pick the leaf cell to the north east of the parent cell centre (again for nominal
+    # orientation).
+    # However, in the case of the swapped and inverted curve segment (4th sub-curve segment), the
+    # ..10.. will select the 'lower left' and then iterate to the 'upper right' with each ..00..
+    # following. In that case, we will be offset left and down by one leaf cell in each of I and J,
+    # which needs to be fixed to have a consistent mapping. This is detectable by seeing that the
+    # final bit of I or J is 1 (i.e we have picked an odd row/column, which will happen concurrently
+    # in both I and J, so we only need to check one), except in case of level 29 where the logic is
+    # inverted and the correction needs to be applied when we pick an even row/column (i.e I/J ends
+    # in 0), since there are no trailing ..00..  available after the ``..10..`` when we are at level
+    # 29+.
     #
     # This behaviour can be captured in the expression:
     # apply_correction = not leaf and (i ^ (is level 29)) & 1
-    # apply_corerction = not leaf and (i ^ (cell_id >> 2)) & 1
+    # apply_correction = not leaf and (i ^ (cell_id >> 2)) & 1
     #
-    # We check for level 29 by looking for the trailing 1 in third LSB, when we already know that we
-    # are not a leaf cell (which could give false positive) by the initial check in the expression.
+    # We check for level 29 by looking for the trailing 1 in the third LSB, when we already know
+    # that we are not a leaf cell (which could give false positive) by the initial check in the
+    # expression.
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.h#L503-L529
     #
     face = cell_id >> _S2_POS_BITS
     bits = face & _S2_SWAP_MASK  # ppppppppoo. Initially set by by face
-    lookup_mask = np.uint64((1 << _S2_LOOKUP_BITS) - 1)
+    lookup_mask = np.uint64((1 << _S2_LOOKUP_BITS) - 1)  # Mask of 4 one bits: 0b1111
     i = np.uint64(0)
     j = np.uint64(0)
     for k in range(7, -1, -1):
@@ -585,7 +589,7 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
             (cell_id >> np.uint32(k * 2 * _S2_LOOKUP_BITS + 1)) & extract_mask
         ) << np.uint32(2)
 
-        # Map bits from ppppppppoo to iiiijjjjoo
+        # Map bits from ppppppppoo to iiiijjjjoo using lookup table
         bits = _S2_LOOKUP_IJ[bits]
 
         # Extract I and J bits
@@ -594,20 +598,21 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
         j += ((bits >> np.uint32(2)) & lookup_mask) << offset
 
         # Remove I and J bits, leaving just new swap and invert bits for the next round
-        bits &= (_S2_SWAP_MASK | _S2_INVERT_MASK)
+        bits &= _S2_SWAP_MASK | _S2_INVERT_MASK  # Mask: 0b11
 
     # Resolve the centre of the cell. For leaf cells, we add half the leaf cell size. For non-leaf
-    # cells, we currently have one of either two cells diagonally around the cell centre, as
-    # described above. The centre_correction_delta is 2x the offset, as we left shift I and J first.
+    # cells, we currently have one of either two cells diagonally around the cell centre and want
+    # to pick the leaf-cell edges that represent the parent cell centre, as described above. The
+    # centre_correction_delta is 2x the offset, as we left shift I and J first.
     # This gives us the values Si and Ti, which are discrete representation of S and T in range 0 to
     # _S2_MAX_SI_TI. The extra power of 2 over IJ allows for identifying both the centre and edge of
     # cells, whilst IJ is just the leaf cells.
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L57-L65
     is_leaf = bool(cell_id & np.uint64(1))  # Cell is leaf cell when trailing one bit is in LSB
     apply_correction = not is_leaf and ((i ^ (cell_id >> np.uint32(2))) & np.uint64(1))
-    centre_correction_delta = np.uint64(1 if is_leaf else (2 if apply_correction else 0))
-    si = (i << np.uint32(1)) + centre_correction_delta  # pylint: disable=invalid-name
-    ti = (j << np.uint32(1)) + centre_correction_delta  # pylint: disable=invalid-name
+    correction_delta = np.uint64(1 if is_leaf else (2 if apply_correction else 0))
+    si = (i << np.uint32(1)) + correction_delta  # pylint: disable=invalid-name
+    ti = (j << np.uint32(1)) + correction_delta  # pylint: disable=invalid-name
 
     # Convert integer si/ti to double ST
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L338-L341
