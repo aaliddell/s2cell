@@ -522,12 +522,12 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
 
     Raises:
         TypeError: If the cell_id is not int or np.uint64.
-        ValueError: If the cell_id has invalid face bits.
+        ValueError: If the cell_id is invalid.
 
     """
-    # Check type
-    if not isinstance(cell_id, (int, np.uint64)):
-        raise TypeError('Cannot decode S2 cell ID from type: ' + str(type(cell_id)))
+    # Check input
+    if not cell_id_is_valid(cell_id):
+        raise ValueError('Cannot decode invalid S2 cell ID: ' + str(cell_id))
     cell_id = np.uint64(cell_id)
 
     # Populate _S2_LOOKUP_IJ on first run.
@@ -653,9 +653,13 @@ def token_to_lat_lon(token: str) -> Tuple[float, float]:
     Raises:
         TypeError: If the token is not str.
         ValueError: If the token length is over 16.
-        ValueError: If the token has invalid face bits.
+        ValueError: If the token is invalid.
 
     """
+    # Check input
+    if not token_is_valid(token):
+        raise ValueError('Cannot decode invalid S2 token: ' + str(token))
+
     # Convert to cell ID and decode to lat/lon
     return cell_id_to_lat_lon(token_to_cell_id(token))
 
@@ -724,6 +728,11 @@ def cell_id_is_valid(cell_id: Union[int, np.uint64]) -> bool:
         raise TypeError('Cannot decode S2 cell ID from type: ' + str(type(cell_id)))
     cell_id = np.uint64(cell_id)
 
+    # Check for zero ID
+    # This avoids overflow warnings below when 1 gets added to max uint64
+    if cell_id == 0:
+        return False
+
     # Check face bits
     if (cell_id >> _S2_POS_BITS) > 5:
         return False
@@ -785,17 +794,13 @@ def cell_id_to_level(cell_id: Union[int, np.uint64]) -> int:
 
     Raises:
         TypeError: If the cell_id is not int or np.uint64.
-        ValueError: If the cell_id is 0.
+        ValueError: If the cell_id is invalid.
 
     """
     # Check input
-    if not isinstance(cell_id, (int, np.uint64)):
-        raise TypeError('Cannot decode S2 cell ID from type: ' + str(type(cell_id)))
+    if not cell_id_is_valid(cell_id):
+        raise ValueError('Cannot decode invalid S2 cell ID: ' + str(cell_id))
     cell_id = np.uint64(cell_id)
-
-    if cell_id == 0:
-        # The cell ID 0 has no level
-        raise ValueError('Cannot decode invalid S2 cell ID: 0')
 
     # Find the position of the lowest set one bit, which will be the trailing one bit. The level is
     # given by the max level (30) minus the floored division by two of the position of the lowest
@@ -828,8 +833,12 @@ def token_to_level(token: str) -> int:
     Raises:
         TypeError: If the token is not str.
         ValueError: If the token length is over 16.
-        ValueError: If the token as cell ID is 0.
+        ValueError: If the token is invalid.
 
     """
+    # Check input
+    if not token_is_valid(token):
+        raise ValueError('Cannot decode invalid S2 token: ' + str(token))
+
     # Convert to cell ID and get the level for that
     return cell_id_to_level(token_to_cell_id(token))

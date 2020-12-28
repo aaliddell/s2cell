@@ -23,6 +23,11 @@ import pytest
 import s2cell
 
 
+def test_invalid__s2_face_uv_to_xyz():
+    with pytest.raises(ValueError, match=re.escape('Cannot convert UV to XYZ with invalid face: 6')):
+        s2cell._s2_face_uv_to_xyz(6, (0, 0))
+
+
 def test_zero_cell_id_to_token():
     assert s2cell.cell_id_to_token(0) == 'X'
 
@@ -48,6 +53,9 @@ def test_zero_token_to_cell_id():
 def test_invalid_token_to_cell_id():
     with pytest.raises(TypeError, match=re.escape("Cannot convert S2 token from type: <class 'float'>")):
         s2cell.token_to_cell_id(1.0)
+
+    with pytest.raises(ValueError, match=re.escape('Cannot convert S2 token with length > 16 characters')):
+        s2cell.token_to_cell_id('a' * 17)
 
 
 def test_token_to_cell_id_compat():
@@ -106,7 +114,7 @@ def test_invalid_cell_id_to_lat_lon():
     with pytest.raises(TypeError, match=re.escape("Cannot decode S2 cell ID from type: <class 'float'>")):
         s2cell.cell_id_to_lat_lon(1.0)
 
-    with pytest.raises(ValueError, match=re.escape("Cannot convert UV to XYZ with invalid face: 6")):
+    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 cell ID: -4611686018427387904')):
         s2cell.cell_id_to_lat_lon(int(0b110 << s2cell._S2_POS_BITS))
 
 
@@ -125,13 +133,13 @@ def test_cell_id_to_lat_lon_compat():
 
 
 def test_invalid_token_to_lat_lon():
-    with pytest.raises(TypeError, match=re.escape("Cannot convert S2 token from type: <class 'float'>")):
+    with pytest.raises(TypeError, match=re.escape("Cannot check S2 token with type: <class 'float'>")):
         s2cell.token_to_lat_lon(1.0)
 
-    with pytest.raises(ValueError, match=re.escape('Cannot convert S2 token with length > 16 characters')):
+    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 token: aaaaaaaaaaaaaaaaa')):
         s2cell.token_to_lat_lon('a' * 17)
 
-    with pytest.raises(ValueError, match=re.escape("Cannot convert UV to XYZ with invalid face: 6")):
+    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 token: c000000000000000')):
         s2cell.token_to_lat_lon('{:016x}'.format(np.uint64(0b110 << s2cell._S2_POS_BITS)))
 
 
@@ -209,13 +217,13 @@ def test_cell_id_to_level():
 
 
 def test_invalid_token_to_level():
-    with pytest.raises(TypeError, match=re.escape("Cannot convert S2 token from type: <class 'float'>")):
+    with pytest.raises(TypeError, match=re.escape("Cannot check S2 token with type: <class 'float'>")):
         s2cell.token_to_level(1.0)
 
-    with pytest.raises(ValueError, match=re.escape('Cannot convert S2 token with length > 16 characters')):
+    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 token: aaaaaaaaaaaaaaaaa')):
         s2cell.token_to_level('a' * 17)
 
-    with pytest.raises(ValueError, match=re.escape("Cannot decode invalid S2 cell ID: 0")):
+    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 token: ')):
         s2cell.token_to_level('')
 
 
