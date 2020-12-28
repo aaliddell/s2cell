@@ -201,7 +201,8 @@ def _s2_init_lookups() -> None:
     """
     global _S2_LOOKUP_POS, _S2_LOOKUP_IJ  # pylint: disable=global-statement
     if _S2_LOOKUP_POS is None or _S2_LOOKUP_IJ is None:  # pragma: no branch
-        lookup_length = 1 << (2 * _S2_LOOKUP_BITS + 2)
+        # Initialise empty lookup tables
+        lookup_length = 1 << (2 * _S2_LOOKUP_BITS + 2)  # = 1024
         _S2_LOOKUP_POS = np.zeros((lookup_length,), dtype=np.uint64)
         _S2_LOOKUP_IJ = np.zeros((lookup_length,), dtype=np.uint64)
 
@@ -209,14 +210,15 @@ def _s2_init_lookups() -> None:
         for base_orientation in np.array([
             0, _S2_SWAP_MASK, _S2_INVERT_MASK, _S2_SWAP_MASK | _S2_INVERT_MASK  # 0-3 effectively
         ], dtype=np.uint64):
-            # Walk the 256 possible positions within a level 4 curve. There is probably a smarter
-            # way of doing this iteratively that reuses work at each level. e.g. 4 nested for loops?
-            for pos in np.arange(4 ** 4, dtype=np.uint64):
+            # Walk the 256 possible positions within a level 4 curve. This implementation is not
+            # the fastest since it does not reuse the common ancestor of neighbouring positions, but
+            # is simpler to read
+            for pos in np.arange(4 ** 4, dtype=np.uint64):  # 4 levels of sub-divisions
                 ij = np.uint64(0)  # Has pattern iiiijjjj, not ijijijij  # pylint: disable=invalid-name
                 orientation = np.uint64(base_orientation)
 
-                # Walk the pairs of bits of pos, from most significant, getting IJ and orientation
-                # as we go
+                # Walk the pairs of bits of pos, from most significant to least, getting IJ and
+                # orientation as we go
                 for bit_pair_offset in range(4):
                     # Bit pair is effectively the sub-cell index
                     bit_pair = (pos >> np.uint64((3 - bit_pair_offset) * 2)) & np.uint64(0b11)

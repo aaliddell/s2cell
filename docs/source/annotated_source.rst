@@ -1,3 +1,5 @@
+.. _sec_annotated_source:
+
 Annotated Source
 ================
 
