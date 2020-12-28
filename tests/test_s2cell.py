@@ -149,6 +149,22 @@ def test_token_to_lat_lon_compat():
                 assert ll_tuple == expected_tuple
 
 
+@pytest.mark.parametrize('token, expected', [
+    ('3', '3'),
+    ('2ef59bd352b93ac3', '2ef59bd352b93ac3'),
+    ('  2ef59bd352b93ac3', '2ef59bd352b93ac3'),
+    ('2ef59bd352b93ac3  ', '2ef59bd352b93ac3'),
+    (' 2ef59bd352b93ac3 ', '2ef59bd352b93ac3'),
+    ('2EF', '2ef'),
+    ('2eF', '2ef'),
+    ('2ef000', '2ef'),
+    ('', 'X'),
+    ('x', 'X'),
+])
+def test_token_to_canonical_token(token, expected):
+    assert s2cell.token_to_canonical_token(token) == expected
+
+
 def test_invalid_cell_id_to_level():
     with pytest.raises(TypeError, match=re.escape("Cannot decode S2 cell ID from type: <class 'float'>")):
         s2cell.cell_id_to_level(1.0)

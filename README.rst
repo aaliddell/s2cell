@@ -112,6 +112,11 @@ There are also a few other useful functions for inspecting or converting a cell 
    s2cell.cell_id_to_level(3383781119341101056)  # -> 10
    s2cell.token_to_level('3')                    # -> 0
 
+.. code-block:: python3
+
+   # Token canonicalisation
+   s2cell.token_to_canonical_token('2ef59BD352b90') # -> '2ef59bd352b9'
+
 
 Useful S2 Links
 ---------------
