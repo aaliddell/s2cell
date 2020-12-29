@@ -66,7 +66,7 @@ jobs:
         run: |
           git checkout gh-pages
           git rm -r .  # Clean branch to ensure removed files don't persist
-          rm -rf __pycache__ **/__pycache__ .doctrees
+          rm -rf __pycache__ **/__pycache__ .doctrees **/.doctrees .buildinfo **/.buildinfo
           git --work-tree docs/build add .
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
