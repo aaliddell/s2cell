@@ -62,11 +62,14 @@ jobs:
         run: pip install nox
       - name: Build docs
         run: nox -s docs -- -d /tmp/sphinx-doctrees
+      - name: Copy built docs and checkout
+        run: |
+          cp -r docs/build /tmp/sphinx-build
+          git checkout gh-pages
       - name: Commit and push docs
         env:
-          GIT_WORK_TREE: docs/build
+          GIT_WORK_TREE: /tmp/sphinx-build
         run: |
-          git checkout gh-pages
           git rm -r .  # Clean branch to ensure removed files don't persist
           git status
           rm -rf __pycache__ **/__pycache__ .doctrees **/.doctrees .buildinfo **/.buildinfo
