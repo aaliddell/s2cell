@@ -55,6 +55,12 @@ html_favicon = 'source/_static/logo-64.png'
 # Used to generate CNAME file
 html_baseurl = 'https://docs.s2cell.aliddell.com'
 
+# Extra vars to provide to templating
+html_context = {
+    'baseurl': html_baseurl,
+    'icon_png': 'logo.png'
+}
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".

@@ -1,8 +1,28 @@
 {% extends "!layout.html" %}
 {% block extrahead %}
+    <!-- Icons -->
     {%- if favicon %}
     <link rel="shortcut icon" href="{{ pathto('_static/' + favicon, 1)|e }}"/>
     {%- endif %}
+    {% if icon_png %}
+    <link rel="apple-touch-icon" href="{{ pathto('_static/' + icon_png, 1)|e }}">
+    {%- endif %}
+
+    <!-- Canonical URL -->
+    {% if baseurl %}
+    <link rel="canonical" href="{{ baseurl.rstrip('/')|e }}/{{ pagename|e }}.html"/>
+    {% endif %}
+
+    <!-- Open Graph -->
+    {% if baseurl %}
+    <meta property="og:url" content="{{ baseurl.rstrip('/')|e }}/{{ pagename|e }}.html" />
+    {% endif %}
+    <meta property="og:title" content="{{ title|striptags|e }}{{ titlesuffix }}" />
+    {% if icon_png %}
+    <meta property="og:image" content="{{ pathto('_static/' + icon_png, 1)|e }}" />
+    {%- endif %}
+    <meta property="og:type" content="website">
+
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "52ee346c580548d7ab0cfb7f837ba106"}'></script>
     {{ super() }}
 {% endblock %}
