@@ -34,7 +34,6 @@ setuptools.setup(
     ],
     extras_require={
         'dev': [
-            'bandit~=1.7.0',
             'flake8~=3.8',
             'nox~=2020.8.22',
             'pydocstyle~=5.1',

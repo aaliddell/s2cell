@@ -3,13 +3,8 @@ import nox
 
 nox.options.error_on_external_run = True
 nox.options.reuse_existing_virtualenvs = True
-nox.options.sessions = ['bandit', 'coverage', 'docs', 'flake8', 'pylint', 'pydocstyle']
+nox.options.sessions = ['coverage', 'docs', 'flake8', 'pylint', 'pydocstyle']
 
-
-@nox.session()
-def bandit(session):
-    session.install('.[dev]')
-    session.run('bandit', '-r', 's2cell', *session.posargs)
 
 @nox.session()
 def coverage(session):
