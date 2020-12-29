@@ -68,7 +68,7 @@ jobs:
           cp -r docs/build/* /tmp/gh-pages
           git checkout gh-pages
           git rm -r .  # Clean branch to ensure removed files don't persist
-          git clean -x  # Remove untracked files
+          git clean -fx  # Remove untracked files
           cp -r /tmp/gh-pages/* .
           touch .nojekyll
           rm -rf __pycache__ **/__pycache__
