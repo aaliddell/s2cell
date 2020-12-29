@@ -56,6 +56,11 @@ a:hover, .site-content a:hover .literal {
     color: unset;
 }
 
+/* Colour code blocks to work with monokai pygments theme */
+div.highlight-bash, div.highlight-default, div.highlight-python3, div.highlight {
+    background-color: #333;
+}
+
 /* Colour table headings */
 th {
     background-color: #de6b00;
@@ -120,10 +125,6 @@ div.highlight {
 
     .navigation-toggle, .mobile-menu-open .navigation-toggle {
         background: rgba(0, 0, 0, 0.3);
-    }
-
-    div.highlight-bash, div.highlight-default, div.highlight-python3, div.highlight {
-        background-color: #333;
     }
 
     .site-content .literal {
