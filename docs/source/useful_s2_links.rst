@@ -49,6 +49,7 @@ Reference and third-party implementations of S2 in various languages.
 - `mapbox/node-s2 <https://github.com/mapbox/node-s2>`__: NodeJS/Javascript bindings for the
   reference C++ implementation.
 - `r-spatial/s2 <https://github.com/r-spatial/s2/>`__: R bindings for the reference implementation.
+- `s2geometry-d <https://code.dlang.org/packages/s2geometry-d>`__: A D implementation of S2.
 
 
 Users
@@ -58,6 +59,8 @@ Users of S2 in general, not just of this library.
 
 - `Apache Lucene <https://lucene.apache.org/>`__: Used to implement spatial indexing for Apache
   Solr.
+- `Azure Data Explorer <https://docs.microsoft.com/en-us/azure/data-explorer/kusto/query/geo-point-to-s2cell-function>`__:
+  Used by the ``geo_point_to_s2cell`` function.
 - `BigQuery <https://cloud.google.com/bigquery/docs/reference/standard-sql/geography_functions>`__:
   Used to implement the BigQuery geography functions.
 - `CockroachDB <https://www.cockroachlabs.com/docs/v20.2/spatial-indexes.html>`__: Used to
