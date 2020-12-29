@@ -85,6 +85,18 @@ div.highlight {
     overflow-y: hidden;
 }
 
+/* Restyle API reference sections */
+.site-content dl.function {
+    margin-top: 40px;
+}
+
+.site-content dl:not(.docutils) dt {
+    border-radius: 0;
+    background: none;
+    padding: 0 20px;
+    margin: 10px 0;
+}
+
 /* Remove colour overloads */
 .branding-link__version, .site-breadcrumbs, .site-breadcrumbs__leaf, .site-sidebar a,
 .site-content .literal {
