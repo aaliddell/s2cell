@@ -1,6 +1,14 @@
 Changelog
 =========
 
+1.2.0
+-----
+
+- Added token and cell ID validation functions ``cell_id_is_valid()`` and ``token_is_valid()``
+- Added ``token_to_canonical_token()``
+- Added S2 Concepts page to docs
+
+
 1.1.1
 -----
 

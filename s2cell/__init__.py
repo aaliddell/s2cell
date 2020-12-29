@@ -20,7 +20,7 @@ from typing import Tuple, Union
 
 import numpy as np
 
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 
 
 #
