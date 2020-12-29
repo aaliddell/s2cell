@@ -41,7 +41,7 @@ _S2_FACE_BITS = np.uint32(3)
 _S2_POS_BITS = np.uint32(2 * _S2_MAX_LEVEL + 1)
 
 # The maximum value of the Si/Ti integers used when mapping from IJ to ST. This is twice the max
-# value of I and J, since Si/Ti allow referencing both the centre and edge of a leaf cell
+# value of I and J, since Si/Ti allow referencing both the center and edge of a leaf cell
 _S2_MAX_SI_TI = np.uint32(1) << (_S2_MAX_LEVEL + 1)
 
 # Mask that specifies the swap orientation bit for the Hilbert curve
@@ -553,11 +553,11 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
     # out, since these are not set in the IJ to cell ID during encoding.
     #
     # The I and J returned here are of one of the two leaf (level 30) cells that are located
-    # diagonally closest to the cell centre. This happens because repeated ..00.. will select the
+    # diagonally closest to the cell center. This happens because repeated ..00.. will select the
     # 'lower left' (for nominally oriented Hilbert curve segments) of the sub-cells. The ..10..
     # arising from the trailing bit, prior to the repeated ..00.. bits, ensures we first pick the
     # 'upper right' of the cell, then iterate in to lower left until we hit the leaf cell. This means
-    # we pick the leaf cell to the north east of the parent cell centre (again for nominal
+    # we pick the leaf cell to the north east of the parent cell center (again for nominal
     # orientation).
     # However, in the case of the swapped and inverted curve segment (4th sub-curve segment), the
     # ..10.. will select the 'lower left' and then iterate to the 'upper right' with each ..00..
@@ -602,12 +602,12 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
         # Remove I and J bits, leaving just new swap and invert bits for the next round
         bits &= _S2_SWAP_MASK | _S2_INVERT_MASK  # Mask: 0b11
 
-    # Resolve the centre of the cell. For leaf cells, we add half the leaf cell size. For non-leaf
-    # cells, we currently have one of either two cells diagonally around the cell centre and want
-    # to pick the leaf-cell edges that represent the parent cell centre, as described above. The
-    # centre_correction_delta is 2x the offset, as we left shift I and J first.
+    # Resolve the center of the cell. For leaf cells, we add half the leaf cell size. For non-leaf
+    # cells, we currently have one of either two cells diagonally around the cell center and want
+    # to pick the leaf-cell edges that represent the parent cell center, as described above. The
+    # center_correction_delta is 2x the offset, as we left shift I and J first.
     # This gives us the values Si and Ti, which are discrete representation of S and T in range 0 to
-    # _S2_MAX_SI_TI. The extra power of 2 over IJ allows for identifying both the centre and edge of
+    # _S2_MAX_SI_TI. The extra power of 2 over IJ allows for identifying both the center and edge of
     # cells, whilst IJ is just the leaf cells.
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L57-L65
     is_leaf = bool(cell_id & np.uint64(1))  # Cell is leaf cell when trailing one bit is in LSB

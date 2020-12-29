@@ -45,7 +45,7 @@ lower left in nominal curve orientation):
 
 This is linked to the concept of a `Quadtree <https://en.wikipedia.org/wiki/Quadtree>`__, where a
 square is recursively subdivided into four equal sub-cells. When considered from the Hilbert Curve
-perspective, the curve walks the centres of the tree's leaf nodes.
+perspective, the curve walks the centers of the tree's leaf nodes.
 
 In S2, six copies of the Hilbert Curve are mapped onto the six faces of a cubesurrounding the unit
 sphere, with the curve orientation on each face adjusted to produce a single continuous curve that
@@ -113,7 +113,7 @@ points out of the (lat = 0°, lon = 0°) point, the :math:`z` axis points out of
 (lat = 90°, lon = N/A) and the :math:`y` axis therefore points out of the (lat = 0°, lon = 90°)
 point to produce a right-handed orthogonal system. This coordinate system arrangement is effectively
 equivalent to the
-`Earth-Centred Earth-Fixed (ECEF) coordinate frame <https://en.wikipedia.org/wiki/ECEF>`__, with the
+`Earth-Centered Earth-Fixed (ECEF) coordinate frame <https://en.wikipedia.org/wiki/ECEF>`__, with the
 transformation from latitude and longitude angles using a unit sphere rather than a WGS84 or similar
 spheroid. There are a number of benefits of this representation compared to lat/lon angles, in
 particular the avoidance of degenerate points at the poles. The XYZ vector is typically normalised
@@ -157,7 +157,7 @@ The UV coordinate system is similar to the concept of
 `UV mapping <https://en.wikipedia.org/wiki/UV_mapping>`_ commonly used in computer graphics, whereby
 a 3D geometry is unwrapped to produce a 2D coordinate space for texture mapping. In the case of S2,
 the :math:`u` and :math:`v` coordinates represent the location of a point on a single face of the
-cube, with the point :math:`u = 0, v = 0` representing the centre of the face.
+cube, with the point :math:`u = 0, v = 0` representing the center of the face.
 :numref:`fig_uv_face_0` shows how the earth is mapped into the UV coordinates of face 0 of the S2
 cube.
 
@@ -182,7 +182,7 @@ ST
 The ST coordinate system is a warped version of the :ref:`sec_coord_uv` coordinate system, after
 mapping through a projection function. This is done to give a more homogenous area per S2 cell on
 the unit-sphere, where cells near the cube face edges would otherwise be significantly smaller than
-those near the face centres.
+those near the face centers.
 
 There are actually three projection implementations for UV to ST specified in the S2 reference
 implementation, namely the 'linear', 'tan' and 'quadratic' projections. The linear projection
@@ -269,7 +269,7 @@ Si/Ti
 :math:`si`` and :math:`ti` are integral versions of the values :math:`s` and :math:`t` respectively,
 which are used when mapping IJ values from a cell ID back into ST value. The range of Si/Ti is twice
 that of IJ. The additional power of two in the range of Si/Ti versus IJ allows for :math:`si`` and
-:math:`ti` to specify both the centre and edges of the leaf cells, whilst IJ only specifies the leaf
+:math:`ti` to specify both the center and edges of the leaf cells, whilst IJ only specifies the leaf
 cell generically.
 
 
@@ -284,7 +284,7 @@ Cell ID
 
 The S2 cell ID is another of the fundamental S2 types, which uses a single 64 bit unsigned integer
 to represent a location on the surface of the earth with
-`up to millimetre <https://s2geometry.io/resources/s2cell_statistics>`__ resolution. Due to the
+`up to millimeter <https://s2geometry.io/resources/s2cell_statistics>`__ resolution. Due to the
 locality given by the Hilbert Curve and the layout of faces in :numref:`fig_cube_unwrapped`, cell
 IDs that are close numerically are generally close geographically, which can be useful when sharding
 on a cell ID. Note however that the opposite is not necessarily true: points that are geographically
@@ -565,11 +565,11 @@ similar iteration with 8 bit lookups, producing 4 bits each of :math:`i` and :ma
         bits &= SWAP_MASK | INVERT_MASK  # Mask: 0b11
 
 The :math:`i` and :math:`j` returned here are of one of the two leaf (level 30) cells that are
-located diagonally closest to the cell centre. This happens because repeated ``..00..`` will select
+located diagonally closest to the cell center. This happens because repeated ``..00..`` will select
 the 'lower left' (for nominally oriented Hilbert curve segments) of the sub-cells. The ``..10..``
 arising from the trailing bit, prior to the repeated ``..00..`` bits, ensures we first pick the
 'upper right' of the cell, then iterate in to lower left until we hit the leaf cell. This means
-we pick the leaf cell to the north east of the parent cell centre (again for nominal orientation).
+we pick the leaf cell to the north east of the parent cell center (again for nominal orientation).
 However, in the case of the swapped and inverted curve segment (4th sub-curve segment), the
 ``..10..`` will select the 'lower left' and then iterate to the 'upper right' with each ``..00..``
 following. In that case, we will be offset left and down by one leaf cell in each of :math:`i` and
@@ -590,8 +590,8 @@ We check for level 29 by looking for the trailing 1 in the third least-significa
 already know that we are not a leaf cell (which could give false positive) by the initial check in
 the expression.
 
-The centre correction is applied at the same time as mapping into :ref:`sec_coord_si_ti`. For leaf
-cells, we pick :math:`si` and :math:`ti` values that represent the centre of the level 30 cell. For
+The center correction is applied at the same time as mapping into :ref:`sec_coord_si_ti`. For leaf
+cells, we pick :math:`si` and :math:`ti` values that represent the center of the level 30 cell. For
 non-leaf cells, we pick the relevant edges of the leaf cell based on the value of
 ``apply_correction`` above. The correction delta is 0, 1 or 2, rather than 0, 0.5 or 1, since we are
 deailing with integer values and as the values of :math:`si` and :math:`ti` are twice those in
