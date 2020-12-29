@@ -556,8 +556,8 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
     # diagonally closest to the cell center. This happens because repeated ..00.. will select the
     # 'lower left' (for nominally oriented Hilbert curve segments) of the sub-cells. The ..10..
     # arising from the trailing bit, prior to the repeated ..00.. bits, ensures we first pick the
-    # 'upper right' of the cell, then iterate in to lower left until we hit the leaf cell. This means
-    # we pick the leaf cell to the north east of the parent cell center (again for nominal
+    # 'upper right' of the cell, then iterate in to lower left until we hit the leaf cell. This
+    # means we pick the leaf cell to the north east of the parent cell center (again for nominal
     # orientation).
     # However, in the case of the swapped and inverted curve segment (4th sub-curve segment), the
     # ..10.. will select the 'lower left' and then iterate to the 'upper right' with each ..00..
@@ -746,7 +746,7 @@ def cell_id_is_valid(cell_id: Union[int, np.uint64]) -> bool:
 
     # Check trailing 1 bit is in one of the even bit positions allowed for the 30 levels, using the
     # mask: 0b0001010101010101010101010101010101010101010101010101010101010101 = 0x1555555555555555
-    lowest_set_bit = cell_id & (~cell_id + np.uint64(1))
+    lowest_set_bit = cell_id & (~cell_id + np.uint64(1))  # pylint: disable=invalid-unary-operand-type
     if not lowest_set_bit & np.uint64(0x1555555555555555):
         return False
 
