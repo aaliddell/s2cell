@@ -18,8 +18,8 @@
     <meta property="og:url" content="{{ baseurl.rstrip('/')|e }}/{{ pagename|e }}.html" />
     {% endif %}
     <meta property="og:title" content="{{ title|striptags|e }}{{ titlesuffix }}" />
-    {% if icon_png %}
-    <meta property="og:image" content="{{ pathto('_static/' + icon_png, 1)|e }}" />
+    {% if baseurl and icon_png %}
+    <meta property="og:image" content="{{ (baseurl.rstrip('/') + '/_static/' + icon_png)|e }}" />
     {%- endif %}
     <meta property="og:type" content="website">
 
