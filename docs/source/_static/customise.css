@@ -106,6 +106,10 @@ div.highlight {
         background-color: #222;
     }
 
+    .navigation-toggle, .mobile-menu-open .navigation-toggle {
+        background: rgba(0, 0, 0, 0.3);
+    }
+
     div.highlight-bash, div.highlight-default, div.highlight-python3, div.highlight {
         background-color: #333;
     }
