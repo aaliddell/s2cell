@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://docs.s2cell.aliddell.com/sitemap.xml

@@ -44,6 +44,7 @@ setuptools.setup(
             'pytest-xdist~=2.2.0',
             'Sphinx~=3.4.0',
             'sphinx-redactor-theme==0.0.1',
+            'sphinx-sitemap==2.2.0',
         ],
     },
     classifiers=[

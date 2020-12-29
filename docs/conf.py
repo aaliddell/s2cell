@@ -14,9 +14,13 @@ version = release
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    # Internal
     'sphinx.ext.autodoc',
     'sphinx.ext.githubpages',
     'sphinx.ext.napoleon',
+
+    # External
+    'sphinx_sitemap',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -73,6 +77,13 @@ html_css_files = [
     'customise.css',
 ]
 
+# Extra files to include
+html_extra_path = [
+    'source/robots.txt',
+]
+
+# Sitemap options
+sitemap_url_scheme = '{lang}{link}'
 
 # -- Options for autodoc -----------------------------------------------------
 

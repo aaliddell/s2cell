@@ -53,7 +53,7 @@ def docs(session):
         '-T', # Show full trace on error
         '-W', # Treat warnings as errors
         '--keep-going', # When using -W, only exit after all warnings shown
-        '-j', 'auto', # Generate in parallel
+        #'-j', 'auto', # Generate in parallel
         'docs/source', 'docs/build',
     )
 
