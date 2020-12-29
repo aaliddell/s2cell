@@ -50,7 +50,7 @@ misunderstandings of the S2 cell system. Please note that this library strives t
 reference rather than aiming for peak performance (it is in Python after all), so PRs which reduce
 readability of the implementation (such as for Python specific speed optimisations) are generally
 discouraged. However, if you have optimisations that are applicable to S2 implementations across
-many langauges and can be described easily, please do consider making a PR.
+many languages and can be described easily, please do consider making a PR.
 
 
 Installation
@@ -95,7 +95,7 @@ functions:
    s2cell.cell_id_to_lat_lon(3383781119341101056)  # -> (-10.452552407574101, 105.6412526632361)
    s2cell.token_to_lat_lon('3')                    # -> (0.0, 90.0)
 
-The lat/lon returned will be the centre of the cell at the level available in the provided cell ID
+The lat/lon returned will be the center of the cell at the level available in the provided cell ID
 or token.
 
 There are also a few other useful functions for inspecting or converting a cell ID/token:

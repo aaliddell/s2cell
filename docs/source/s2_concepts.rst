@@ -2,7 +2,7 @@ S2 Concepts
 ===========
 
 The core concepts of S2 are well explained on the `S2 Geometry website <https://s2geometry.io/>`__.
-This page aims to suplement the information available there with more details about the coordinate
+This page aims to supplement the information available there with more details about the coordinate
 systems and specifics of the cell ID system, so I suggest reading that site in conjunction with
 this one.
 
@@ -47,7 +47,7 @@ This is linked to the concept of a `Quadtree <https://en.wikipedia.org/wiki/Quad
 square is recursively subdivided into four equal sub-cells. When considered from the Hilbert Curve
 perspective, the curve walks the centers of the tree's leaf nodes.
 
-In S2, six copies of the Hilbert Curve are mapped onto the six faces of a cubesurrounding the unit
+In S2, six copies of the Hilbert Curve are mapped onto the six faces of a cube surrounding the unit
 sphere, with the curve orientation on each face adjusted to produce a single continuous curve that
 wraps from face to face. The 'level' value used by S2 corresponds to the Hilbert Curve 'order' shown
 above, with the levels continuing fractally to 30 iterations.
@@ -74,7 +74,7 @@ Latitude and Longitude
 `Latitude and longitude <https://en.wikipedia.org/wiki/Geographic_coordinate_system#Latitude_and_longitude>`__
 are the familiar coordinates used to represent locations on the surface of the earth, as you might
 retrieve from your phone's GPS or in most GIS data. In a spherical earth, these represent the
-angluar offsets from the intersection of the equator and a reference meridian respectively. However,
+angular offsets from the intersection of the equator and a reference meridian respectively. However,
 a spherical earth approximation is often not sufficiently accurate, so more complex
 ellipsoidal/spheroidal approximations, such as
 `WGS84 <https://en.wikipedia.org/wiki/World_Geodetic_System>`__, are often used instead.
