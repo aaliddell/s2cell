@@ -60,6 +60,8 @@ Users of S2 in general, not just of this library.
   Solr.
 - `BigQuery <https://cloud.google.com/bigquery/docs/reference/standard-sql/geography_functions>`__:
   Used to implement the BigQuery geography functions.
+- `CockroachDB <https://www.cockroachlabs.com/docs/v20.2/spatial-indexes.html>`__: Used to
+  implement the spatial indexing.
 - `InfluxDB <https://docs.influxdata.com/influxdb/cloud/query-data/flux/geo/shape-geo-data/#generate-s2-cell-id-tokens>`__:
   Used to implement the `Geo` package.
 - `MongoDB <https://docs.mongodb.com/manual/core/2dsphere/>`__: Used to implement the ``2dsphere``
