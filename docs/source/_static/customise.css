@@ -2,12 +2,20 @@
 h1, h2, h3, h4, h5, .site-content .topic-title, .toctree-wrapper .caption, .auto-toc .caption {
     overflow: auto;
     line-height: normal;
+    background: none;
 }
 
 /* Reduce horizontal padding in left sidebar */
 section.site-sidebar {
     padding-left: 4%;
     padding-right: 4%;
+}
+
+/* Limit max width of main text */
+main.site-main > * {
+    max-width: 70em;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Centre align logo and title in sidebar and reduce its size when too big */
@@ -45,7 +53,7 @@ a, .site-content a .literal {
 }
 
 a:hover, .site-content a:hover .literal {
-    color: black;
+    color: unset;
 }
 
 /* Colour table headings */
@@ -74,5 +82,52 @@ img {
 
 /* Hide unusable scroll bars on code blocks */
 div.highlight {
-    overflow-y: clip;
+    overflow-y: hidden;
+}
+
+/* Remove colour overloads */
+.branding-link__version, .site-breadcrumbs, .site-breadcrumbs__leaf, .site-sidebar a,
+.site-content .literal {
+    color: unset;
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #333;
+        color: white;
+    }
+
+    .site-sidebar {
+        background-color: #333;
+    }
+
+    .site-main {
+        background-color: #222;
+    }
+
+    div.highlight-bash, div.highlight-default, div.highlight-python3, div.highlight {
+        background-color: #333;
+    }
+
+    .site-content .literal {
+        background-color: #333;
+    }
+
+    table {
+        background-color: #444;
+    }
+
+    table .row-odd td {
+        background: #333;
+    }
+
+    td {
+        border-bottom: 1px solid #222;
+    }
+
+    .site-searchform [type="text"] {
+        background-color: #222;
+        color: unset;
+    }
 }
