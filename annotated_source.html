@@ -652,8 +652,8 @@ The full source of the library is included below.</p>
     <span class="c1"># diagonally closest to the cell center. This happens because repeated ..00.. will select the</span>
     <span class="c1"># &#39;lower left&#39; (for nominally oriented Hilbert curve segments) of the sub-cells. The ..10..</span>
     <span class="c1"># arising from the trailing bit, prior to the repeated ..00.. bits, ensures we first pick the</span>
-    <span class="c1"># &#39;upper right&#39; of the cell, then iterate in to lower left until we hit the leaf cell. This means</span>
-    <span class="c1"># we pick the leaf cell to the north east of the parent cell center (again for nominal</span>
+    <span class="c1"># &#39;upper right&#39; of the cell, then iterate in to lower left until we hit the leaf cell. This</span>
+    <span class="c1"># means we pick the leaf cell to the north east of the parent cell center (again for nominal</span>
     <span class="c1"># orientation).</span>
     <span class="c1"># However, in the case of the swapped and inverted curve segment (4th sub-curve segment), the</span>
     <span class="c1"># ..10.. will select the &#39;lower left&#39; and then iterate to the &#39;upper right&#39; with each ..00..</span>
@@ -842,7 +842,7 @@ The full source of the library is included below.</p>
 
     <span class="c1"># Check trailing 1 bit is in one of the even bit positions allowed for the 30 levels, using the</span>
     <span class="c1"># mask: 0b0001010101010101010101010101010101010101010101010101010101010101 = 0x1555555555555555</span>
-    <span class="n">lowest_set_bit</span> <span class="o">=</span> <span class="n">cell_id</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">cell_id</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">lowest_set_bit</span> <span class="o">=</span> <span class="n">cell_id</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">cell_id</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>  <span class="c1"># pylint: disable=invalid-unary-operand-type</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">lowest_set_bit</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mh">0x1555555555555555</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">False</span>
 
