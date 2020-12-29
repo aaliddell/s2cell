@@ -32,7 +32,7 @@ templates_path = []
 exclude_patterns = ['.ipynb_checkpoints']
 
 # Code highlighting
-pygments_style = 'default'
+pygments_style = 'monokai'
 
 # Enable figure numbering
 numfig = True
