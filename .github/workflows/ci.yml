@@ -68,11 +68,11 @@ jobs:
           cp -r docs/build /tmp/sphinx-build
           git clean -fx
           git checkout gh-pages
+          git rm -r .  # Clean branch to ensure removed files don't persist
       - name: Commit and push docs
         env:
           GIT_WORK_TREE: /tmp/sphinx-build
         run: |
-          git rm -r .  # Clean branch to ensure removed files don't persist
           git status
           git add .
           git status
