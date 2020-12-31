@@ -1,3 +1,9 @@
+:author: Adam Liddell
+:description:
+    Introduction to the core concepts of the S2 Geometry coordinate systems and conversions, using
+    code from the s2cell Python library
+:keywords: S2, S2 Geometry, s2cell, S2 cell, cell ID, S2 token, token, Python, concepts, code
+
 S2 Concepts
 ===========
 
