@@ -1,3 +1,7 @@
+:author: Adam Liddell
+:description: Changelog for the s2cell Python library
+:keywords: S2, S2 Geometry, s2cell, Python, changes, changelog
+
 Changelog
 =========
 

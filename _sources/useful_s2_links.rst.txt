@@ -1,3 +1,9 @@
+:author: Adam Liddell
+:description:
+    Useful links for the S2 Geometry ecosystem, including documentation, implementations and links
+    to existing users of S2.
+:keywords: S2, S2 Geometry, links, concepts, visualisations, implementations, users
+
 Useful S2 Links
 ===============
 

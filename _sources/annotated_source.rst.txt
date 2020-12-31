@@ -1,3 +1,8 @@
+:author: Adam Liddell
+:description:
+    Annotated source code of the the s2cell implementation of the S2 cell coordinate system
+:keywords: S2, S2 Geometry, s2cell, Python, source, code
+
 .. _sec_annotated_source:
 
 Annotated Source

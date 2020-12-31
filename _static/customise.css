@@ -108,6 +108,22 @@ div.highlight {
     color: unset;
 }
 
+/* Fix how mobile menu behaves to hide element and stop Google complaining */
+@media only screen and (max-width: 980px) {
+    .site-main {
+        transition: none;
+    }
+
+    .site-sidebar {
+        display: none;
+        transition: none;
+    }
+
+    .mobile-menu-open .site-sidebar {
+        display: block;
+    }
+}
+
 /* Dark theme */
 @media (prefers-color-scheme: dark) {
     body {
