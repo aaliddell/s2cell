@@ -5,7 +5,7 @@
     {%- if meta %}
     {%- for tag in ('description', 'author', 'keywords') %}
     {%- if tag in meta %}
-    <meta name="{{ tag }}" content="{{ meta[tag]|e }}">
+    <meta name="{{ tag }}" content="{{ meta[tag].replace('\n', ' ')|e }}">
     {%- endif %}
     {%- endfor %}
     {%- endif %}
@@ -33,7 +33,7 @@
     {%- endif %}
     <meta property="og:type" content="website">
     {%- if meta and 'description' in meta %}
-    <meta property="og:description" content="{{ meta['description'] }}">
+    <meta property="og:description" content="{{ meta['description'].replace('\n', ' ') }}">
     {%- endif %}
 
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "52ee346c580548d7ab0cfb7f837ba106"}'></script>
