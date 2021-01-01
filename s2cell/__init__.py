@@ -29,11 +29,10 @@ __version__ = '1.3.0'
 
 class InvalidCellID(Exception):
     """Exception type for invalid cell IDs."""
-    pass
+
 
 class InvalidToken(Exception):
     """Exception type for invalid tokens."""
-    pass
 
 
 #
