@@ -370,6 +370,63 @@ invalid.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt id="s2cell.cell_id_to_parent_cell_id">
+<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">cell_id_to_parent_cell_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_id</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>int<span class="p">, </span>numpy.uint64<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">level</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; numpy.uint64<a class="headerlink" href="#s2cell.cell_id_to_parent_cell_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the parent cell ID of a S2 cell ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cell_id</strong> – The S2 cell ID integer.</p></li>
+<li><p><strong>level</strong> – The parent level to get the cell ID for. Must be less than or equal to the current
+level of the provided cell ID. If unspecified, or None, the direct parent cell ID will
+be returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The parent cell ID at the specified level.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TypeError</strong> – If the cell_id is not int or np.uint64.</p></li>
+<li><p><strong>ValueError</strong> – If the cell_id is invalid.</p></li>
+<li><p><strong>ValueError</strong> – If cell ID is already level 0 and level is None.</p></li>
+<li><p><strong>ValueError</strong> – When level is not an integer, is &lt; 0 or is &gt; 30.</p></li>
+<li><p><strong>ValueError</strong> – If level is greater than the provided cell ID level.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="s2cell.token_to_parent_token">
+<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">token_to_parent_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">level</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#s2cell.token_to_parent_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the parent token of a S2 token.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>token</strong> – The S2 token string. Can be upper or lower case hex string.</p></li>
+<li><p><strong>level</strong> – The parent level to get the token for. Must be less than or equal to the current
+level of the provided toke. If unspecified, or None, the direct parent token will be
+returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The parent token at the specified level.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TypeError</strong> – If the token is not str.</p></li>
+<li><p><strong>ValueError</strong> – If the token length is over 16.</p></li>
+<li><p><strong>ValueError</strong> – If the token is invalid.</p></li>
+<li><p><strong>ValueError</strong> – If token is already level 0 and level is None.</p></li>
+<li><p><strong>ValueError</strong> – When level is not an integer, is &lt; 0 or is &gt; 30.</p></li>
+<li><p><strong>ValueError</strong> – If level is greater than the provided token level.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 </div>
 

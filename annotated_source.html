@@ -295,7 +295,7 @@ The full source of the library is included below.</p>
     <span class="k">elif</span> <span class="n">face</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
         <span class="n">s2_point</span> <span class="o">=</span> <span class="p">(</span><span class="n">uv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot convert UV to XYZ with invalid face: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">face</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot convert UV to XYZ with invalid face: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">face</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">s2_point</span>
 
@@ -385,7 +385,7 @@ The full source of the library is included below.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check type</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell_id</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot convert S2 cell ID from type: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)))</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot convert S2 cell ID from type: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)))</span>
     <span class="n">cell_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)</span>
 
     <span class="c1"># The zero token is encoded as &#39;X&#39; rather than as a zero-length string</span>
@@ -417,7 +417,7 @@ The full source of the library is included below.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check input</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot convert S2 token from type: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">token</span><span class="p">)))</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot convert S2 token from type: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">token</span><span class="p">)))</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">16</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot convert S2 token with length &gt; 16 characters&#39;</span><span class="p">)</span>
@@ -645,7 +645,7 @@ The full source of the library is included below.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check input</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">cell_id_is_valid</span><span class="p">(</span><span class="n">cell_id</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot decode invalid S2 cell ID: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cell_id</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot decode invalid S2 cell ID: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cell_id</span><span class="p">))</span>
     <span class="n">cell_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)</span>
 
     <span class="c1"># Populate _S2_LOOKUP_IJ on first run.</span>
@@ -781,7 +781,7 @@ The full source of the library is included below.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check input</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">token_is_valid</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot decode invalid S2 token: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot decode invalid S2 token: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
 
     <span class="c1"># Convert to cell ID and decode to lat/lon</span>
     <span class="k">return</span> <span class="n">cell_id_to_lat_lon</span><span class="p">(</span><span class="n">token_to_cell_id</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
@@ -848,7 +848,7 @@ The full source of the library is included below.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check input</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell_id</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot decode S2 cell ID from type: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)))</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot decode S2 cell ID from type: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)))</span>
     <span class="n">cell_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)</span>
 
     <span class="c1"># Check for zero ID</span>
@@ -889,7 +889,7 @@ The full source of the library is included below.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check input</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot check S2 token with type: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">token</span><span class="p">)))</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Cannot check S2 token with type: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">token</span><span class="p">)))</span>
 
     <span class="c1"># First check string with regex</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^[0-9a-fA-f]{1,16}$&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
@@ -922,7 +922,7 @@ The full source of the library is included below.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check input</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">cell_id_is_valid</span><span class="p">(</span><span class="n">cell_id</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot decode invalid S2 cell ID: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cell_id</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot decode invalid S2 cell ID: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cell_id</span><span class="p">))</span>
     <span class="n">cell_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)</span>
 
     <span class="c1"># Find the position of the lowest set one bit, which will be the trailing one bit. The level is</span>
@@ -961,10 +961,102 @@ The full source of the library is included below.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check input</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">token_is_valid</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot decode invalid S2 token: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot decode invalid S2 token: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
 
     <span class="c1"># Convert to cell ID and get the level for that</span>
     <span class="k">return</span> <span class="n">cell_id_to_level</span><span class="p">(</span><span class="n">token_to_cell_id</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># Parent functions</span>
+<span class="c1">#</span>
+
+<span class="k">def</span> <span class="nf">cell_id_to_parent_cell_id</span><span class="p">(</span>
+        <span class="n">cell_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">],</span> <span class="n">level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the parent cell ID of a S2 cell ID.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cell_id: The S2 cell ID integer.</span>
+<span class="sd">        level: The parent level to get the cell ID for. Must be less than or equal to the current</span>
+<span class="sd">            level of the provided cell ID. If unspecified, or None, the direct parent cell ID will</span>
+<span class="sd">            be returned.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The parent cell ID at the specified level.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If the cell_id is not int or np.uint64.</span>
+<span class="sd">        ValueError: If the cell_id is invalid.</span>
+<span class="sd">        ValueError: If cell ID is already level 0 and level is None.</span>
+<span class="sd">        ValueError: When level is not an integer, is &lt; 0 or is &gt; 30.</span>
+<span class="sd">        ValueError: If level is greater than the provided cell ID level.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check input</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cell_id_is_valid</span><span class="p">(</span><span class="n">cell_id</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot decode invalid S2 cell ID: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cell_id</span><span class="p">))</span>
+    <span class="n">cell_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)</span>
+
+    <span class="c1"># Get current level of the cell ID and check it is suitable with the requested level</span>
+    <span class="n">current_level</span> <span class="o">=</span> <span class="n">cell_id_to_level</span><span class="p">(</span><span class="n">cell_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">current_level</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot get parent cell ID of a level 0 cell ID&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">current_level</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">level</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">level</span> <span class="o">&gt;</span> <span class="n">_S2_MAX_LEVEL</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;S2 level must be integer &gt;= 0 and &lt;= 30&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">level</span> <span class="o">&gt;</span> <span class="n">current_level</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot get level </span><span class="si">{}</span><span class="s1"> parent cell ID of cell ID with level </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">level</span><span class="p">,</span> <span class="n">current_level</span>
+        <span class="p">))</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="n">current_level</span><span class="p">:</span>
+        <span class="c1"># Requested parent level is current level, return cell ID itself</span>
+        <span class="k">return</span> <span class="n">cell_id</span>
+
+    <span class="c1"># Truncate to desired level</span>
+    <span class="c1"># This is done by finding the mask of the trailing 1 bit for the specified level, then zeroing</span>
+    <span class="c1"># out all bits less significant than this, then finally setting the trailing 1 bit. This is</span>
+    <span class="c1"># still necessary to do even after a reduced number of steps `required_steps` above, since each</span>
+    <span class="c1"># step contains multiple levels that may need partial overwrite. Additionally, we need to add</span>
+    <span class="c1"># the trailing 1 bit, which is not yet set above.</span>
+    <span class="n">least_significant_bit_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">_S2_MAX_LEVEL</span> <span class="o">-</span> <span class="n">level</span><span class="p">))</span>
+    <span class="n">cell_id</span> <span class="o">=</span> <span class="p">(</span><span class="n">cell_id</span> <span class="o">&amp;</span> <span class="o">-</span><span class="n">least_significant_bit_mask</span><span class="p">)</span> <span class="o">|</span> <span class="n">least_significant_bit_mask</span>
+
+    <span class="k">return</span> <span class="n">cell_id</span>
+
+
+<span class="k">def</span> <span class="nf">token_to_parent_token</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the parent token of a S2 token.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        token: The S2 token string. Can be upper or lower case hex string.</span>
+<span class="sd">        level: The parent level to get the token for. Must be less than or equal to the current</span>
+<span class="sd">            level of the provided toke. If unspecified, or None, the direct parent token will be</span>
+<span class="sd">            returned.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The parent token at the specified level.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If the token is not str.</span>
+<span class="sd">        ValueError: If the token length is over 16.</span>
+<span class="sd">        ValueError: If the token is invalid.</span>
+<span class="sd">        ValueError: If token is already level 0 and level is None.</span>
+<span class="sd">        ValueError: When level is not an integer, is &lt; 0 or is &gt; 30.</span>
+<span class="sd">        ValueError: If level is greater than the provided token level.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check input</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">token_is_valid</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot decode invalid S2 token: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+
+    <span class="c1"># Convert to cell ID and get parent and convert back to token</span>
+    <span class="k">return</span> <span class="n">cell_id_to_token</span><span class="p">(</span><span class="n">cell_id_to_parent_cell_id</span><span class="p">(</span><span class="n">token_to_cell_id</span><span class="p">(</span><span class="n">token</span><span class="p">),</span> <span class="n">level</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
