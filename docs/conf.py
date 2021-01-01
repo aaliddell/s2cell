@@ -1,8 +1,12 @@
+import datetime
+
 # -- Project information -----------------------------------------------------
 
 import s2cell
 project = 's2cell'
-copyright = '2020, Adam Liddell - Apache 2.0 License'
+copyright = '2020-{}, Adam Liddell - Apache 2.0 License'.format(
+    datetime.date.today().year
+)
 author = 'Adam Liddell'
 release = s2cell.__version__
 version = release
