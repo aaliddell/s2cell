@@ -261,6 +261,9 @@ def test_invalid_cell_id_to_parent_cell_id():
         s2cell.cell_id_to_parent_cell_id(3458764513820540928)
 
     with pytest.raises(ValueError, match=re.escape('S2 level must be integer >= 0 and <= 30')):
+        s2cell.cell_id_to_parent_cell_id(3383782026652942336, 'a')
+
+    with pytest.raises(ValueError, match=re.escape('S2 level must be integer >= 0 and <= 30')):
         s2cell.cell_id_to_parent_cell_id(3383782026652942336, -1)
 
     with pytest.raises(ValueError, match=re.escape('S2 level must be integer >= 0 and <= 30')):
@@ -294,3 +297,52 @@ def test_cell_id_to_parent_cell_id_compat():
                 else:
                     with pytest.raises(ValueError, match=re.escape('Cannot get level {} parent cell ID of cell ID with level {}'.format(other_level, level))):
                         s2cell.cell_id_to_parent_cell_id(levels_dict[level], other_level)
+
+
+def test_invalid_token_to_parent_token():
+    with pytest.raises(TypeError, match=re.escape("Cannot check S2 token with type: <class 'float'>")):
+        s2cell.token_to_parent_token(1.0)
+
+    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 token: aaaaaaaaaaaaaaaaa')):
+        s2cell.token_to_parent_token('a' * 17)
+
+    with pytest.raises(ValueError, match=re.escape('Cannot get parent cell ID of a level 0 cell ID')):
+        s2cell.token_to_parent_token('3')
+
+    with pytest.raises(ValueError, match=re.escape('S2 level must be integer >= 0 and <= 30')):
+        s2cell.token_to_parent_token('2ef59bd34', 'a')
+
+    with pytest.raises(ValueError, match=re.escape('S2 level must be integer >= 0 and <= 30')):
+        s2cell.token_to_parent_token('2ef59bd34', -1)
+
+    with pytest.raises(ValueError, match=re.escape('S2 level must be integer >= 0 and <= 30')):
+        s2cell.token_to_parent_token('2ef59bd34', 31)
+
+    with pytest.raises(ValueError, match=re.escape('Cannot get level 16 parent cell ID of cell ID with level 15')):
+        s2cell.token_to_parent_token('2ef59bd34', 16)
+
+
+def test_token_to_parent_token_compat():
+    # Check against generated S2 tests
+    encode_file = pathlib.Path(__file__).parent / 's2_encode_corpus.csv.gz'
+    with gzip.open(str(encode_file), 'rt') as f:
+        points = collections.defaultdict(dict)
+        for row in csv.DictReader(f):
+            points[(float(row['lat']), float(row['lon']))][int(row['level'])] = row['token']
+
+    for levels_dict in list(points.values())[::200]:
+        for level in levels_dict:
+            # Test direct parent
+            if level > 0:
+                assert s2cell.token_to_parent_token(levels_dict[level]) == levels_dict[level - 1]
+            else:
+                with pytest.raises(ValueError, match=re.escape('Cannot get parent cell ID of a level 0 cell ID')):
+                    s2cell.token_to_parent_token(levels_dict[level])
+
+            # Test all other levels
+            for other_level in levels_dict:
+                if other_level <= level:
+                    assert s2cell.token_to_parent_token(levels_dict[level], other_level) == levels_dict[other_level]
+                else:
+                    with pytest.raises(ValueError, match=re.escape('Cannot get level {} parent cell ID of cell ID with level {}'.format(other_level, level))):
+                        s2cell.token_to_parent_token(levels_dict[level], other_level)
