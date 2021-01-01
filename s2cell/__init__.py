@@ -27,15 +27,11 @@ __version__ = '1.3.0'
 # s2cell exceptions
 #
 
-class S2CellBaseException(Exception):
-    """Base exception type for s2cell."""
-    pass
-
-class InvalidCellID(S2CellBaseException):
+class InvalidCellID(Exception):
     """Exception type for invalid cell IDs."""
     pass
 
-class InvalidToken(S2CellBaseException):
+class InvalidToken(Exception):
     """Exception type for invalid tokens."""
     pass
 
