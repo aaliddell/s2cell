@@ -137,6 +137,27 @@
 <div class="section" id="module-s2cell">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-s2cell" title="Permalink to this headline">¶</a></h2>
 <p>Minimal Python S2 cell ID, S2 token and lat/lon conversion library.</p>
+<dl class="py exception">
+<dt id="s2cell.S2CellBaseException">
+<em class="property">exception </em><code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">S2CellBaseException</code><a class="headerlink" href="#s2cell.S2CellBaseException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Base exception type for s2cell.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="s2cell.InvalidCellID">
+<em class="property">exception </em><code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">InvalidCellID</code><a class="headerlink" href="#s2cell.InvalidCellID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#s2cell.S2CellBaseException" title="s2cell.S2CellBaseException"><code class="xref py py-class docutils literal notranslate"><span class="pre">s2cell.S2CellBaseException</span></code></a></p>
+<p>Exception type for invalid cell IDs.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="s2cell.InvalidToken">
+<em class="property">exception </em><code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">InvalidToken</code><a class="headerlink" href="#s2cell.InvalidToken" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#s2cell.S2CellBaseException" title="s2cell.S2CellBaseException"><code class="xref py py-class docutils literal notranslate"><span class="pre">s2cell.S2CellBaseException</span></code></a></p>
+<p>Exception type for invalid tokens.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt id="s2cell.cell_id_to_token">
 <code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">cell_id_to_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_id</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>int<span class="p">, </span>numpy.uint64<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#s2cell.cell_id_to_token" title="Permalink to this definition">¶</a></dt>
@@ -173,7 +194,7 @@ as ‘X’ to prevent it being an empty string.</p>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>TypeError</strong> – If the token is not str.</p></li>
-<li><p><strong>ValueError</strong> – If the token length is over 16.</p></li>
+<li><p><a class="reference internal" href="#s2cell.InvalidToken" title="s2cell.InvalidToken"><strong>InvalidToken</strong></a> – If the token length is over 16.</p></li>
 </ul>
 </dd>
 </dl>
@@ -240,7 +261,7 @@ as ‘X’ to prevent it being an empty string.</p>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>TypeError</strong> – If the cell_id is not int or np.uint64.</p></li>
-<li><p><strong>ValueError</strong> – If the cell_id is invalid.</p></li>
+<li><p><a class="reference internal" href="#s2cell.InvalidCellID" title="s2cell.InvalidCellID"><strong>InvalidCellID</strong></a> – If the cell_id is invalid.</p></li>
 </ul>
 </dd>
 </dl>
@@ -261,8 +282,9 @@ as ‘X’ to prevent it being an empty string.</p>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>TypeError</strong> – If the token is not str.</p></li>
-<li><p><strong>ValueError</strong> – If the token length is over 16.</p></li>
-<li><p><strong>ValueError</strong> – If the token is invalid.</p></li>
+<li><p><a class="reference internal" href="#s2cell.InvalidToken" title="s2cell.InvalidToken"><strong>InvalidToken</strong></a> – If the token length is over 16.</p></li>
+<li><p><a class="reference internal" href="#s2cell.InvalidToken" title="s2cell.InvalidToken"><strong>InvalidToken</strong></a> – If the token is invalid.</p></li>
+<li><p><a class="reference internal" href="#s2cell.InvalidCellID" title="s2cell.InvalidCellID"><strong>InvalidCellID</strong></a> – If the contained cell_id is invalid.</p></li>
 </ul>
 </dd>
 </dl>
@@ -342,7 +364,7 @@ invalid.</p>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>TypeError</strong> – If the cell_id is not int or np.uint64.</p></li>
-<li><p><strong>ValueError</strong> – If the cell_id is invalid.</p></li>
+<li><p><a class="reference internal" href="#s2cell.InvalidCellID" title="s2cell.InvalidCellID"><strong>InvalidCellID</strong></a> – If the cell_id is invalid.</p></li>
 </ul>
 </dd>
 </dl>
@@ -363,8 +385,9 @@ invalid.</p>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>TypeError</strong> – If the token is not str.</p></li>
-<li><p><strong>ValueError</strong> – If the token length is over 16.</p></li>
-<li><p><strong>ValueError</strong> – If the token is invalid.</p></li>
+<li><p><a class="reference internal" href="#s2cell.InvalidToken" title="s2cell.InvalidToken"><strong>InvalidToken</strong></a> – If the token length is over 16.</p></li>
+<li><p><a class="reference internal" href="#s2cell.InvalidToken" title="s2cell.InvalidToken"><strong>InvalidToken</strong></a> – If the token is invalid.</p></li>
+<li><p><a class="reference internal" href="#s2cell.InvalidCellID" title="s2cell.InvalidCellID"><strong>InvalidCellID</strong></a> – If the contained cell_id is invalid.</p></li>
 </ul>
 </dd>
 </dl>
@@ -389,7 +412,7 @@ be returned.</p></li>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>TypeError</strong> – If the cell_id is not int or np.uint64.</p></li>
-<li><p><strong>ValueError</strong> – If the cell_id is invalid.</p></li>
+<li><p><a class="reference internal" href="#s2cell.InvalidCellID" title="s2cell.InvalidCellID"><strong>InvalidCellID</strong></a> – If the cell_id is invalid.</p></li>
 <li><p><strong>ValueError</strong> – If cell ID is already level 0 and level is None.</p></li>
 <li><p><strong>ValueError</strong> – When level is not an integer, is &lt; 0 or is &gt; 30.</p></li>
 <li><p><strong>ValueError</strong> – If level is greater than the provided cell ID level.</p></li>
@@ -417,8 +440,9 @@ returned.</p></li>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>TypeError</strong> – If the token is not str.</p></li>
-<li><p><strong>ValueError</strong> – If the token length is over 16.</p></li>
-<li><p><strong>ValueError</strong> – If the token is invalid.</p></li>
+<li><p><a class="reference internal" href="#s2cell.InvalidToken" title="s2cell.InvalidToken"><strong>InvalidToken</strong></a> – If the token length is over 16.</p></li>
+<li><p><a class="reference internal" href="#s2cell.InvalidToken" title="s2cell.InvalidToken"><strong>InvalidToken</strong></a> – If the token is invalid.</p></li>
+<li><p><a class="reference internal" href="#s2cell.InvalidCellID" title="s2cell.InvalidCellID"><strong>InvalidCellID</strong></a> – If the contained cell_id is invalid.</p></li>
 <li><p><strong>ValueError</strong> – If token is already level 0 and level is None.</p></li>
 <li><p><strong>ValueError</strong> – When level is not an integer, is &lt; 0 or is &gt; 30.</p></li>
 <li><p><strong>ValueError</strong> – If level is greater than the provided token level.</p></li>

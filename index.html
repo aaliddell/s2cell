@@ -207,6 +207,14 @@ or token.</p>
 <span class="n">s2cell</span><span class="o">.</span><span class="n">token_to_level</span><span class="p">(</span><span class="s1">&#39;3&#39;</span><span class="p">)</span>                    <span class="c1"># -&gt; 0</span>
 </pre></div>
 </div>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Parent cell calculation</span>
+<span class="n">s2cell</span><span class="o">.</span><span class="n">cell_id_to_parent_cell_id</span><span class="p">(</span><span class="mi">3383781119341101056</span><span class="p">)</span>     <span class="c1"># -&gt; 3383782218852728832</span>
+<span class="n">s2cell</span><span class="o">.</span><span class="n">cell_id_to_parent_cell_id</span><span class="p">(</span><span class="mi">3383781119341101056</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># -&gt; 3386706919782612992</span>
+
+<span class="n">s2cell</span><span class="o">.</span><span class="n">token_to_parent_token</span><span class="p">(</span><span class="s1">&#39;2ef59b&#39;</span><span class="p">)</span>                    <span class="c1"># -&gt; &#39;2ef59c&#39;</span>
+<span class="n">s2cell</span><span class="o">.</span><span class="n">token_to_parent_token</span><span class="p">(</span><span class="s1">&#39;2ef59b&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>                 <span class="c1"># -&gt; &#39;2f&#39;</span>
+</pre></div>
+</div>
 <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Token canonicalisation</span>
 <span class="n">s2cell</span><span class="o">.</span><span class="n">token_to_canonical_token</span><span class="p">(</span><span class="s1">&#39;2ef59BD352b90&#39;</span><span class="p">)</span> <span class="c1"># -&gt; &#39;2ef59bd352b9&#39;</span>
 </pre></div>
