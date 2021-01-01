@@ -9,6 +9,7 @@ Changelog
 -----
 
 - Added ``cell_id_to_parent_cell_id()`` and ``token_to_parent_token()``
+- Added custom exception types for invalid cell IDs and tokens
 - Tidied docs generation
 
 

@@ -100,8 +100,8 @@ sitemap_url_scheme = '{lang}{link}'
 autodoc_default_options = {
     'members': True,
     'member-order': 'bysource',
-    'special-members': '__init__',
-    'undoc-members': True,
+    #'special-members': '__init__',
+    #'undoc-members': True,
     'show-inheritance': True,
-    'inherited-members': True,
+    #'inherited-members': True,
 }

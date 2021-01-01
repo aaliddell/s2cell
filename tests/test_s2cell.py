@@ -55,7 +55,7 @@ def test_invalid_token_to_cell_id():
     with pytest.raises(TypeError, match=re.escape("Cannot convert S2 token from type: <class 'float'>")):
         s2cell.token_to_cell_id(1.0)
 
-    with pytest.raises(ValueError, match=re.escape('Cannot convert S2 token with length > 16 characters')):
+    with pytest.raises(s2cell.InvalidToken, match=re.escape('Cannot convert S2 token with length > 16 characters')):
         s2cell.token_to_cell_id('a' * 17)
 
 
@@ -115,7 +115,7 @@ def test_invalid_cell_id_to_lat_lon():
     with pytest.raises(TypeError, match=re.escape("Cannot decode S2 cell ID from type: <class 'float'>")):
         s2cell.cell_id_to_lat_lon(1.0)
 
-    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 cell ID: -4611686018427387904')):
+    with pytest.raises(s2cell.InvalidCellID, match=re.escape('Cannot decode invalid S2 cell ID: -4611686018427387904')):
         s2cell.cell_id_to_lat_lon(int(0b110 << s2cell._S2_POS_BITS))
 
 
@@ -137,10 +137,10 @@ def test_invalid_token_to_lat_lon():
     with pytest.raises(TypeError, match=re.escape("Cannot check S2 token with type: <class 'float'>")):
         s2cell.token_to_lat_lon(1.0)
 
-    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 token: aaaaaaaaaaaaaaaaa')):
+    with pytest.raises(s2cell.InvalidToken, match=re.escape('Cannot decode invalid S2 token: aaaaaaaaaaaaaaaaa')):
         s2cell.token_to_lat_lon('a' * 17)
 
-    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 token: c000000000000000')):
+    with pytest.raises(s2cell.InvalidToken, match=re.escape('Cannot decode invalid S2 token: c000000000000000')):
         s2cell.token_to_lat_lon('{:016x}'.format(np.uint64(0b110 << s2cell._S2_POS_BITS)))
 
 
@@ -219,7 +219,7 @@ def test_invalid_cell_id_to_level():
     with pytest.raises(TypeError, match=re.escape("Cannot decode S2 cell ID from type: <class 'float'>")):
         s2cell.cell_id_to_level(1.0)
 
-    with pytest.raises(ValueError, match=re.escape("Cannot decode invalid S2 cell ID: 0")):
+    with pytest.raises(s2cell.InvalidCellID, match=re.escape("Cannot decode invalid S2 cell ID: 0")):
         s2cell.cell_id_to_level(0)
 
 
@@ -235,10 +235,10 @@ def test_invalid_token_to_level():
     with pytest.raises(TypeError, match=re.escape("Cannot check S2 token with type: <class 'float'>")):
         s2cell.token_to_level(1.0)
 
-    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 token: aaaaaaaaaaaaaaaaa')):
+    with pytest.raises(s2cell.InvalidToken, match=re.escape('Cannot decode invalid S2 token: aaaaaaaaaaaaaaaaa')):
         s2cell.token_to_level('a' * 17)
 
-    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 token: ')):
+    with pytest.raises(s2cell.InvalidToken, match=re.escape('Cannot decode invalid S2 token: ')):
         s2cell.token_to_level('')
 
 
@@ -254,7 +254,7 @@ def test_invalid_cell_id_to_parent_cell_id():
     with pytest.raises(TypeError, match=re.escape("Cannot decode S2 cell ID from type: <class 'float'>")):
         s2cell.cell_id_to_parent_cell_id(1.0)
 
-    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 cell ID: 0')):
+    with pytest.raises(s2cell.InvalidCellID, match=re.escape('Cannot decode invalid S2 cell ID: 0')):
         s2cell.cell_id_to_parent_cell_id(0)
 
     with pytest.raises(ValueError, match=re.escape('Cannot get parent cell ID of a level 0 cell ID')):
@@ -303,7 +303,7 @@ def test_invalid_token_to_parent_token():
     with pytest.raises(TypeError, match=re.escape("Cannot check S2 token with type: <class 'float'>")):
         s2cell.token_to_parent_token(1.0)
 
-    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 token: aaaaaaaaaaaaaaaaa')):
+    with pytest.raises(s2cell.InvalidToken, match=re.escape('Cannot decode invalid S2 token: aaaaaaaaaaaaaaaaa')):
         s2cell.token_to_parent_token('a' * 17)
 
     with pytest.raises(ValueError, match=re.escape('Cannot get parent cell ID of a level 0 cell ID')):

@@ -24,6 +24,23 @@ __version__ = '1.3.0'
 
 
 #
+# s2cell exceptions
+#
+
+class S2CellBaseException(Exception):
+    """Base exception type for s2cell."""
+    pass
+
+class InvalidCellID(S2CellBaseException):
+    """Exception type for invalid cell IDs."""
+    pass
+
+class InvalidToken(S2CellBaseException):
+    """Exception type for invalid tokens."""
+    pass
+
+
+#
 # S2 base constants needed for cell mapping
 #
 
@@ -296,7 +313,7 @@ def token_to_cell_id(token: str) -> np.uint64:
 
     Raises:
         TypeError: If the token is not str.
-        ValueError: If the token length is over 16.
+        InvalidToken: If the token length is over 16.
 
     """
     # Check input
@@ -304,7 +321,7 @@ def token_to_cell_id(token: str) -> np.uint64:
         raise TypeError('Cannot convert S2 token from type: {}'.format(type(token)))
 
     if len(token) > 16:
-        raise ValueError('Cannot convert S2 token with length > 16 characters')
+        raise InvalidToken('Cannot convert S2 token with length > 16 characters')
 
     # Check for the zero cell ID represented by the character 'x' or 'X' rather than as the empty
     # string
@@ -524,12 +541,12 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
 
     Raises:
         TypeError: If the cell_id is not int or np.uint64.
-        ValueError: If the cell_id is invalid.
+        InvalidCellID: If the cell_id is invalid.
 
     """
     # Check input
     if not cell_id_is_valid(cell_id):
-        raise ValueError('Cannot decode invalid S2 cell ID: {}'.format(cell_id))
+        raise InvalidCellID('Cannot decode invalid S2 cell ID: {}'.format(cell_id))
     cell_id = np.uint64(cell_id)
 
     # Populate _S2_LOOKUP_IJ on first run.
@@ -659,13 +676,14 @@ def token_to_lat_lon(token: str) -> Tuple[float, float]:
 
     Raises:
         TypeError: If the token is not str.
-        ValueError: If the token length is over 16.
-        ValueError: If the token is invalid.
+        InvalidToken: If the token length is over 16.
+        InvalidToken: If the token is invalid.
+        InvalidCellID: If the contained cell_id is invalid.
 
     """
     # Check input
     if not token_is_valid(token):
-        raise ValueError('Cannot decode invalid S2 token: {}'.format(token))
+        raise InvalidToken('Cannot decode invalid S2 token: {}'.format(token))
 
     # Convert to cell ID and decode to lat/lon
     return cell_id_to_lat_lon(token_to_cell_id(token))
@@ -801,12 +819,12 @@ def cell_id_to_level(cell_id: Union[int, np.uint64]) -> int:
 
     Raises:
         TypeError: If the cell_id is not int or np.uint64.
-        ValueError: If the cell_id is invalid.
+        InvalidCellID: If the cell_id is invalid.
 
     """
     # Check input
     if not cell_id_is_valid(cell_id):
-        raise ValueError('Cannot decode invalid S2 cell ID: {}'.format(cell_id))
+        raise InvalidCellID('Cannot decode invalid S2 cell ID: {}'.format(cell_id))
     cell_id = np.uint64(cell_id)
 
     # Find the position of the lowest set one bit, which will be the trailing one bit. The level is
@@ -839,13 +857,14 @@ def token_to_level(token: str) -> int:
 
     Raises:
         TypeError: If the token is not str.
-        ValueError: If the token length is over 16.
-        ValueError: If the token is invalid.
+        InvalidToken: If the token length is over 16.
+        InvalidToken: If the token is invalid.
+        InvalidCellID: If the contained cell_id is invalid.
 
     """
     # Check input
     if not token_is_valid(token):
-        raise ValueError('Cannot decode invalid S2 token: {}'.format(token))
+        raise InvalidToken('Cannot decode invalid S2 token: {}'.format(token))
 
     # Convert to cell ID and get the level for that
     return cell_id_to_level(token_to_cell_id(token))
@@ -872,7 +891,7 @@ def cell_id_to_parent_cell_id(
 
     Raises:
         TypeError: If the cell_id is not int or np.uint64.
-        ValueError: If the cell_id is invalid.
+        InvalidCellID: If the cell_id is invalid.
         ValueError: If cell ID is already level 0 and level is None.
         ValueError: When level is not an integer, is < 0 or is > 30.
         ValueError: If level is greater than the provided cell ID level.
@@ -880,7 +899,7 @@ def cell_id_to_parent_cell_id(
     """
     # Check input
     if not cell_id_is_valid(cell_id):
-        raise ValueError('Cannot decode invalid S2 cell ID: {}'.format(cell_id))
+        raise InvalidCellID('Cannot decode invalid S2 cell ID: {}'.format(cell_id))
     cell_id = np.uint64(cell_id)
 
     # Get current level of the cell ID and check it is suitable with the requested level
@@ -928,8 +947,9 @@ def token_to_parent_token(token: str, level: Optional[int] = None) -> str:
 
     Raises:
         TypeError: If the token is not str.
-        ValueError: If the token length is over 16.
-        ValueError: If the token is invalid.
+        InvalidToken: If the token length is over 16.
+        InvalidToken: If the token is invalid.
+        InvalidCellID: If the contained cell_id is invalid.
         ValueError: If token is already level 0 and level is None.
         ValueError: When level is not an integer, is < 0 or is > 30.
         ValueError: If level is greater than the provided token level.
@@ -937,7 +957,7 @@ def token_to_parent_token(token: str, level: Optional[int] = None) -> str:
     """
     # Check input
     if not token_is_valid(token):
-        raise ValueError('Cannot decode invalid S2 token: {}'.format(token))
+        raise InvalidToken('Cannot decode invalid S2 token: {}'.format(token))
 
     # Convert to cell ID and get parent and convert back to token
     return cell_id_to_token(cell_id_to_parent_cell_id(token_to_cell_id(token), level))
