@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
 import csv
 import gzip
 import pathlib
@@ -185,6 +186,13 @@ def test_cell_id_is_valid(cell_id, is_valid):
     assert s2cell.cell_id_is_valid(cell_id) == is_valid
 
 
+def test_cell_id_is_valid_compat():
+    decode_file = pathlib.Path(__file__).parent / 's2_decode_corpus.csv.gz'
+    with gzip.open(str(decode_file), 'rt') as f:
+        for row in csv.DictReader(f):
+            assert s2cell.cell_id_is_valid(int(row['cell_id']))
+
+
 @pytest.mark.parametrize('token, is_valid', [
     ('', False),  # Invalid cell ID
     ('x', False),  # Invalid cell ID
@@ -200,6 +208,13 @@ def test_token_is_valid(token, is_valid):
     assert s2cell.token_is_valid(token) == is_valid
 
 
+def test_token_is_valid_compat():
+    decode_file = pathlib.Path(__file__).parent / 's2_decode_corpus.csv.gz'
+    with gzip.open(str(decode_file), 'rt') as f:
+        for row in csv.DictReader(f):
+            assert s2cell.token_is_valid(row['token'])
+
+
 def test_invalid_cell_id_to_level():
     with pytest.raises(TypeError, match=re.escape("Cannot decode S2 cell ID from type: <class 'float'>")):
         s2cell.cell_id_to_level(1.0)
@@ -208,7 +223,7 @@ def test_invalid_cell_id_to_level():
         s2cell.cell_id_to_level(0)
 
 
-def test_cell_id_to_level():
+def test_cell_id_to_level_compat():
     # Check against generated S2 tests
     encode_file = pathlib.Path(__file__).parent / 's2_encode_corpus.csv.gz'
     with gzip.open(str(encode_file), 'rt') as f:
@@ -227,9 +242,55 @@ def test_invalid_token_to_level():
         s2cell.token_to_level('')
 
 
-def test_token_to_level():
+def test_token_to_level_compat():
     # Check against generated S2 tests
     encode_file = pathlib.Path(__file__).parent / 's2_encode_corpus.csv.gz'
     with gzip.open(str(encode_file), 'rt') as f:
         for row in csv.DictReader(f):
             assert s2cell.token_to_level(row['token']) == int(row['level'])
+
+
+def test_invalid_cell_id_to_parent_cell_id():
+    with pytest.raises(TypeError, match=re.escape("Cannot decode S2 cell ID from type: <class 'float'>")):
+        s2cell.cell_id_to_parent_cell_id(1.0)
+
+    with pytest.raises(ValueError, match=re.escape('Cannot decode invalid S2 cell ID: 0')):
+        s2cell.cell_id_to_parent_cell_id(0)
+
+    with pytest.raises(ValueError, match=re.escape('Cannot get parent cell ID of a level 0 cell ID')):
+        s2cell.cell_id_to_parent_cell_id(3458764513820540928)
+
+    with pytest.raises(ValueError, match=re.escape('S2 level must be integer >= 0 and <= 30')):
+        s2cell.cell_id_to_parent_cell_id(3383782026652942336, -1)
+
+    with pytest.raises(ValueError, match=re.escape('S2 level must be integer >= 0 and <= 30')):
+        s2cell.cell_id_to_parent_cell_id(3383782026652942336, 31)
+
+    with pytest.raises(ValueError, match=re.escape('Cannot get level 16 parent cell ID of cell ID with level 15')):
+        s2cell.cell_id_to_parent_cell_id(3383782026652942336, 16)
+
+
+def test_cell_id_to_parent_cell_id_compat():
+    # Check against generated S2 tests
+    encode_file = pathlib.Path(__file__).parent / 's2_encode_corpus.csv.gz'
+    with gzip.open(str(encode_file), 'rt') as f:
+        points = collections.defaultdict(dict)
+        for row in csv.DictReader(f):
+            points[(float(row['lat']), float(row['lon']))][int(row['level'])] = int(row['cell_id'])
+
+    for levels_dict in list(points.values())[::200]:
+        for level in levels_dict:
+            # Test direct parent
+            if level > 0:
+                assert s2cell.cell_id_to_parent_cell_id(levels_dict[level]) == levels_dict[level - 1]
+            else:
+                with pytest.raises(ValueError, match=re.escape('Cannot get parent cell ID of a level 0 cell ID')):
+                    s2cell.cell_id_to_parent_cell_id(levels_dict[level])
+
+            # Test all other levels
+            for other_level in levels_dict:
+                if other_level <= level:
+                    assert s2cell.cell_id_to_parent_cell_id(levels_dict[level], other_level) == levels_dict[other_level]
+                else:
+                    with pytest.raises(ValueError, match=re.escape('Cannot get level {} parent cell ID of cell ID with level {}'.format(other_level, level))):
+                        s2cell.cell_id_to_parent_cell_id(levels_dict[level], other_level)

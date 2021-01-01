@@ -16,7 +16,7 @@
 
 import math
 import re
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
 
@@ -849,3 +849,64 @@ def token_to_level(token: str) -> int:
 
     # Convert to cell ID and get the level for that
     return cell_id_to_level(token_to_cell_id(token))
+
+
+#
+# Parent functions
+#
+
+def cell_id_to_parent_cell_id(
+        cell_id: Union[int, np.uint64], level: Optional[int] = None
+) -> np.uint64:
+    """
+    Get the parent cell ID of a S2 cell ID.
+
+    Args:
+        cell_id: The S2 cell ID integer.
+        level: The parent level to get the cell ID for. Must be less than or equal to the current
+            level of the provided cell ID. If unspecified, or None, the direct parent cell ID will
+            be returned.
+
+    Returns:
+        The parent cell ID at the specified level.
+
+    Raises:
+        TypeError: If the cell_id is not int or np.uint64.
+        ValueError: If the cell_id is invalid.
+        ValueError: If cell ID is already level 0 and level is None.
+        ValueError: When level is not an integer, is < 0 or is > 30.
+        ValueError: if level is greater than current level.
+    """
+    # Check input
+    if not cell_id_is_valid(cell_id):
+        raise ValueError('Cannot decode invalid S2 cell ID: {}'.format(cell_id))
+    cell_id = np.uint64(cell_id)
+
+    # Get current level of the cell ID and check it is suitable with the requested level
+    current_level = cell_id_to_level(cell_id)
+    if level is None and current_level == 0:
+        raise ValueError('Cannot get parent cell ID of a level 0 cell ID')
+    elif level is None:
+        level = current_level - 1
+
+    if not isinstance(level, int) or level < 0 or level > _S2_MAX_LEVEL:
+        raise ValueError('S2 level must be integer >= 0 and <= 30')
+
+    if level > current_level:
+        raise ValueError('Cannot get level {} parent cell ID of cell ID with level {}'.format(
+            level, current_level
+        ))
+    elif level == current_level:
+        # Requested parent level is current level, return cell ID itself
+        return cell_id
+
+    # Truncate to desired level
+    # This is done by finding the mask of the trailing 1 bit for the specified level, then zeroing
+    # out all bits less significant than this, then finally setting the trailing 1 bit. This is
+    # still necessary to do even after a reduced number of steps `required_steps` above, since each
+    # step contains multiple levels that may need partial overwrite. Additionally, we need to add
+    # the trailing 1 bit, which is not yet set above.
+    least_significant_bit_mask = np.uint64(1) << np.uint32(2 * (_S2_MAX_LEVEL - level))
+    cell_id = (cell_id & -least_significant_bit_mask) | least_significant_bit_mask
+
+    return cell_id
