@@ -114,6 +114,15 @@ There are also a few other useful functions for inspecting or converting a cell 
 
 .. code-block:: python3
 
+   # Parent cell calculation
+   s2cell.cell_id_to_parent_cell_id(3383781119341101056)     # -> 3383782218852728832
+   s2cell.cell_id_to_parent_cell_id(3383781119341101056, 2)  # -> 3386706919782612992
+
+   s2cell.token_to_parent_token('2ef59b')                    # -> '2ef59c'
+   s2cell.token_to_parent_token('2ef59b', 2)                 # -> '2f'
+
+.. code-block:: python3
+
    # Token canonicalisation
    s2cell.token_to_canonical_token('2ef59BD352b90') # -> '2ef59bd352b9'
 
