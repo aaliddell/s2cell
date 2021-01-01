@@ -5,6 +5,13 @@
 Changelog
 =========
 
+1.3.0
+-----
+
+- Added ``cell_id_to_parent_cell_id()`` and ``token_to_parent_token()``
+- Tidied docs generation
+
+
 1.2.0
 -----
 
