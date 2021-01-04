@@ -1015,7 +1015,7 @@ based on the :py:func:`s2cell.cell_id_to_token()` function:
 
 
 
-Conversion from Cell ID to Token
+Conversion from Token to Cell ID
 ********************************
 
 Conversion from a S2 token ``token`` to a cell ID is done by the following Python code, which is
