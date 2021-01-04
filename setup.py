@@ -29,9 +29,7 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(),
     python_requires='>=3.6',
-    install_requires=[
-        'numpy>=1.15,<2',
-    ],
+    install_requires=[],
     extras_require={
         'dev': [
             'flake8~=3.8',

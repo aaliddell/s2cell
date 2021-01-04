@@ -12,13 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Minimal Python S2 cell ID, S2 token and lat/lon conversion library."""
+"""Minimal Python S2 Geometry cell ID, token and lat/lon conversion library."""
 
 import math
 import re
-from typing import Optional, Tuple, Union
-
-import numpy as np
+from typing import Optional, Tuple
 
 __version__ = '1.3.0'
 
@@ -41,29 +39,29 @@ class InvalidToken(Exception):
 
 # The maximum level supported within an S2 cell ID. Each level is represented by two bits in the
 # final cell ID
-_S2_MAX_LEVEL = np.uint32(30)
+_S2_MAX_LEVEL = 30
 
 # The maximum value within the I and J bits of an S2 cell ID
-_S2_MAX_SIZE = np.uint32(1) << _S2_MAX_LEVEL
+_S2_MAX_SIZE = 1 << _S2_MAX_LEVEL
 
 # The number of bits in a S2 cell ID used for specifying the base face
-_S2_FACE_BITS = np.uint32(3)
+_S2_FACE_BITS = 3
 
 # The number of bits in a S2 cell ID used for specifying the position along the Hilbert curve
-_S2_POS_BITS = np.uint32(2 * _S2_MAX_LEVEL + 1)
+_S2_POS_BITS = 2 * _S2_MAX_LEVEL + 1
 
 # The maximum value of the Si/Ti integers used when mapping from IJ to ST. This is twice the max
 # value of I and J, since Si/Ti allow referencing both the center and edge of a leaf cell
-_S2_MAX_SI_TI = np.uint32(1) << (_S2_MAX_LEVEL + 1)
+_S2_MAX_SI_TI = 1 << (_S2_MAX_LEVEL + 1)
 
 # Mask that specifies the swap orientation bit for the Hilbert curve
-_S2_SWAP_MASK = np.uint64(1)
+_S2_SWAP_MASK = 1
 
 # Mask that specifies the invert orientation bit for the Hilbert curve
-_S2_INVERT_MASK = np.uint64(2)
+_S2_INVERT_MASK = 2
 
 # The number of bits per I and J in the lookup tables
-_S2_LOOKUP_BITS = np.uint32(4)
+_S2_LOOKUP_BITS = 4
 
 # Lookup table for mapping 10 bits of IJ + orientation to 10 bits of Hilbert curve position +
 # orientation. Populated later by _s2_init_lookups
@@ -75,18 +73,16 @@ _S2_LOOKUP_IJ = None
 
 # Lookup table of two bits of IJ from two bits of curve position, based also on the current curve
 # orientation from the swap and invert bits
-_S2_POS_TO_IJ = np.array([
+_S2_POS_TO_IJ = [
     [0, 1, 3, 2],  # 0: Normal order, no swap or invert
     [0, 2, 3, 1],  # 1: Swap bit set, swap I and J bits
     [3, 2, 0, 1],  # 2: Invert bit set, invert bits
     [3, 1, 0, 2],  # 3: Swap and invert bits set
-], dtype=np.uint64)
+]
 
 # Lookup for the orientation update mask of one of the four sub-cells within a higher level cell.
 # This mask is XOR'ed with the current orientation to get the sub-cell orientation.
-_S2_POS_TO_ORIENTATION_MASK = np.array([
-    _S2_SWAP_MASK, 0, 0, _S2_SWAP_MASK | _S2_INVERT_MASK
-], dtype=np.uint64)
+_S2_POS_TO_ORIENTATION_MASK = [_S2_SWAP_MASK, 0, 0, _S2_SWAP_MASK | _S2_INVERT_MASK]
 
 
 #
@@ -125,7 +121,7 @@ def _s2_st_to_uv(component: float) -> float:
     return (1.0 / 3.0) * (1.0 - 4.0 * (1.0 - component) ** 2)
 
 
-def _s2_st_to_ij(component: float) -> np.uint64:
+def _s2_st_to_ij(component: float) -> int:
     """
     Convert S2 ST to IJ.
 
@@ -137,10 +133,10 @@ def _s2_st_to_ij(component: float) -> np.uint64:
     """
     # The reference implementation does round(_S2_MAX_SIZE * component - 0.5), which is equivalent
     # to math.floor(_S2_MAX_SIZE * component)
-    return np.uint64(max(0, min(_S2_MAX_SIZE - 1, math.floor(_S2_MAX_SIZE * component))))
+    return int(max(0, min(_S2_MAX_SIZE - 1, math.floor(_S2_MAX_SIZE * component))))
 
 
-def _s2_si_ti_to_st(component: np.uint64) -> float:
+def _s2_si_ti_to_st(component: int) -> float:
     """
     Convert S2 Si/Ti to ST.
 
@@ -153,7 +149,7 @@ def _s2_si_ti_to_st(component: np.uint64) -> float:
 
 
 def _s2_face_uv_to_xyz(  # pylint: disable=invalid-name
-        face: Union[int, np.uint64], uv: Tuple[float, float]
+        face: int, uv: Tuple[float, float]
 ) -> Tuple[float, float, float]:
     """
     Convert face + UV to S2Point XYZ.
@@ -214,42 +210,42 @@ def _s2_init_lookups() -> None:
     global _S2_LOOKUP_POS, _S2_LOOKUP_IJ  # pylint: disable=global-statement
     if _S2_LOOKUP_POS is None or _S2_LOOKUP_IJ is None:  # pragma: no branch
         # Initialise empty lookup tables
-        lookup_length = 1 << (2 * _S2_LOOKUP_BITS + 2)  # = 1024
-        _S2_LOOKUP_POS = np.zeros((lookup_length,), dtype=np.uint64)
-        _S2_LOOKUP_IJ = np.zeros((lookup_length,), dtype=np.uint64)
+        lookup_length = 1 << int(2 * _S2_LOOKUP_BITS + 2)  # = 1024
+        _S2_LOOKUP_POS = [0] * lookup_length
+        _S2_LOOKUP_IJ = [0] * lookup_length
 
         # Generate lookups for each of the base orientations given by the swap and invert bits
-        for base_orientation in np.array([
+        for base_orientation in [
             0, _S2_SWAP_MASK, _S2_INVERT_MASK, _S2_SWAP_MASK | _S2_INVERT_MASK  # 0-3 effectively
-        ], dtype=np.uint64):
+        ]:
             # Walk the 256 possible positions within a level 4 curve. This implementation is not
             # the fastest since it does not reuse the common ancestor of neighbouring positions, but
             # is simpler to read
-            for pos in np.arange(4 ** 4, dtype=np.uint64):  # 4 levels of sub-divisions
-                ij = np.uint64(0)  # Has pattern iiiijjjj, not ijijijij  # pylint: disable=invalid-name
-                orientation = np.uint64(base_orientation)
+            for pos in range(4 ** 4):  # 4 levels of sub-divisions
+                ij = 0  # Has pattern iiiijjjj, not ijijijij  # pylint: disable=invalid-name
+                orientation = base_orientation
 
                 # Walk the pairs of bits of pos, from most significant to least, getting IJ and
                 # orientation as we go
                 for bit_pair_offset in range(4):
                     # Bit pair is effectively the sub-cell index
-                    bit_pair = (pos >> np.uint64((3 - bit_pair_offset) * 2)) & np.uint64(0b11)
+                    bit_pair = (pos >> ((3 - bit_pair_offset) * 2)) & 0b11
 
                     # Get the I and J for the sub-cell index. These need to be spread into iiiijjjj
                     # by inserting as bit positions 4 and 0
                     ij_bits = _S2_POS_TO_IJ[orientation][bit_pair]
                     ij = (  # pylint: disable=invalid-name
-                        (ij << np.uint64(1))  # Free up position 4 and 0 from old IJ
-                        | ((ij_bits & np.uint32(2)) << np.uint32(3))  # I bit in position 4
-                        | (ij_bits & np.uint32(1))  # J bit in position 0
+                        (ij << 1)  # Free up position 4 and 0 from old IJ
+                        | ((ij_bits & 2) << 3)  # I bit in position 4
+                        | (ij_bits & 1)  # J bit in position 0
                     )
 
                     # Update the orientation with the new sub-cell orientation
                     orientation = orientation ^ _S2_POS_TO_ORIENTATION_MASK[bit_pair]
 
                 # Shift IJ and position to allow orientation bits in LSBs of lookup
-                ij <<= np.uint32(2)  # pylint: disable=invalid-name
-                pos <<= np.uint32(2)
+                ij <<= 2  # pylint: disable=invalid-name
+                pos <<= 2
 
                 # Write lookups
                 _S2_LOOKUP_POS[ij | base_orientation] = pos | orientation
@@ -260,7 +256,7 @@ def _s2_init_lookups() -> None:
 # Cell ID <-> Token translation functions
 #
 
-def cell_id_to_token(cell_id: Union[int, np.uint64]) -> str:
+def cell_id_to_token(cell_id: int) -> str:
     """
     Convert S2 cell ID to a S2 token.
 
@@ -276,13 +272,12 @@ def cell_id_to_token(cell_id: Union[int, np.uint64]) -> str:
         The S2 token string for the S2 cell ID.
 
     Raises:
-        TypeError: If the cell_id is not int or np.uint64.
+        TypeError: If the cell_id is not int.
 
     """
     # Check type
-    if not isinstance(cell_id, (int, np.uint64)):
+    if not isinstance(cell_id, int):
         raise TypeError('Cannot convert S2 cell ID from type: {}'.format(type(cell_id)))
-    cell_id = np.uint64(cell_id)
 
     # The zero token is encoded as 'X' rather than as a zero-length string
     if cell_id == 0:
@@ -292,7 +287,7 @@ def cell_id_to_token(cell_id: Union[int, np.uint64]) -> str:
     return '{:016x}'.format(cell_id).rstrip('0')
 
 
-def token_to_cell_id(token: str) -> np.uint64:
+def token_to_cell_id(token: str) -> int:
     """
     Convert S2 token to S2 cell ID.
 
@@ -321,13 +316,13 @@ def token_to_cell_id(token: str) -> np.uint64:
     # Check for the zero cell ID represented by the character 'x' or 'X' rather than as the empty
     # string
     if token in ('x', 'X'):
-        return np.uint64(0)
+        return 0
 
     # Add stripped implicit zeros to create the full 16 character hex string
     token = token + ('0' * (16 - len(token)))
 
     # Convert to cell ID by converting hex to int
-    return np.uint64(int(token, 16))
+    return int(token, 16)
 
 
 #
@@ -336,7 +331,7 @@ def token_to_cell_id(token: str) -> np.uint64:
 
 def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
         lat: float, lon: float, level: int = 30
-) -> np.uint64:
+) -> int:
     """
     Convert lat/lon to a S2 cell ID.
 
@@ -393,7 +388,7 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     # -x -> 3
     # -y -> 4
     # -z -> 5
-    face = int(np.argmax(np.abs(s2_point)))  # Largest absolute component
+    face = max(enumerate(s2_point), key=lambda p: abs(p[1]))[0]  # Largest absolute component
     if s2_point[face] < 0.0:
         face += 3
 
@@ -454,21 +449,21 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     # levels, so the required number of steps is ceil((level + 2) / 4), when level is > 0. The
     # additional 2 levels added are required to account for the top 3 bits (4 before right shift)
     # that are occupied by the face bits.
-    bits = np.uint64(face) & _S2_SWAP_MASK  # iiiijjjjoo. Initially set by by face
-    cell_id = np.uint64(face << (_S2_POS_BITS - 1))  # Insert face at second most signficant bits
-    lookup_mask = np.uint64((1 << _S2_LOOKUP_BITS) - 1)  # Mask of 4 one bits: 0b1111
+    bits = face & _S2_SWAP_MASK  # iiiijjjjoo. Initially set by by face
+    cell_id = face << (_S2_POS_BITS - 1)  # Insert face at second most signficant bits
+    lookup_mask = (1 << int(_S2_LOOKUP_BITS)) - 1  # Mask of 4 one bits: 0b1111
     required_steps = math.ceil((level + 2) / 4) if level > 0 else 0
     for k in range(7, 7 - required_steps, -1):
         # Grab 4 bits of each of I and J
-        offset = np.uint32(k * _S2_LOOKUP_BITS)
-        bits += ((ij[0] >> offset) & lookup_mask) << np.uint32(_S2_LOOKUP_BITS + 2)
-        bits += ((ij[1] >> offset) & lookup_mask) << np.uint32(2)
+        offset = k * _S2_LOOKUP_BITS
+        bits += ((ij[0] >> offset) & lookup_mask) << (_S2_LOOKUP_BITS + 2)
+        bits += ((ij[1] >> offset) & lookup_mask) << 2
 
         # Map bits from iiiijjjjoo to ppppppppoo using lookup table
         bits = _S2_LOOKUP_POS[bits]
 
         # Insert position bits into cell ID
-        cell_id |= (bits >> np.uint32(2)) << np.uint32(k * 2 * _S2_LOOKUP_BITS)
+        cell_id |= (bits >> 2) << (k * 2 * _S2_LOOKUP_BITS)
 
         # Remove position bits, leaving just new swap and invert bits for the next round
         bits &= _S2_SWAP_MASK | _S2_INVERT_MASK  # Mask: 0b11
@@ -477,7 +472,7 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     # The trailing bit addition is disabled, as we are overwriting this below in the truncation
     # anyway. This line is kept as an example of the full method for S2 cell ID creation as is done
     # in the standard library versions.
-    cell_id = (cell_id << np.uint8(1))  # + np.uint64(1)
+    cell_id = cell_id << 1  # + 1
 
     # Truncate to desired level
     # This is done by finding the mask of the trailing 1 bit for the specified level, then zeroing
@@ -485,7 +480,7 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     # still necessary to do even after a reduced number of steps `required_steps` above, since each
     # step contains multiple levels that may need partial overwrite. Additionally, we need to add
     # the trailing 1 bit, which is not yet set above.
-    least_significant_bit_mask = np.uint64(1) << np.uint32(2 * (_S2_MAX_LEVEL - level))
+    least_significant_bit_mask = 1 << (2 * (_S2_MAX_LEVEL - level))
     cell_id = (cell_id & -least_significant_bit_mask) | least_significant_bit_mask
 
     return cell_id
@@ -523,7 +518,7 @@ def lat_lon_to_token(lat: float, lon: float, level: int = 30) -> str:
 #
 
 def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
-    cell_id: Union[int, np.uint64]
+    cell_id: int
 ) -> Tuple[float, float]:
     """
     Convert S2 cell ID to lat/lon.
@@ -535,14 +530,13 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
         The lat/lon (in degrees) tuple generated from the S2 cell ID.
 
     Raises:
-        TypeError: If the cell_id is not int or np.uint64.
+        TypeError: If the cell_id is not int.
         InvalidCellID: If the cell_id is invalid.
 
     """
     # Check input
     if not cell_id_is_valid(cell_id):
         raise InvalidCellID('Cannot decode invalid S2 cell ID: {}'.format(cell_id))
-    cell_id = np.uint64(cell_id)
 
     # Populate _S2_LOOKUP_IJ on first run.
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109
@@ -592,24 +586,24 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
     #
     face = cell_id >> _S2_POS_BITS
     bits = face & _S2_SWAP_MASK  # ppppppppoo. Initially set by by face
-    lookup_mask = np.uint64((1 << _S2_LOOKUP_BITS) - 1)  # Mask of 4 one bits: 0b1111
-    i = np.uint64(0)
-    j = np.uint64(0)
+    lookup_mask = (1 << _S2_LOOKUP_BITS) - 1  # Mask of 4 one bits: 0b1111
+    i = 0
+    j = 0
     for k in range(7, -1, -1):
         # Pull out 8 bits of cell ID, except in first loop where we pull out only 4
         n_bits = (_S2_MAX_LEVEL - 7 * _S2_LOOKUP_BITS) if k == 7 else _S2_LOOKUP_BITS
-        extract_mask = np.uint64((1 << (2 * n_bits)) - 1)  # 8 (or 4) one bits
+        extract_mask = (1 << (2 * n_bits)) - 1  # 8 (or 4) one bits
         bits += (
-            (cell_id >> np.uint32(k * 2 * _S2_LOOKUP_BITS + 1)) & extract_mask
-        ) << np.uint32(2)
+            (cell_id >> (k * 2 * _S2_LOOKUP_BITS + 1)) & extract_mask
+        ) << 2
 
         # Map bits from ppppppppoo to iiiijjjjoo using lookup table
         bits = _S2_LOOKUP_IJ[bits]
 
         # Extract I and J bits
-        offset = np.uint32(k * _S2_LOOKUP_BITS)
-        i += (bits >> np.uint32(_S2_LOOKUP_BITS + 2)) << offset  # Don't need lookup mask here
-        j += ((bits >> np.uint32(2)) & lookup_mask) << offset
+        offset = k * _S2_LOOKUP_BITS
+        i += (bits >> (_S2_LOOKUP_BITS + 2)) << offset  # Don't need lookup mask here
+        j += ((bits >> 2) & lookup_mask) << offset
 
         # Remove I and J bits, leaving just new swap and invert bits for the next round
         bits &= _S2_SWAP_MASK | _S2_INVERT_MASK  # Mask: 0b11
@@ -622,11 +616,11 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
     # _S2_MAX_SI_TI. The extra power of 2 over IJ allows for identifying both the center and edge of
     # cells, whilst IJ is just the leaf cells.
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L57-L65
-    is_leaf = bool(cell_id & np.uint64(1))  # Cell is leaf cell when trailing one bit is in LSB
-    apply_correction = not is_leaf and ((i ^ (cell_id >> np.uint32(2))) & np.uint64(1))
-    correction_delta = np.uint64(1 if is_leaf else (2 if apply_correction else 0))
-    si = (i << np.uint32(1)) + correction_delta  # pylint: disable=invalid-name
-    ti = (j << np.uint32(1)) + correction_delta  # pylint: disable=invalid-name
+    is_leaf = bool(cell_id & 1)  # Cell is leaf cell when trailing one bit is in LSB
+    apply_correction = not is_leaf and ((i ^ (cell_id >> 2)) & 1)
+    correction_delta = 1 if is_leaf else (2 if apply_correction else 0)
+    si = (i << 1) + correction_delta  # pylint: disable=invalid-name
+    ti = (j << 1) + correction_delta  # pylint: disable=invalid-name
 
     # Convert integer si/ti to double ST
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L338-L341
@@ -727,7 +721,7 @@ def token_to_canonical_token(token: str) -> str:
 # Validation
 #
 
-def cell_id_is_valid(cell_id: Union[int, np.uint64]) -> bool:
+def cell_id_is_valid(cell_id: int) -> bool:
     """
     Check that a S2 cell ID is valid.
 
@@ -740,13 +734,12 @@ def cell_id_is_valid(cell_id: Union[int, np.uint64]) -> bool:
         True if the cell ID is valid, False otherwise.
 
     Raises:
-        TypeError: If the cell_id is not int or np.uint64.
+        TypeError: If the cell_id is not int.
 
     """
     # Check input
-    if not isinstance(cell_id, (int, np.uint64)):
+    if not isinstance(cell_id, int):
         raise TypeError('Cannot decode S2 cell ID from type: {}'.format(type(cell_id)))
-    cell_id = np.uint64(cell_id)
 
     # Check for zero ID
     # This avoids overflow warnings below when 1 gets added to max uint64
@@ -759,8 +752,8 @@ def cell_id_is_valid(cell_id: Union[int, np.uint64]) -> bool:
 
     # Check trailing 1 bit is in one of the even bit positions allowed for the 30 levels, using the
     # mask: 0b0001010101010101010101010101010101010101010101010101010101010101 = 0x1555555555555555
-    lowest_set_bit = cell_id & (~cell_id + np.uint64(1))  # pylint: disable=invalid-unary-operand-type
-    if not lowest_set_bit & np.uint64(0x1555555555555555):
+    lowest_set_bit = cell_id & (~cell_id + 1)  # pylint: disable=invalid-unary-operand-type
+    if not lowest_set_bit & 0x1555555555555555:
         return False
 
     return True  # Checks have passed, cell ID must be valid
@@ -800,7 +793,7 @@ def token_is_valid(token: str) -> bool:
 # Level extraction functions
 #
 
-def cell_id_to_level(cell_id: Union[int, np.uint64]) -> int:
+def cell_id_to_level(cell_id: int) -> int:
     """
     Get the level for a S2 cell ID.
 
@@ -813,14 +806,13 @@ def cell_id_to_level(cell_id: Union[int, np.uint64]) -> int:
         The level of the S2 cell ID.
 
     Raises:
-        TypeError: If the cell_id is not int or np.uint64.
+        TypeError: If the cell_id is not int.
         InvalidCellID: If the cell_id is invalid.
 
     """
     # Check input
     if not cell_id_is_valid(cell_id):
         raise InvalidCellID('Cannot decode invalid S2 cell ID: {}'.format(cell_id))
-    cell_id = np.uint64(cell_id)
 
     # Find the position of the lowest set one bit, which will be the trailing one bit. The level is
     # given by the max level (30) minus the floored division by two of the position of the lowest
@@ -830,10 +822,10 @@ def cell_id_to_level(cell_id: Union[int, np.uint64]) -> int:
     # equivalent to the C++20 function std::countr_zero() or the ctz instruction.
     lsb_pos = 0
     while cell_id != 0:  # pragma: no branch
-        if cell_id & np.uint64(1):
+        if cell_id & 1:
             break
         lsb_pos += 1
-        cell_id >>= np.uint64(1)
+        cell_id >>= 1
 
     return int(_S2_MAX_LEVEL - (lsb_pos >> 1))
 
@@ -870,8 +862,8 @@ def token_to_level(token: str) -> int:
 #
 
 def cell_id_to_parent_cell_id(
-        cell_id: Union[int, np.uint64], level: Optional[int] = None
-) -> np.uint64:
+        cell_id: int, level: Optional[int] = None
+) -> int:
     """
     Get the parent cell ID of a S2 cell ID.
 
@@ -885,7 +877,7 @@ def cell_id_to_parent_cell_id(
         The parent cell ID at the specified level.
 
     Raises:
-        TypeError: If the cell_id is not int or np.uint64.
+        TypeError: If the cell_id is not int.
         InvalidCellID: If the cell_id is invalid.
         ValueError: If cell ID is already level 0 and level is None.
         ValueError: When level is not an integer, is < 0 or is > 30.
@@ -895,7 +887,6 @@ def cell_id_to_parent_cell_id(
     # Check input
     if not cell_id_is_valid(cell_id):
         raise InvalidCellID('Cannot decode invalid S2 cell ID: {}'.format(cell_id))
-    cell_id = np.uint64(cell_id)
 
     # Get current level of the cell ID and check it is suitable with the requested level
     current_level = cell_id_to_level(cell_id)
@@ -921,7 +912,7 @@ def cell_id_to_parent_cell_id(
     # still necessary to do even after a reduced number of steps `required_steps` above, since each
     # step contains multiple levels that may need partial overwrite. Additionally, we need to add
     # the trailing 1 bit, which is not yet set above.
-    least_significant_bit_mask = np.uint64(1) << np.uint32(2 * (_S2_MAX_LEVEL - level))
+    least_significant_bit_mask = 1 << (2 * (_S2_MAX_LEVEL - level))
     cell_id = (cell_id & -least_significant_bit_mask) | least_significant_bit_mask
 
     return cell_id
