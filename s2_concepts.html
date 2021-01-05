@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     
-    <title>S2 Concepts</title>
+    <title>S2 Geometry Concepts</title>
     
 
     <link rel="stylesheet" href="_static/css/redactor.css" type="text/css" />
@@ -36,7 +36,7 @@
 
     <!-- Open Graph -->
     <meta property="og:url" content="https://docs.s2cell.aliddell.com/s2_concepts.html" />
-    <meta property="og:title" content="S2 Concepts" />
+    <meta property="og:title" content="S2 Geometry Concepts" />
     <meta property="og:image" content="https://docs.s2cell.aliddell.com/_static/logo.png" />
     <meta property="og:type" content="website">
     <meta property="og:description" content="Introduction to the core concepts of the S2 Geometry coordinate systems and conversions, using code from the s2cell Python library">
@@ -91,8 +91,8 @@
     
     
         <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">S2 Concepts</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">S2 Geometry Concepts</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#hilbert-curve">Hilbert Curve</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coordinate-systems">Coordinate Systems</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#latitude-and-longitude">Latitude and Longitude</a></li>
@@ -115,13 +115,13 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#s2-tokens">S2 Tokens</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#conversion-from-cell-id-to-token">Conversion from Cell ID to Token</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Conversion from Cell ID to Token</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conversion-from-token-to-cell-id">Conversion from Token to Cell ID</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/s2cell.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="useful_s2_links.html">Useful S2 Links</a></li>
+<li class="toctree-l1"><a class="reference internal" href="useful_s2_links.html">Useful S2 Geometry Links</a></li>
 <li class="toctree-l1"><a class="reference internal" href="annotated_source.html">Annotated Source</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
@@ -153,16 +153,17 @@
             <a href="index.html">Docs</a> /
         </li>
         
-        <li class="site-breadcrumbs__leaf">S2 Concepts</li>
+        <li class="site-breadcrumbs__leaf">S2 Geometry Concepts</li>
     
     </ul>
 </nav>
         <section class="site-content">
             <div class="container">
                 
-  <div class="section" id="s2-concepts">
-<h1>S2 Concepts<a class="headerlink" href="#s2-concepts" title="Permalink to this headline">¶</a></h1>
-<p>The core concepts of S2 are well explained on the <a class="reference external" href="https://s2geometry.io/">S2 Geometry website</a>.
+  <div class="section" id="s2-geometry-concepts">
+<h1>S2 Geometry Concepts<a class="headerlink" href="#s2-geometry-concepts" title="Permalink to this headline">¶</a></h1>
+<p>The core concepts of S2 Geometry are well explained on the
+<a class="reference external" href="https://s2geometry.io/">S2 Geometry website</a>.
 This page aims to supplement the information available there with more details about the coordinate
 systems and specifics of the cell ID system, so I suggest reading that site in conjunction with
 this one.</p>
@@ -180,9 +181,9 @@ step are replaced with the base ‘U’ shape and joined in a self-similar way t
 continuous curve. The benefit of this shape is that it can be used to map the two dimensional plane
 into a one dimensional distance along the curve, with good locality (meaning values close in curve
 position generally become close in 2D space).</p>
-<div class="figure align-center" id="id2">
+<div class="figure align-center" id="id1">
 <span id="fig-hilbert"></span><a class="reference internal image-reference" href="_images/hilbert.svg"><img alt="Hilbert Curve Steps 1, 2 and 3 (Qef, Public domain, via Wikimedia Commons)" height="200px" src="_images/hilbert.svg" /></a>
-<p class="caption"><span class="caption-number">Fig. 1 </span><span class="caption-text">Hilbert Curves of order 1, 2 and 3 (Qef, Public domain, via Wikimedia Commons)</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-number">Fig. 1 </span><span class="caption-text">Hilbert Curves of order 1, 2 and 3 (Qef, Public domain, via Wikimedia Commons)</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
 </div>
 <p>The orientation of the curve at each segment within its parent is updated based on the parent’s
 orientation and the following mapping (indexed by the curve segment 0 to 3, numbered clockwise from
@@ -268,8 +269,8 @@ the dominant axis in the <a class="reference internal" href="#sec-coord-xyz"><sp
 <a class="reference internal" href="#table-face-calculation"><span class="std std-numref">Table 1</span></a>.
 To give a continuous curve across the faces, some of the faces use tranposed or inverted copies of
 the base Hilbert Curve.</p>
-<div class="figure align-center" id="id3">
-<span id="fig-cube-unwrapped"></span><img alt="Cube face mapping" src="_images/cube_unwrapped.svg" /><p class="caption"><span class="caption-number">Fig. 2 </span><span class="caption-text">Cube face mapping</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+<div class="figure align-center" id="id2">
+<span id="fig-cube-unwrapped"></span><img alt="Cube face mapping" src="_images/cube_unwrapped.svg" /><p class="caption"><span class="caption-number">Fig. 2 </span><span class="caption-text">Cube face mapping</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
 </div>
 <div class="section" id="uv">
@@ -286,8 +287,8 @@ the <span class="math notranslate nohighlight">\(u\)</span> and <span class="mat
 cube, with the point <span class="math notranslate nohighlight">\(u = 0, v = 0\)</span> representing the center of the face.
 <a class="reference internal" href="#fig-uv-face-0"><span class="std std-numref">Fig. 3</span></a> shows how the earth is mapped into the UV coordinates of face 0 of the S2
 cube.</p>
-<div class="figure align-center" id="id4">
-<span id="fig-uv-face-0"></span><img alt="Face 0 in UV coordinates" src="_images/uv_face_0.svg" /><p class="caption"><span class="caption-number">Fig. 3 </span><span class="caption-text">Face 0 in UV coordinates</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+<div class="figure align-center" id="id3">
+<span id="fig-uv-face-0"></span><img alt="Face 0 in UV coordinates" src="_images/uv_face_0.svg" /><p class="caption"><span class="caption-number">Fig. 3 </span><span class="caption-text">Face 0 in UV coordinates</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
 </div>
 </div>
 <div class="section" id="st">
@@ -313,11 +314,11 @@ cleanly with a system on the standard projection.</p>
 that the quadratic projection provides a good match to the more computationally expensive tan
 projection. <a class="reference internal" href="#fig-st-face-0"><span class="std std-numref">Fig. 5</span></a> shows the ST mapping of the same region as shown in UV in
 <a class="reference internal" href="#fig-uv-to-st-projections"><span class="std std-numref">Fig. 4</span></a></p>
-<div class="figure align-center" id="id5">
-<span id="fig-uv-to-st-projections"></span><img alt="The three UV to ST projections provided in the reference S2 implementation" src="_images/uv_to_st_projections.svg" /><p class="caption"><span class="caption-number">Fig. 4 </span><span class="caption-text">The three UV to ST projections provided in the reference S2 implementation</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+<div class="figure align-center" id="id4">
+<span id="fig-uv-to-st-projections"></span><img alt="The three UV to ST projections provided in the reference S2 implementation" src="_images/uv_to_st_projections.svg" /><p class="caption"><span class="caption-number">Fig. 4 </span><span class="caption-text">The three UV to ST projections provided in the reference S2 implementation</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
 </div>
-<div class="figure align-center" id="id6">
-<span id="fig-st-face-0"></span><img alt="Face 0 in ST coordinates" src="_images/st_face_0.svg" /><p class="caption"><span class="caption-number">Fig. 5 </span><span class="caption-text">Face 0 in ST coordinates</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+<div class="figure align-center" id="id5">
+<span id="fig-st-face-0"></span><img alt="Face 0 in ST coordinates" src="_images/st_face_0.svg" /><p class="caption"><span class="caption-number">Fig. 5 </span><span class="caption-text">Face 0 in ST coordinates</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -443,8 +444,8 @@ unit sphere:</p>
 <p>The <a class="reference internal" href="#sec-coord-face"><span class="std std-ref">Face</span></a> is determined by the largest absolute <span class="math notranslate nohighlight">\(x\)</span>, <span class="math notranslate nohighlight">\(y\)</span> or <span class="math notranslate nohighlight">\(z\)</span>
 component of the S2Point vector. When the component is negative, the second (back) set of three
 faces is used:</p>
-<span id="table-face-calculation"></span><table class="docutils align-default" id="id7">
-<caption><span class="caption-number">Table 1 </span><span class="caption-text">Face determination from dominant XYZ component</span><a class="headerlink" href="#id7" title="Permalink to this table">¶</a></caption>
+<span id="table-face-calculation"></span><table class="docutils align-default" id="id6">
+<caption><span class="caption-number">Table 1 </span><span class="caption-text">Face determination from dominant XYZ component</span><a class="headerlink" href="#id6" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 50%" />
 <col style="width: 50%" />
@@ -481,8 +482,8 @@ these are then both divided by the dominant component to produce a value in the 
 <span class="math notranslate nohighlight">\([-1.0, 1.0]\)</span>. From the listing in the table below you can see the equations used to calculate
 <span class="math notranslate nohighlight">\(u\)</span> and <span class="math notranslate nohighlight">\(v\)</span> on each face of the cube. Additionally, you can see that some faces of the
 cube are transposed or flipped to produce the single continuous curve on the cube.</p>
-<table class="docutils align-default" id="id8">
-<caption><span class="caption-number">Table 2 </span><span class="caption-text">UV coordinate calculation from face and XYZ</span><a class="headerlink" href="#id8" title="Permalink to this table">¶</a></caption>
+<table class="docutils align-default" id="id7">
+<caption><span class="caption-number">Table 2 </span><span class="caption-text">UV coordinate calculation from face and XYZ</span><a class="headerlink" href="#id7" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 33%" />
 <col style="width: 33%" />
@@ -848,8 +849,8 @@ form generated by the reference C++ implementation:</p>
 </div>
 <p>The table below shows examples of S2 tokens for the same point at every level from 0 to 30, as well
 as the special ‘X’ token for cell ID <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
-<table class="docutils align-default" id="id9">
-<caption><span class="caption-number">Table 3 </span><span class="caption-text">S2 token examples</span><a class="headerlink" href="#id9" title="Permalink to this table">¶</a></caption>
+<table class="docutils align-default" id="id8">
+<caption><span class="caption-number">Table 3 </span><span class="caption-text">S2 token examples</span><a class="headerlink" href="#id8" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 20%" />
 <col style="width: 20%" />
@@ -1077,8 +1078,8 @@ based on the <a class="reference internal" href="api/s2cell.html#s2cell.cell_id_
 </pre></div>
 </div>
 </div>
-<div class="section" id="id1">
-<h3>Conversion from Cell ID to Token<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="conversion-from-token-to-cell-id">
+<h3>Conversion from Token to Cell ID<a class="headerlink" href="#conversion-from-token-to-cell-id" title="Permalink to this headline">¶</a></h3>
 <p>Conversion from a S2 token <code class="docutils literal notranslate"><span class="pre">token</span></code> to a cell ID is done by the following Python code, which is
 based on the <a class="reference internal" href="api/s2cell.html#s2cell.token_to_cell_id" title="s2cell.token_to_cell_id"><code class="xref py py-func docutils literal notranslate"><span class="pre">s2cell.token_to_cell_id()</span></code></a> function:</p>
 <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">token_to_cell_id</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">:</span>

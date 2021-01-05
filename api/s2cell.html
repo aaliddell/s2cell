@@ -19,8 +19,8 @@
     <link rel="index" title="Index" href="../genindex.html"/>
     <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="s2cell 1.3.0 documentation" href="../index.html"/>
-    <link rel="next" title="Useful S2 Links" href="../useful_s2_links.html"/>
-    <link rel="prev" title="S2 Concepts" href="../s2_concepts.html"/>
+    <link rel="next" title="Useful S2 Geometry Links" href="../useful_s2_links.html"/>
+    <link rel="prev" title="S2 Geometry Concepts" href="../s2_concepts.html"/>
 
     <!-- Metadata -->
 
@@ -87,13 +87,13 @@
     
     
         <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../s2_concepts.html">S2 Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../s2_concepts.html">S2 Geometry Concepts</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-s2cell">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../useful_s2_links.html">Useful S2 Links</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../useful_s2_links.html">Useful S2 Geometry Links</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../annotated_source.html">Annotated Source</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
@@ -136,7 +136,7 @@
 <h1>s2cell package<a class="headerlink" href="#s2cell-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-s2cell">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-s2cell" title="Permalink to this headline">¶</a></h2>
-<p>Minimal Python S2 cell ID, S2 token and lat/lon conversion library.</p>
+<p>Minimal Python S2 Geometry cell ID, token and lat/lon conversion library.</p>
 <dl class="py exception">
 <dt id="s2cell.InvalidCellID">
 <em class="property">exception </em><code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">InvalidCellID</code><a class="headerlink" href="#s2cell.InvalidCellID" title="Permalink to this definition">¶</a></dt>
@@ -153,7 +153,7 @@
 
 <dl class="py function">
 <dt id="s2cell.cell_id_to_token">
-<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">cell_id_to_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_id</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>int<span class="p">, </span>numpy.uint64<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#s2cell.cell_id_to_token" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">cell_id_to_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#s2cell.cell_id_to_token" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert S2 cell ID to a S2 token.</p>
 <p>Converts the S2 cell ID to hex and strips any trailing zeros. The 0 cell ID token is represented
 as ‘X’ to prevent it being an empty string.</p>
@@ -166,14 +166,14 @@ as ‘X’ to prevent it being an empty string.</p>
 <dd class="field-even"><p>The S2 token string for the S2 cell ID.</p>
 </dd>
 <dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><strong>TypeError</strong> – If the cell_id is not int or np.uint64.</p>
+<dd class="field-odd"><p><strong>TypeError</strong> – If the cell_id is not int.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="s2cell.token_to_cell_id">
-<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">token_to_cell_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; numpy.uint64<a class="headerlink" href="#s2cell.token_to_cell_id" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">token_to_cell_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#s2cell.token_to_cell_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert S2 token to S2 cell ID.</p>
 <p>Restores the stripped 0 characters from the token and converts the hex string to integer.</p>
 <p>See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L222-L239</p>
@@ -195,7 +195,7 @@ as ‘X’ to prevent it being an empty string.</p>
 
 <dl class="py function">
 <dt id="s2cell.lat_lon_to_cell_id">
-<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">lat_lon_to_cell_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">lon</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">level</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">30</span></em><span class="sig-paren">)</span> &#x2192; numpy.uint64<a class="headerlink" href="#s2cell.lat_lon_to_cell_id" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">lat_lon_to_cell_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">lon</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">level</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">30</span></em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#s2cell.lat_lon_to_cell_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert lat/lon to a S2 cell ID.</p>
 <p>It is expected that the lat/lon provided are normalised, with latitude in the range -90 to 90.</p>
 <dl class="field-list simple">
@@ -242,7 +242,7 @@ as ‘X’ to prevent it being an empty string.</p>
 
 <dl class="py function">
 <dt id="s2cell.cell_id_to_lat_lon">
-<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">cell_id_to_lat_lon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_id</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>int<span class="p">, </span>numpy.uint64<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">]</span><a class="headerlink" href="#s2cell.cell_id_to_lat_lon" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">cell_id_to_lat_lon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">]</span><a class="headerlink" href="#s2cell.cell_id_to_lat_lon" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert S2 cell ID to lat/lon.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -253,7 +253,7 @@ as ‘X’ to prevent it being an empty string.</p>
 </dd>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>TypeError</strong> – If the cell_id is not int or np.uint64.</p></li>
+<li><p><strong>TypeError</strong> – If the cell_id is not int.</p></li>
 <li><p><a class="reference internal" href="#s2cell.InvalidCellID" title="s2cell.InvalidCellID"><strong>InvalidCellID</strong></a> – If the cell_id is invalid.</p></li>
 </ul>
 </dd>
@@ -306,7 +306,7 @@ as ‘X’ to prevent it being an empty string.</p>
 
 <dl class="py function">
 <dt id="s2cell.cell_id_is_valid">
-<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">cell_id_is_valid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_id</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>int<span class="p">, </span>numpy.uint64<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#s2cell.cell_id_is_valid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">cell_id_is_valid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#s2cell.cell_id_is_valid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check that a S2 cell ID is valid.</p>
 <p>Looks for valid face bits and a trailing 1 bit in one of the correct locations.</p>
 <dl class="field-list simple">
@@ -317,7 +317,7 @@ as ‘X’ to prevent it being an empty string.</p>
 <dd class="field-even"><p>True if the cell ID is valid, False otherwise.</p>
 </dd>
 <dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><strong>TypeError</strong> – If the cell_id is not int or np.uint64.</p>
+<dd class="field-odd"><p><strong>TypeError</strong> – If the cell_id is not int.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -344,7 +344,7 @@ invalid.</p>
 
 <dl class="py function">
 <dt id="s2cell.cell_id_to_level">
-<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">cell_id_to_level</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_id</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>int<span class="p">, </span>numpy.uint64<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#s2cell.cell_id_to_level" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">cell_id_to_level</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#s2cell.cell_id_to_level" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the level for a S2 cell ID.</p>
 <p>See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.h#L543-L551</p>
 <dl class="field-list simple">
@@ -356,7 +356,7 @@ invalid.</p>
 </dd>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>TypeError</strong> – If the cell_id is not int or np.uint64.</p></li>
+<li><p><strong>TypeError</strong> – If the cell_id is not int.</p></li>
 <li><p><a class="reference internal" href="#s2cell.InvalidCellID" title="s2cell.InvalidCellID"><strong>InvalidCellID</strong></a> – If the cell_id is invalid.</p></li>
 </ul>
 </dd>
@@ -388,7 +388,7 @@ invalid.</p>
 
 <dl class="py function">
 <dt id="s2cell.cell_id_to_parent_cell_id">
-<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">cell_id_to_parent_cell_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_id</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>int<span class="p">, </span>numpy.uint64<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">level</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; numpy.uint64<a class="headerlink" href="#s2cell.cell_id_to_parent_cell_id" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">s2cell.</code><code class="sig-name descname">cell_id_to_parent_cell_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_id</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">level</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#s2cell.cell_id_to_parent_cell_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the parent cell ID of a S2 cell ID.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -404,7 +404,7 @@ be returned.</p></li>
 </dd>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>TypeError</strong> – If the cell_id is not int or np.uint64.</p></li>
+<li><p><strong>TypeError</strong> – If the cell_id is not int.</p></li>
 <li><p><a class="reference internal" href="#s2cell.InvalidCellID" title="s2cell.InvalidCellID"><strong>InvalidCellID</strong></a> – If the cell_id is invalid.</p></li>
 <li><p><strong>ValueError</strong> – If cell ID is already level 0 and level is None.</p></li>
 <li><p><strong>ValueError</strong> – When level is not an integer, is &lt; 0 or is &gt; 30.</p></li>
@@ -456,13 +456,13 @@ returned.</p></li>
             <nav class="site-bottom-navigation" role="navigation">
             
                 <a href="../useful_s2_links.html" class="btn btn--primary btn--next right"
-                    title="Useful S2 Links" accesskey="n">
+                    title="Useful S2 Geometry Links" accesskey="n">
                     Next
                 </a>
             
             
                 <a href="../s2_concepts.html" class="btn btn--primary btn--prev"
-                    title="S2 Concepts" accesskey="p">
+                    title="S2 Geometry Concepts" accesskey="p">
                     Previous
                 </a>
             
