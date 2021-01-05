@@ -126,7 +126,7 @@ def test_cell_id_to_lat_lon_compat():
             expected_tuple = (float(row['lat']), float(row['lon']))
 
             # MacOS and Windows has slightly different rounding performance
-            if sys.platform in ('darwin', 'win32'):
+            if sys.platform in ('darwin', 'win32') and False:
                 assert ll_tuple == pytest.approx(expected_tuple, abs=1e-12, rel=0.0)
             else:
                 assert ll_tuple == expected_tuple
@@ -151,7 +151,7 @@ def test_token_to_lat_lon_compat():
             expected_tuple = (float(row['lat']), float(row['lon']))
 
             # MacOS and Windows has slightly different rounding performance
-            if sys.platform in ('darwin', 'win32'):
+            if sys.platform in ('darwin', 'win32') and False:
                 assert ll_tuple == pytest.approx(expected_tuple, abs=1e-12, rel=0.0)
             else:
                 assert ll_tuple == expected_tuple
