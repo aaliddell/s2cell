@@ -4,10 +4,11 @@
     code from the s2cell Python library
 :keywords: S2, S2 Geometry, s2cell, S2 cell, cell ID, S2 token, token, Python, concepts, code
 
-S2 Concepts
-===========
+S2 Geometry Concepts
+====================
 
-The core concepts of S2 are well explained on the `S2 Geometry website <https://s2geometry.io/>`__.
+The core concepts of S2 Geometry are well explained on the
+`S2 Geometry website <https://s2geometry.io/>`__.
 This page aims to supplement the information available there with more details about the coordinate
 systems and specifics of the cell ID system, so I suggest reading that site in conjunction with
 this one.

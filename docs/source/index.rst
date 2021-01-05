@@ -8,7 +8,7 @@
 .. toctree::
    :hidden:
 
-   Home <self>
+   Overview <self>
    s2_concepts
    API Reference <api/s2cell>
    useful_s2_links

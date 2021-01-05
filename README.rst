@@ -6,8 +6,8 @@
 s2cell
 ======
 
-Minimal Python `S2 <https://s2geometry.io/>`__
-`cell ID <https://s2geometry.io/devguide/s2cell_hierarchy.html>`__, S2 token and lat/lon conversion
+Minimal Python `S2 Geometry <https://s2geometry.io/>`__
+`cell ID <https://s2geometry.io/devguide/s2cell_hierarchy.html>`__, token and lat/lon conversion
 library.
 
 `Docs <https://docs.s2cell.aliddell.com>`__ | `PyPI <https://pypi.org/project/s2cell>`__ | `GitHub <https://github.com/aaliddell/s2cell>`__
@@ -127,8 +127,8 @@ There are also a few other useful functions for inspecting or converting a cell 
    s2cell.token_to_canonical_token('2ef59BD352b90') # -> '2ef59bd352b9'
 
 
-Useful S2 Links
----------------
+Useful S2 Geometry Links
+------------------------
 
 A list of useful links for S2 related concepts and projects can be found
 `here <https://docs.s2cell.aliddell.com/useful_s2_links.html>`__.

@@ -4,11 +4,11 @@
     to existing users of S2.
 :keywords: S2, S2 Geometry, links, concepts, visualisations, implementations, users
 
-Useful S2 Links
-===============
+Useful S2 Geometry Links
+========================
 
-Your micro 'Awesome S2' list. If you have another S2 related link that may be useful here, please
-`open an Issue <https://github.com/aaliddell/s2cell/issues/new>`__ or PR.
+Your micro 'Awesome S2 Geometry' list. If you have another S2 related link that may be useful here,
+please `open an Issue <https://github.com/aaliddell/s2cell/issues/new>`__ or PR.
 
 
 Concepts

@@ -18,7 +18,7 @@ setuptools.setup(
     version=__version__,
     author='Adam Liddell',
     author_email='s2cell@aliddell.com',
-    description='Minimal Python S2 cell ID, S2 token and lat/lon conversion library',
+    description='Minimal Python S2 Geometry cell ID, token and lat/lon conversion library',
     long_description=long_description,
     long_description_content_type='text/x-rst',
     url='https://docs.s2cell.aliddell.com',
