@@ -5,6 +5,12 @@
 Changelog
 =========
 
+1.4.0
+-----
+
+- Removed dependency on NumPy and improved performance
+
+
 1.3.0
 -----
 
