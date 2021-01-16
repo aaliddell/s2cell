@@ -75,5 +75,7 @@ Users of S2 in general, not just of this library.
   Used to implement the `Geo` package.
 - `MongoDB <https://docs.mongodb.com/manual/core/2dsphere/>`__: Used to implement the ``2dsphere``
   indexing.
+- `PhotoPrism <https://docs.photoprism.org/developer-guide/metadata/geocoding/>`__: Used to
+  implement photo geocoding.
 - `S2 Users Mailing List <https://groups.google.com/g/s2geometry-io?pli=1>`__: The Google Groups
   mailing list for S2 users and developers.
