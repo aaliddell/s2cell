@@ -17,7 +17,6 @@ import csv
 import gzip
 import pathlib
 import re
-import sys
 
 import pytest
 import s2cell
