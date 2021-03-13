@@ -124,12 +124,7 @@ def test_cell_id_to_lat_lon_compat():
         for row in csv.DictReader(f):
             ll_tuple = s2cell.cell_id_to_lat_lon(int(row['cell_id']))
             expected_tuple = (float(row['lat']), float(row['lon']))
-
-            # MacOS and Windows has slightly different rounding performance
-            if sys.platform in ('darwin', 'win32'):
-                assert ll_tuple == pytest.approx(expected_tuple, abs=1e-12, rel=0.0)
-            else:
-                assert ll_tuple == expected_tuple
+            assert ll_tuple == pytest.approx(expected_tuple, abs=1e-12, rel=0.0)
 
 
 def test_invalid_token_to_lat_lon():
@@ -149,12 +144,7 @@ def test_token_to_lat_lon_compat():
         for row in csv.DictReader(f):
             ll_tuple = s2cell.token_to_lat_lon(row['token'])
             expected_tuple = (float(row['lat']), float(row['lon']))
-
-            # MacOS and Windows has slightly different rounding performance
-            if sys.platform in ('darwin', 'win32'):
-                assert ll_tuple == pytest.approx(expected_tuple, abs=1e-12, rel=0.0)
-            else:
-                assert ll_tuple == expected_tuple
+            assert ll_tuple == pytest.approx(expected_tuple, abs=1e-12, rel=0.0)
 
 
 @pytest.mark.parametrize('token, expected', [
