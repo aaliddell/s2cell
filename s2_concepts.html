@@ -2,7 +2,8 @@
 <html lang="en" >
 <head>
     <meta charset="utf-8">
-    
+    <meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     
@@ -160,7 +161,7 @@
         <section class="site-content">
             <div class="container">
                 
-  <div class="section" id="s2-geometry-concepts">
+  <section id="s2-geometry-concepts">
 <h1>S2 Geometry Concepts<a class="headerlink" href="#s2-geometry-concepts" title="Permalink to this headline">¶</a></h1>
 <p>The core concepts of S2 Geometry are well explained on the
 <a class="reference external" href="https://s2geometry.io/">S2 Geometry website</a>.
@@ -172,7 +173,7 @@ documentation, which contains a well commented implementation of the minimal ste
 between lat/lon, S2 cell IDs and tokens.</p>
 <p>Should you find any typos, issues or complete misunderstandings in the descriptions below,
 <a class="reference external" href="https://github.com/aaliddell/s2cell/issues/new">a comment in an issue</a> would be very welcome!</p>
-<div class="section" id="hilbert-curve">
+<section id="hilbert-curve">
 <h2>Hilbert Curve<a class="headerlink" href="#hilbert-curve" title="Permalink to this headline">¶</a></h2>
 <p>The core of the S2 cell ID system is based on the S2 cube and the space-filling
 <a class="reference external" href="https://en.wikipedia.org/wiki/Hilbert_curve">Hilbert Curve</a>. The first three steps of the
@@ -181,10 +182,12 @@ step are replaced with the base ‘U’ shape and joined in a self-similar way t
 continuous curve. The benefit of this shape is that it can be used to map the two dimensional plane
 into a one dimensional distance along the curve, with good locality (meaning values close in curve
 position generally become close in 2D space).</p>
-<div class="figure align-center" id="id1">
+<figure class="align-center" id="id1">
 <span id="fig-hilbert"></span><a class="reference internal image-reference" href="_images/hilbert.svg"><img alt="Hilbert Curve Steps 1, 2 and 3 (Qef, Public domain, via Wikimedia Commons)" height="200px" src="_images/hilbert.svg" /></a>
-<p class="caption"><span class="caption-number">Fig. 1 </span><span class="caption-text">Hilbert Curves of order 1, 2 and 3 (Qef, Public domain, via Wikimedia Commons)</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">Hilbert Curves of order 1, 2 and 3 (Qef, Public domain, via Wikimedia Commons)</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>The orientation of the curve at each segment within its parent is updated based on the parent’s
 orientation and the following mapping (indexed by the curve segment 0 to 3, numbered clockwise from
 lower left in nominal curve orientation):</p>
@@ -201,13 +204,13 @@ perspective, the curve walks the centers of the tree’s leaf nodes.</p>
 sphere, with the curve orientation on each face adjusted to produce a single continuous curve that
 wraps from face to face. The ‘level’ value used by S2 corresponds to the Hilbert Curve ‘order’ shown
 above, with the levels continuing fractally to 30 iterations.</p>
-</div>
-<div class="section" id="coordinate-systems">
+</section>
+<section id="coordinate-systems">
 <h2>Coordinate Systems<a class="headerlink" href="#coordinate-systems" title="Permalink to this headline">¶</a></h2>
 <p>A number of intermediate coordinate systems are used when mapping between latitude/longitude and S2
 cell IDs. These are explained and justified below, in the order they are typically used when
 creating a cell ID.</p>
-<div class="section" id="latitude-and-longitude">
+<section id="latitude-and-longitude">
 <span id="sec-coord-lat-lon"></span><h3>Latitude and Longitude<a class="headerlink" href="#latitude-and-longitude" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Range</strong>: <span class="math notranslate nohighlight">\(lat = [-\pi/2, \pi/2], lon = [0, 2\pi]\)</span></p></li>
@@ -237,8 +240,8 @@ operation of S2, but care should be taken not to mix datasets using degree and r
 representations of latitude and longitude. The latitude and longitude are typically also expected to
 be normalised to the ranges shown above, with the latitude clipped to the range and the longitude
 wrapped modulo 360 degrees.</p>
-</div>
-<div class="section" id="s2point-xyz">
+</section>
+<section id="s2point-xyz">
 <span id="sec-coord-xyz"></span><h3>S2Point (XYZ)<a class="headerlink" href="#s2point-xyz" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Range</strong>: <span class="math notranslate nohighlight">\(x = [-1.0, 1.0], y = [-1.0, 1.0], z = [-1.0, 1.0]\)</span></p></li>
@@ -256,8 +259,8 @@ transformation from latitude and longitude angles using a unit sphere rather tha
 spheroid. There are a number of benefits of this representation compared to lat/lon angles, in
 particular the avoidance of degenerate points at the poles. The XYZ vector is typically normalised
 to unit length.</p>
-</div>
-<div class="section" id="face">
+</section>
+<section id="face">
 <span id="sec-coord-face"></span><h3>Face<a class="headerlink" href="#face" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Range</strong>: <span class="math notranslate nohighlight">\([0, 5]\)</span></p></li>
@@ -269,11 +272,13 @@ the dominant axis in the <a class="reference internal" href="#sec-coord-xyz"><sp
 <a class="reference internal" href="#table-face-calculation"><span class="std std-numref">Table 1</span></a>.
 To give a continuous curve across the faces, some of the faces use tranposed or inverted copies of
 the base Hilbert Curve.</p>
-<div class="figure align-center" id="id2">
-<span id="fig-cube-unwrapped"></span><img alt="Cube face mapping" src="_images/cube_unwrapped.svg" /><p class="caption"><span class="caption-number">Fig. 2 </span><span class="caption-text">Cube face mapping</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
-</div>
-</div>
-<div class="section" id="uv">
+<figure class="align-center" id="id2">
+<span id="fig-cube-unwrapped"></span><img alt="Cube face mapping" src="_images/cube_unwrapped.svg" /><figcaption>
+<p><span class="caption-number">Fig. 2 </span><span class="caption-text">Cube face mapping</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="uv">
 <span id="sec-coord-uv"></span><h3>UV<a class="headerlink" href="#uv" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Range</strong>: <span class="math notranslate nohighlight">\(u = [-1.0, 1.0], v = [-1.0, 1.0]\)</span></p></li>
@@ -287,11 +292,13 @@ the <span class="math notranslate nohighlight">\(u\)</span> and <span class="mat
 cube, with the point <span class="math notranslate nohighlight">\(u = 0, v = 0\)</span> representing the center of the face.
 <a class="reference internal" href="#fig-uv-face-0"><span class="std std-numref">Fig. 3</span></a> shows how the earth is mapped into the UV coordinates of face 0 of the S2
 cube.</p>
-<div class="figure align-center" id="id3">
-<span id="fig-uv-face-0"></span><img alt="Face 0 in UV coordinates" src="_images/uv_face_0.svg" /><p class="caption"><span class="caption-number">Fig. 3 </span><span class="caption-text">Face 0 in UV coordinates</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
-</div>
-</div>
-<div class="section" id="st">
+<figure class="align-center" id="id3">
+<span id="fig-uv-face-0"></span><img alt="Face 0 in UV coordinates" src="_images/uv_face_0.svg" /><figcaption>
+<p><span class="caption-number">Fig. 3 </span><span class="caption-text">Face 0 in UV coordinates</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="st">
 <span id="sec-coord-st"></span><h3>ST<a class="headerlink" href="#st" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Range</strong>: <span class="math notranslate nohighlight">\(s = [0.0, 1.0], t = [0.0, 1.0]\)</span></p></li>
@@ -314,12 +321,16 @@ cleanly with a system on the standard projection.</p>
 that the quadratic projection provides a good match to the more computationally expensive tan
 projection. <a class="reference internal" href="#fig-st-face-0"><span class="std std-numref">Fig. 5</span></a> shows the ST mapping of the same region as shown in UV in
 <a class="reference internal" href="#fig-uv-to-st-projections"><span class="std std-numref">Fig. 4</span></a></p>
-<div class="figure align-center" id="id4">
-<span id="fig-uv-to-st-projections"></span><img alt="The three UV to ST projections provided in the reference S2 implementation" src="_images/uv_to_st_projections.svg" /><p class="caption"><span class="caption-number">Fig. 4 </span><span class="caption-text">The three UV to ST projections provided in the reference S2 implementation</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
-</div>
-<div class="figure align-center" id="id5">
-<span id="fig-st-face-0"></span><img alt="Face 0 in ST coordinates" src="_images/st_face_0.svg" /><p class="caption"><span class="caption-number">Fig. 5 </span><span class="caption-text">Face 0 in ST coordinates</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
-</div>
+<figure class="align-center" id="id4">
+<span id="fig-uv-to-st-projections"></span><img alt="The three UV to ST projections provided in the reference S2 implementation" src="_images/uv_to_st_projections.svg" /><figcaption>
+<p><span class="caption-number">Fig. 4 </span><span class="caption-text">The three UV to ST projections provided in the reference S2 implementation</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id5">
+<span id="fig-st-face-0"></span><img alt="Face 0 in ST coordinates" src="_images/st_face_0.svg" /><figcaption>
+<p><span class="caption-number">Fig. 5 </span><span class="caption-text">Face 0 in ST coordinates</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Note that the C++ and Java reference implementations have slightly different definitions for the
@@ -328,8 +339,8 @@ the two. This does not effect the final cell IDs since the differences are subse
 corrected for, but the intermediate ST terms should be treated as implementation specific. The
 equations in this document use the C++ variant of ST.</p>
 </div>
-</div>
-<div class="section" id="ij">
+</section>
+<section id="ij">
 <span id="sec-coord-ij"></span><h3>IJ<a class="headerlink" href="#ij" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Range</strong>: <span class="math notranslate nohighlight">\(i = [0, 2^{30}), j = [0, 2^{30})\)</span></p></li>
@@ -339,8 +350,8 @@ equations in this document use the C++ variant of ST.</p>
 <p>The <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span> coordinates specify the two dimensions of the leaf-cells on a cube face.
 This coordinate system is directly related to the final <a class="reference internal" href="#sec-coord-pos"><span class="std std-ref">Hilbert Curve Position</span></a> coordinate used in the
 cell ID, through the lookup tables generated in <a class="reference internal" href="#sec-op-lookup-generation"><span class="std std-ref">Lookup Table Generation</span></a>.</p>
-</div>
-<div class="section" id="hilbert-curve-position">
+</section>
+<section id="hilbert-curve-position">
 <span id="sec-coord-pos"></span><h3>Hilbert Curve Position<a class="headerlink" href="#hilbert-curve-position" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Range</strong>: <span class="math notranslate nohighlight">\([0, 2^{60})\)</span></p></li>
@@ -355,8 +366,8 @@ another layer of the quadtree subdivisions. The most-significant bits in the pos
 representing the higher level cells and each subsequent pair of bits determining the chosen subcell
 in the next quadtree subdivision, with the order of the cells determined by the local Hilbert Curve
 orientation.</p>
-</div>
-<div class="section" id="si-ti">
+</section>
+<section id="si-ti">
 <span id="sec-coord-si-ti"></span><h3>Si/Ti<a class="headerlink" href="#si-ti" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Range</strong>: <span class="math notranslate nohighlight">\(si = [0, 2^{31}), ti = [0, 2^{31})\)</span></p></li>
@@ -368,8 +379,8 @@ which are used when mapping IJ values from a cell ID back into ST value. The ran
 that of IJ. The additional power of two in the range of Si/Ti versus IJ allows for <span class="math notranslate nohighlight">\(si\)</span> and
 <span class="math notranslate nohighlight">\(ti\)</span> to specify both the center and edges of the leaf cells, whilst IJ only specifies the leaf
 cell generically.</p>
-</div>
-<div class="section" id="cell-id">
+</section>
+<section id="cell-id">
 <span id="sec-coord-cell-id"></span><h3>Cell ID<a class="headerlink" href="#cell-id" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Range</strong>: <span class="math notranslate nohighlight">\([0, 2^{64})\)</span></p></li>
@@ -427,15 +438,15 @@ valid cell ID. This cell ID is therefore less than all valid cell IDs.</p></li>
 <li><p>The ‘sentinel’ cell ID, which is composed of all 1 bits (<span class="math notranslate nohighlight">\(= 2^{64} - 1\)</span>). This cell ID is
 therefore greater than all valid cell IDs.</p></li>
 </ul>
-</div>
-</div>
-<div class="section" id="operations">
+</section>
+</section>
+<section id="operations">
 <h2>Operations<a class="headerlink" href="#operations" title="Permalink to this headline">¶</a></h2>
 <p>This section walks through the steps for a number of common cell ID operations, such as conversion
 and truncation. The steps will be shown here in mathematical form where possible; if you want a more
 programmatic form, consider instead looking at the <a class="reference internal" href="annotated_source.html#sec-annotated-source"><span class="std std-ref">Annotated Source</span></a> section of this
 s2cell documentation.</p>
-<div class="section" id="lat-lon-to-s2-cell-id">
+<section id="lat-lon-to-s2-cell-id">
 <span id="lat-lon-to-cell-id"></span><h3>Lat/Lon to S2 Cell ID<a class="headerlink" href="#lat-lon-to-s2-cell-id" title="Permalink to this headline">¶</a></h3>
 <p>The <a class="reference internal" href="#sec-coord-lat-lon"><span class="std std-ref">Latitude and Longitude</span></a> (in radians), are first converted to a <a class="reference internal" href="#sec-coord-xyz"><span class="std std-ref">S2Point (XYZ)</span></a> using a
 unit sphere:</p>
@@ -585,8 +596,8 @@ and the trailing 1 bit is put in the least-significant bit to produce a level 30
 iterations in the mapping from IJ to Hilbert Curve position can be skipped, since their outputs are
 masked in the level <a class="reference internal" href="#sec-op-truncation"><span class="std std-ref">Truncation</span></a>. For details on how to calculate the number of
 iterations required, see the implementation and comments in <a class="reference internal" href="annotated_source.html#sec-annotated-source"><span class="std std-ref">Annotated Source</span></a>.</p>
-</div>
-<div class="section" id="truncation">
+</section>
+<section id="truncation">
 <span id="sec-op-truncation"></span><h3>Truncation<a class="headerlink" href="#truncation" title="Permalink to this headline">¶</a></h3>
 <p>Truncation is the process of taking a high precision level cell ID and reducing it to a lower
 precision level cell ID that represents the relevant parent cell of the original. This is useful
@@ -606,8 +617,8 @@ something to a higher precision is not a valid process). If implementing this op
 yourself, your language’s equivalent of an exception should probably be raised if this condition
 is not met.</p>
 </div>
-</div>
-<div class="section" id="s2-cell-id-to-lat-lon">
+</section>
+<section id="s2-cell-id-to-lat-lon">
 <h3>S2 Cell ID to Lat/Lon<a class="headerlink" href="#s2-cell-id-to-lat-lon" title="Permalink to this headline">¶</a></h3>
 <p>The process of converting a <a class="reference internal" href="#sec-coord-cell-id"><span class="std std-ref">Cell ID</span></a> coordinate back to <a class="reference internal" href="#sec-coord-lat-lon"><span class="std std-ref">Latitude and Longitude</span></a> is
 mostly the inverse steps of those shown in <a class="reference internal" href="#lat-lon-to-cell-id"><span class="std std-ref">Lat/Lon to S2 Cell ID</span></a>. Firstly, the
@@ -713,8 +724,8 @@ calculate the lat/lon angles are geometrically similar.</p>
 \[ \begin{align}\begin{aligned}latitude = \text{atan2}(z, \sqrt{x^2 + y^2})\\longitude = \text{atan2}(y, x)\end{aligned}\end{align} \]</div>
 <p>Note that the above will typically be returned in radians, but you may wish to convert to degrees
 to interoperate with other GIS software.</p>
-</div>
-<div class="section" id="lookup-table-generation">
+</section>
+<section id="lookup-table-generation">
 <span id="sec-op-lookup-generation"></span><h3>Lookup Table Generation<a class="headerlink" href="#lookup-table-generation" title="Permalink to this headline">¶</a></h3>
 <p>Two 1024 item lookup tables for mapping between <a class="reference internal" href="#sec-coord-ij"><span class="std std-ref">IJ</span></a> and <a class="reference internal" href="#sec-coord-pos"><span class="std std-ref">Hilbert Curve Position</span></a> are
 typically generated on application startup, but may also be precalculated at compile time. These
@@ -783,9 +794,9 @@ implementation, but the iterative version shown below is slightly easier to get 
         <span class="n">LOOKUP_IJ</span><span class="p">[</span><span class="n">pos</span> <span class="o">|</span> <span class="n">base_orientation</span><span class="p">]</span> <span class="o">=</span> <span class="n">ij</span> <span class="o">|</span> <span class="n">orientation</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="s2-tokens">
+</section>
+</section>
+<section id="s2-tokens">
 <h2>S2 Tokens<a class="headerlink" href="#s2-tokens" title="Permalink to this headline">¶</a></h2>
 <p>S2 tokens provide a concise string representation of cell IDs, with a (almost) 1-to-1 mapping
 between cell IDs and tokens. These tokens are particularly useful for non-binary interfaces, where
@@ -1061,7 +1072,7 @@ as the special ‘X’ token for cell ID <code class="docutils literal notransla
 </tr>
 </tbody>
 </table>
-<div class="section" id="conversion-from-cell-id-to-token">
+<section id="conversion-from-cell-id-to-token">
 <h3>Conversion from Cell ID to Token<a class="headerlink" href="#conversion-from-cell-id-to-token" title="Permalink to this headline">¶</a></h3>
 <p>Conversion from a S2 cell ID <code class="docutils literal notranslate"><span class="pre">cell_id</span></code> to a token is done by the following Python code, which is
 based on the <a class="reference internal" href="api/s2cell.html#s2cell.cell_id_to_token" title="s2cell.cell_id_to_token"><code class="xref py py-func docutils literal notranslate"><span class="pre">s2cell.cell_id_to_token()</span></code></a> function:</p>
@@ -1077,8 +1088,8 @@ based on the <a class="reference internal" href="api/s2cell.html#s2cell.cell_id_
 <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell_id_to_token</span><span class="p">(</span><span class="mi">3383781119341101056</span><span class="p">)</span>  <span class="c1"># -&gt; &#39;2ef59b&#39;</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="conversion-from-token-to-cell-id">
+</section>
+<section id="conversion-from-token-to-cell-id">
 <h3>Conversion from Token to Cell ID<a class="headerlink" href="#conversion-from-token-to-cell-id" title="Permalink to this headline">¶</a></h3>
 <p>Conversion from a S2 token <code class="docutils literal notranslate"><span class="pre">token</span></code> to a cell ID is done by the following Python code, which is
 based on the <a class="reference internal" href="api/s2cell.html#s2cell.token_to_cell_id" title="s2cell.token_to_cell_id"><code class="xref py py-func docutils literal notranslate"><span class="pre">s2cell.token_to_cell_id()</span></code></a> function:</p>
@@ -1098,9 +1109,9 @@ based on the <a class="reference internal" href="api/s2cell.html#s2cell.token_to
 <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">token_to_cell_id</span><span class="p">(</span><span class="s1">&#39;3&#39;</span><span class="p">)</span>                  <span class="c1"># -&gt; 3458764513820540928</span>
 </pre></div>
 </div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
             </div>
