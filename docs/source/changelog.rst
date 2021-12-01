@@ -5,6 +5,12 @@
 Changelog
 =========
 
+1.5.0
+-----
+
+- Updated docs theme to improve readability
+
+
 1.4.0
 -----
 
