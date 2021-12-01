@@ -41,6 +41,7 @@ setuptools.setup(
             'pytest-instafail~=0.4.2',
             'pytest-xdist~=2.4.0',
             'Sphinx~=4.3.1',
+            'sphinx-notfound-page~=0.8',
             'sphinx-redactor-theme==0.0.1',
             'sphinx-sitemap==2.2.0',
         ],

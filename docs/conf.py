@@ -24,6 +24,7 @@ extensions = [
     'sphinx.ext.napoleon',
 
     # External
+    'notfound.extension',
     'sphinx_sitemap',
 ]
 
