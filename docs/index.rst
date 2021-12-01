@@ -10,7 +10,7 @@
 
    Overview <self>
    Concepts <s2_concepts>
-   API Reference <api/s2cell>
+   API Reference <api/s2cell.s2cell>
    Useful Links <useful_s2_links>
    annotated_source
    changelog

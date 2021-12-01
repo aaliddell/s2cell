@@ -35,7 +35,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['.ipynb_checkpoints', '**/.ipynb_checkpoints']
+exclude_patterns = ['.ipynb_checkpoints', '**/.ipynb_checkpoints', 'api/s2cell.rst']
 
 # Code highlighting
 pygments_style = 'monokai'
