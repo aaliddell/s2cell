@@ -120,7 +120,8 @@ html_extra_path = [
 ]
 
 # Sitemap options
-sitemap_url_scheme = '{lang}{link}'
+sitemap_filename = "sitemap-override.xml"  # RTD generates sitemap with not much in it...
+sitemap_url_scheme = "{link}"
 
 # -- Options for autodoc -----------------------------------------------------
 
