@@ -29,7 +29,7 @@ extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = []
+templates_path = ['_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -48,9 +48,7 @@ numfig = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-import sphinx_redactor_theme
-html_theme = 'sphinx_redactor_theme'
-html_theme_path = [sphinx_redactor_theme.get_html_theme_path()]
+html_theme = 'furo'
 
 # Logo and favicon
 html_logo = 'source/_static/logo.min.svg'
@@ -73,20 +71,22 @@ html_static_path = ['source/_static']
 
 # Theme options
 html_theme_options = {
-    'display_version': True,
+    'sidebar_hide_name': True,
+    'light_css_variables': {
+        'color-brand-primary': '#de6b00',
+        'color-brand-content': '#de6b00',
+    },
+    'dark_css_variables': {
+        'color-brand-primary': '#de6b00',
+        'color-brand-content': '#de6b00',
+    },
 }
 
 # Disable footer
 html_show_sphinx = False
 
-# Template overrides
-templates_path = ['_templates']
-
 # Add CSS files
-html_css_files = [
-    'pygments.css',  # Manually add pygments.css, since sphinx_redactor_theme does not
-    'customise.css',
-]
+html_css_files = []
 
 # Extra files to include
 html_extra_path = [

@@ -33,6 +33,7 @@ setuptools.setup(
     extras_require={
         'dev': [
             'flake8~=4.0',
+            'furo==2021.11.23',
             'nox~=2021.10.1',
             'pydocstyle~=6.1.1',
             'pylint~=2.12.1',
@@ -42,7 +43,6 @@ setuptools.setup(
             'pytest-xdist~=2.4.0',
             'Sphinx~=4.3.1',
             'sphinx-notfound-page~=0.8',
-            'sphinx-redactor-theme==0.0.1',
             'sphinx-sitemap==2.2.0',
         ],
     },
