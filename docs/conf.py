@@ -43,6 +43,9 @@ pygments_style = 'monokai'
 # Enable figure numbering
 numfig = True
 
+# Setup root doc
+root_doc = 'source/index'
+
 
 # -- Run sphinx-apidoc -------------------------------------------------------
 

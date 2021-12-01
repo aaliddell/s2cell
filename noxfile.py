@@ -51,7 +51,7 @@ def docs(session):
         '-W', # Treat warnings as errors
         '--keep-going', # When using -W, only exit after all warnings shown
         #'-j', 'auto', # Generate in parallel
-        'docs/source', 'docs/build',
+        'docs', 'docs/build',
     )
 
 @nox.session()
