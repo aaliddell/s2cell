@@ -44,7 +44,7 @@ pygments_style = 'monokai'
 numfig = True
 
 # Setup root doc
-root_doc = 'source/index'
+root_doc = 'index'
 
 
 # -- Run sphinx-apidoc -------------------------------------------------------
@@ -53,7 +53,7 @@ def run_apidoc(_):
     import sphinx.ext.apidoc
 
     docs_path = os.path.dirname(__file__)
-    apidoc_path = os.path.join(docs_path, 'source/api')
+    apidoc_path = os.path.join(docs_path, 'api')
     module_path = os.path.join(docs_path, '..', 's2cell')
 
     sphinx.ext.apidoc.main([
@@ -77,8 +77,8 @@ def setup(app):
 html_theme = 'furo'
 
 # Logo and favicon
-html_logo = 'source/_static/logo.min.svg'
-html_favicon = 'source/_static/logo-64.png'
+html_logo = '_static/logo.min.svg'
+html_favicon = '_static/logo-64.png'
 
 # Base URL for docs
 # Used to generate CNAME file
@@ -93,7 +93,7 @@ html_context = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['source/_static']
+html_static_path = ['_static']
 
 # Theme options
 html_theme_options = {
@@ -116,7 +116,7 @@ html_css_files = []
 
 # Extra files to include
 html_extra_path = [
-    'source/robots.txt',
+    'robots.txt',
 ]
 
 # Sitemap options
