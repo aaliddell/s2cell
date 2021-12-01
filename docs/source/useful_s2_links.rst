@@ -69,6 +69,8 @@ Users of S2 in general, not just of this library.
   Used by the ``geo_point_to_s2cell`` function.
 - `BigQuery <https://cloud.google.com/bigquery/docs/reference/standard-sql/geography_functions>`__:
   Used to implement the BigQuery geography functions.
+- `ClickHouse <https://clickhouse.com/docs/en/sql-reference/functions/geo/s2/>`__: Used to implement
+  geographical data and indexing.
 - `CockroachDB <https://www.cockroachlabs.com/docs/v20.2/spatial-indexes.html>`__: Used to
   implement the spatial indexing.
 - `InfluxDB <https://docs.influxdata.com/influxdb/cloud/query-data/flux/geo/shape-geo-data/#generate-s2-cell-id-tokens>`__:
