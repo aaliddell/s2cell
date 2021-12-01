@@ -43,9 +43,6 @@ def build_wheel(session):
 def docs(session):
     session.install('.[dev]')
     session.run(
-        'sphinx-apidoc', '--no-toc', '--force', '--separate', '-o', 'docs/source/api', 's2cell'
-    )
-    session.run(
         'python', '-m', 'sphinx',
         '-c', 'docs/',
         '-a', # Update all output files

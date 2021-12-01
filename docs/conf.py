@@ -1,4 +1,5 @@
 import datetime
+import os
 
 # -- Project information -----------------------------------------------------
 
@@ -41,6 +42,28 @@ pygments_style = 'monokai'
 
 # Enable figure numbering
 numfig = True
+
+
+# -- Run sphinx-apidoc -------------------------------------------------------
+
+def run_apidoc(_):
+    import sphinx.ext.apidoc
+
+    docs_path = os.path.dirname(__file__)
+    apidoc_path = os.path.join(docs_path, 'source/api')
+    module_path = os.path.join(docs_path, '..', 's2cell')
+
+    sphinx.ext.apidoc.main([
+        '--no-toc',
+        '--force',
+        '--separate',
+        '-o', apidoc_path,
+        module_path
+    ])
+
+
+def setup(app):
+    app.connect('builder-inited', run_apidoc)
 
 
 # -- Options for HTML output -------------------------------------------------
