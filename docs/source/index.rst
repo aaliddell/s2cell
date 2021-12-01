@@ -9,8 +9,8 @@
    :hidden:
 
    Overview <self>
-   s2_concepts
+   Concepts <s2_concepts>
    API Reference <api/s2cell>
-   useful_s2_links
+   Useful Links <useful_s2_links>
    annotated_source
    changelog
