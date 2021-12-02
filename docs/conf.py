@@ -30,7 +30,7 @@ extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -80,8 +80,8 @@ html_theme = 'furo'
 html_title = 's2cell'
 
 # Logo and favicon
-html_logo = '_static/logo.min.svg'
-html_favicon = '_static/logo-64.png'
+html_logo = 'static/logo.min.svg'
+html_favicon = 'static/logo-64.png'
 
 # Base URL for docs
 # Used to generate CNAME file
@@ -96,7 +96,7 @@ html_context = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['static']
 
 # Theme options
 html_theme_options = {
