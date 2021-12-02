@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Minimal Python S2 Geometry cell ID, token and lat/lon conversion library."""
+
 from .s2cell import *
 
 __version__ = '1.4.0'
