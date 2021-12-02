@@ -40,7 +40,7 @@ setuptools.setup(
             'pytest~=6.2.5',
             'pytest-cov~=3.0.0',
             'pytest-instafail~=0.4.2',
-            'pytest-xdist~=2.4.0',
+            'pytest-xdist~=2.2.0',
             'Sphinx~=4.3.1',
             'sphinx-notfound-page~=0.8',
             'sphinx-sitemap==2.2.0',
