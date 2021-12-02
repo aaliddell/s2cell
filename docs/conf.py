@@ -21,7 +21,6 @@ version = release
 extensions = [
     # Internal
     'sphinx.ext.autodoc',
-    'sphinx.ext.githubpages',
     'sphinx.ext.napoleon',
 
     # External
