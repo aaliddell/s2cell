@@ -15,4 +15,4 @@ The full source of the library is included below.
 
 .. literalinclude:: ../s2cell/s2cell.py
    :language: python3
-   :lines: 25-
+   :lines: 22-
