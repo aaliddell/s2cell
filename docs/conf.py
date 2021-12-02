@@ -76,6 +76,9 @@ def setup(app):
 #
 html_theme = 'furo'
 
+# Title
+html_title = 's2cell'
+
 # Logo and favicon
 html_logo = '_static/logo.min.svg'
 html_favicon = '_static/logo-64.png'
