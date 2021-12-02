@@ -12,10 +12,10 @@
 
     <!-- Icons -->
     {%- if favicon %}
-    <link rel="shortcut icon" href="{{ pathto('static/' + favicon, 1)|e }}"/>
+    <link rel="shortcut icon" href="{{ pathto('_static/' + favicon, 1)|e }}"/>
     {%- endif %}
     {%- if icon_png %}
-    <link rel="apple-touch-icon" href="{{ pathto('static/' + icon_png, 1)|e }}"/>
+    <link rel="apple-touch-icon" href="{{ pathto('_static/' + icon_png, 1)|e }}"/>
     {%- endif %}
 
     <!-- Canonical URL -->
@@ -25,11 +25,11 @@
 
     <!-- Open Graph -->
     {%- if baseurl %}
-    <meta property="og:url" content="{{ baseurl.rstrip('/')|e }}/{{ pagename|e }}.html"/>
+    <meta property="og:url" content="{{ pageurl|e }}"/>
     {%- endif %}
     <meta property="og:title" content="{{ title|striptags|e }}{{ titlesuffix }}"/>
     {%- if baseurl and icon_png %}
-    <meta property="og:image" content="{{ (baseurl.rstrip('/') + '/static/' + icon_png)|e }}"/>
+    <meta property="og:image" content="{{ absolute_icon_png|e }}"/>
     {%- endif %}
     <meta property="og:type" content="website"/>
     {%- if meta and 'description' in meta %}

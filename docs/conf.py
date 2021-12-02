@@ -83,13 +83,13 @@ html_logo = 'static/logo.min.svg'
 html_favicon = 'static/logo-64.png'
 
 # Base URL for docs
-# Used to generate CNAME file
 html_baseurl = 'https://docs.s2cell.aliddell.com'
 
 # Extra vars to provide to templating
 html_context = {
     'baseurl': html_baseurl,
-    'icon_png': 'logo.png'
+    'icon_png': 'logo.png',
+    'absolute_icon_png': html_baseurl + '/en/latest/_static/logo.png'  # Used by meta tags
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
