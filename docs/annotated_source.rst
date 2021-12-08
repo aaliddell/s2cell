@@ -13,6 +13,6 @@ system that are useful for understanding the steps to convert from one represent
 The full source of the library is included below.
 
 
-.. literalinclude:: ../../s2cell/__init__.py
+.. literalinclude:: ../s2cell/s2cell.py
    :language: python3
-   :lines: 25-
+   :lines: 22-

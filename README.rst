@@ -17,6 +17,10 @@ library.
    :alt: CI Status
    :target: https://github.com/aaliddell/s2cell/actions
 
+.. image:: https://readthedocs.org/projects/s2cell/badge/?version=latest
+   :alt: Documentation Status
+   :target: https://docs.s2cell.aliddell.com/en/latest
+
 .. image:: https://img.shields.io/github/license/aaliddell/s2cell
    :alt: License
    :target: https://github.com/aaliddell/s2cell

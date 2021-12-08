@@ -43,9 +43,6 @@ def build_wheel(session):
 def docs(session):
     session.install('.[dev]')
     session.run(
-        'sphinx-apidoc', '--no-toc', '--force', '--separate', '-o', 'docs/source/api', 's2cell'
-    )
-    session.run(
         'python', '-m', 'sphinx',
         '-c', 'docs/',
         '-a', # Update all output files
@@ -54,7 +51,7 @@ def docs(session):
         '-W', # Treat warnings as errors
         '--keep-going', # When using -W, only exit after all warnings shown
         #'-j', 'auto', # Generate in parallel
-        'docs/source', 'docs/build',
+        'docs', 'docs/build',
     )
 
 @nox.session()

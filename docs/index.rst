@@ -2,15 +2,15 @@
 :description: Minimal Python S2 cell ID, S2 token and lat/lon conversion library
 :keywords: S2, S2 Geometry, s2cell, S2 cell, cell ID, S2 token, token, Python
 
-.. include:: ../../README.rst
+.. include:: ../README.rst
 
 
 .. toctree::
    :hidden:
 
    Overview <self>
-   s2_concepts
-   API Reference <api/s2cell>
-   useful_s2_links
+   Concepts <s2_concepts>
+   API Reference <api/s2cell.s2cell>
+   Useful Links <useful_s2_links>
    annotated_source
    changelog

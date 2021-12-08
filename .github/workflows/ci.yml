@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.6, 3.7, 3.8, 3.9, '3.10']
 
     steps:
       - uses: actions/checkout@v2
@@ -45,38 +45,3 @@ jobs:
         run: nox -s pylint
       - name: Run pydocstyle
         run: nox -s pydocstyle
-
-  docs:
-    name: Build and push docs
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # To fetch all refs
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.8
-      - name: Install nox
-        run: pip install nox
-      - name: Build docs
-        run: nox -s docs -- -d /tmp/sphinx-doctrees
-      - name: Copy built docs and checkout
-        run: |
-          rm -rf __pycache__ **/__pycache__ .doctrees **/.doctrees .buildinfo **/.buildinfo
-          cp -r docs/build /tmp/sphinx-build
-          git clean -fx
-          git checkout gh-pages
-          git rm -r .  # Clean branch to ensure removed files don't persist
-      - name: Commit and push docs
-        env:
-          GIT_WORK_TREE: /tmp/sphinx-build
-        run: |
-          git status
-          git add .
-          git status
-          git config --global user.name "${GITHUB_ACTOR}"
-          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git commit --allow-empty --message "Update docs to ${GITHUB_SHA} from ${GITHUB_REF}"
-          git push

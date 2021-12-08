@@ -34,7 +34,7 @@ position generally become close in 2D space).
 
 .. _fig_hilbert:
 
-.. figure:: _static/hilbert.svg
+.. figure:: static/hilbert.svg
    :height: 200px
    :alt: Hilbert Curve Steps 1, 2 and 3 (Qef, Public domain, via Wikimedia Commons)
    :align: center
@@ -144,7 +144,7 @@ the base Hilbert Curve.
 
 .. _fig_cube_unwrapped:
 
-.. figure:: _static/cube_unwrapped.svg
+.. figure:: static/cube_unwrapped.svg
    :alt: Cube face mapping
    :align: center
 
@@ -170,7 +170,7 @@ cube.
 
 .. _fig_uv_face_0:
 
-.. figure:: _static/uv_face_0.svg
+.. figure:: static/uv_face_0.svg
    :alt: Face 0 in UV coordinates
    :align: center
 
@@ -207,7 +207,7 @@ projection. :numref:`fig_st_face_0` shows the ST mapping of the same region as s
 
 .. _fig_uv_to_st_projections:
 
-.. figure:: _static/uv_to_st_projections.svg
+.. figure:: static/uv_to_st_projections.svg
    :alt: The three UV to ST projections provided in the reference S2 implementation
    :align: center
 
@@ -215,7 +215,7 @@ projection. :numref:`fig_st_face_0` shows the ST mapping of the same region as s
 
 .. _fig_st_face_0:
 
-.. figure:: _static/st_face_0.svg
+.. figure:: static/st_face_0.svg
    :alt: Face 0 in ST coordinates
    :align: center
 

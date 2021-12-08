@@ -5,6 +5,14 @@
 Changelog
 =========
 
+1.5.0
+-----
+
+- Moved main source out of ``__init__.py``
+- Moved docs hosting to Read the Docs
+- Updated docs to improve readability
+
+
 1.4.0
 -----
 

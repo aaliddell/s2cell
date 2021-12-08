@@ -11,14 +11,15 @@ Your micro 'Awesome S2 Geometry' list. If you have another S2 related link that 
 please `open an Issue <https://github.com/aaliddell/s2cell/issues/new>`__ or PR.
 
 
-Concepts
---------
+Documentation
+-------------
 
-Core concepts of S2 and the S2 cell system.
+Core documentation of S2 and the S2 cell system.
 
 - `S2 Geometry <https://s2geometry.io/>`__: The S2 Geometry homepage.
 - `S2 Cells <https://s2geometry.io/devguide/s2cell_hierarchy>`__: Reference S2 documentation on the
   S2 cell system.
+- `S2 Geometry Concepts <https://docs.s2cell.aliddell.com/en/stable/s2_concepts.html>`__: The concepts page of this documentation.
 - `Earth Cube <https://s2geometry.io/resources/earthcube>`__: Description of the face cell mapping
   in the S2 cell system.
 - `S2 Cell Statistics <https://s2geometry.io/resources/s2cell_statistics>`__: Details on the sizes
@@ -69,6 +70,8 @@ Users of S2 in general, not just of this library.
   Used by the ``geo_point_to_s2cell`` function.
 - `BigQuery <https://cloud.google.com/bigquery/docs/reference/standard-sql/geography_functions>`__:
   Used to implement the BigQuery geography functions.
+- `ClickHouse <https://clickhouse.com/docs/en/sql-reference/functions/geo/s2/>`__: Used to implement
+  geographical data and indexing.
 - `CockroachDB <https://www.cockroachlabs.com/docs/v20.2/spatial-indexes.html>`__: Used to
   implement the spatial indexing.
 - `InfluxDB <https://docs.influxdata.com/influxdb/cloud/query-data/flux/geo/shape-geo-data/#generate-s2-cell-id-tokens>`__:

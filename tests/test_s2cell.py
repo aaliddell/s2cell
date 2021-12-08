@@ -20,11 +20,12 @@ import re
 
 import pytest
 import s2cell
+from s2cell.s2cell import _S2_POS_BITS, _s2_face_uv_to_xyz
 
 
 def test_invalid__s2_face_uv_to_xyz():
     with pytest.raises(ValueError, match=re.escape('Cannot convert UV to XYZ with invalid face: 6')):
-        s2cell._s2_face_uv_to_xyz(6, (0, 0))
+        _s2_face_uv_to_xyz(6, (0, 0))
 
 
 def test_zero_cell_id_to_token():
@@ -114,7 +115,7 @@ def test_invalid_cell_id_to_lat_lon():
         s2cell.cell_id_to_lat_lon(1.0)
 
     with pytest.raises(s2cell.InvalidCellID, match=re.escape('Cannot decode invalid S2 cell ID: 13835058055282163712')):
-        s2cell.cell_id_to_lat_lon(int(0b110 << s2cell._S2_POS_BITS))
+        s2cell.cell_id_to_lat_lon(int(0b110 << _S2_POS_BITS))
 
 
 def test_cell_id_to_lat_lon_compat():
@@ -134,7 +135,7 @@ def test_invalid_token_to_lat_lon():
         s2cell.token_to_lat_lon('a' * 17)
 
     with pytest.raises(s2cell.InvalidToken, match=re.escape('Cannot decode invalid S2 token: c000000000000000')):
-        s2cell.token_to_lat_lon('{:016x}'.format(0b110 << s2cell._S2_POS_BITS))
+        s2cell.token_to_lat_lon('{:016x}'.format(0b110 << _S2_POS_BITS))
 
 
 def test_token_to_lat_lon_compat():
@@ -166,9 +167,9 @@ def test_token_to_canonical_token(token, expected):
     (0b1111010101010101010101010101010101010101010101010101010101010101, False),  # Invalid face
     (0, False),
 ] + [
-    (1 << even_number, True) for even_number in range(0, s2cell._S2_POS_BITS, 2)
+    (1 << even_number, True) for even_number in range(0, _S2_POS_BITS, 2)
 ] + [
-    (1 << odd_number, False) for odd_number in range(1, s2cell._S2_POS_BITS, 2)
+    (1 << odd_number, False) for odd_number in range(1, _S2_POS_BITS, 2)
 ])
 def test_cell_id_is_valid(cell_id, is_valid):
     assert s2cell.cell_id_is_valid(cell_id) == is_valid
