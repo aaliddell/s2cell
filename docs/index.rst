@@ -14,3 +14,10 @@
    Useful Links <useful_s2_links>
    annotated_source
    changelog
+
+
+.. toctree::
+   :caption: External
+   :hidden:
+
+   GitHub Repo <https://github.com/aaliddell/s2cell>
