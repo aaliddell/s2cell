@@ -780,7 +780,7 @@ def token_is_valid(token: str) -> bool:
         raise TypeError('Cannot check S2 token with type: {}'.format(type(token)))
 
     # First check string with regex
-    if not re.match(r'^[0-9a-fA-f]{1,16}$', token):
+    if not re.match(r'^[0-9a-fA-F]{1,16}$', token):
         return False
 
     # Check the contained cell ID is valid
