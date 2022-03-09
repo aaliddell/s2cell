@@ -45,8 +45,8 @@ The library is checked against a test suite generated from the
 standard.
 
 Should you need more complete S2 Geometry functionality or a fast C-based implementation, please
-consider using the `Python extension included
-<https://github.com/google/s2geometry/tree/master/src/python>`__ in the s2geometry repository or the
+consider using the Python extension `included in the s2geometry repository
+<https://github.com/google/s2geometry/tree/master/src/python>`__ or the
 pure-Python `s2sphere <https://pypi.org/project/s2sphere/>`__ implementation.
 
 Issues and PRs are very welcome to improve the implementation, descriptions or to correct any
