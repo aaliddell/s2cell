@@ -5,6 +5,13 @@
 Changelog
 =========
 
+1.6.0
+-----
+
+- Dropped support for Python 3.6
+- Fixed ``token_is_valid()`` accepting some invalid tokens
+
+
 1.5.0
 -----
 
