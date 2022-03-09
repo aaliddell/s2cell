@@ -28,7 +28,7 @@ setuptools.setup(
         'Source Code': 'https://github.com/aaliddell/s2cell',
     },
     packages=setuptools.find_packages(),
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     install_requires=[],
     extras_require={
         'dev': [
