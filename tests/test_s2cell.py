@@ -191,7 +191,7 @@ def test_cell_id_is_valid_compat():
     ('2ef0000000000000', True),
     ('2ef00000000000000', False),  # Too long
     ('2efinvalid', False),  # Invalid characters
-    ('86R', False), # Invalid hex
+    ('86R', False),  # Invalid hex
     ('2efx', False),  # Incorrect use of X
 ])
 def test_token_is_valid(token, is_valid):
