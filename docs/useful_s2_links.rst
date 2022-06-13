@@ -57,6 +57,7 @@ Reference and third-party implementations of S2 in various languages.
   reference C++ implementation.
 - `r-spatial/s2 <https://github.com/r-spatial/s2/>`__: R bindings for the reference implementation.
 - `s2geometry-d <https://code.dlang.org/packages/s2geometry-d>`__: A D implementation of S2.
+- `s2-geometry-kotlin <https://github.com/Enovea/s2-geometry-kotlin>`__: A Kotlin implementation of S2.
 
 
 Users
