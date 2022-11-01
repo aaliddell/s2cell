@@ -328,7 +328,7 @@ def token_to_cell_id(token: str) -> int:
 #
 
 def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
-        lat: float, lon: float, level: int = 30, debug: bool = False
+        lat: float, lon: float, level: int = 30
 ) -> int:
     """
     Convert lat/lon to a S2 cell ID.
@@ -429,13 +429,10 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     # Convert ST to IJ integers
     # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L333-L336
     ij = (_s2_st_to_ij(st[0]), _s2_st_to_ij(st[1]))  # pylint: disable=invalid-name
-    if debug:
-        print(ij)
-        print("{:016b} {:016b}".format(*ij))
+    
     return s2_face_ij_to_cell_id(face, ij, level=level)
 
 def s2_face_ij_to_cell_id(face: int, ij: Tuple[int, int], level: int = 30) -> int:
-    # print("f={:03b}, i={:030b}, j={:030b} encoding to level {}".format(face, ij[0], ij[1], level))
     # Populate _S2_LOOKUP_POS on first run.
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109
     #
@@ -497,7 +494,7 @@ def s2_face_ij_to_cell_id(face: int, ij: Tuple[int, int], level: int = 30) -> in
     return cell_id
 
 
-def lat_lon_to_token(lat: float, lon: float, level: int = 30, debug: bool = False) -> str:
+def lat_lon_to_token(lat: float, lon: float, level: int = 30) -> str:
     """
     Convert lat/lon to a S2 token.
 
@@ -521,7 +518,7 @@ def lat_lon_to_token(lat: float, lon: float, level: int = 30, debug: bool = Fals
 
     """
     # Generate cell ID and convert to token
-    return cell_id_to_token(lat_lon_to_cell_id(lat=lat, lon=lon, level=level, debug=debug))
+    return cell_id_to_token(lat_lon_to_cell_id(lat=lat, lon=lon, level=level))
 
 
 #
@@ -958,39 +955,3 @@ def token_to_parent_token(token: str, level: Optional[int] = None) -> str:
 
     # Convert to cell ID and get parent and convert back to token
     return cell_id_to_token(cell_id_to_parent_cell_id(token_to_cell_id(token), level))
-
-if __name__ == "__main__":
-    import re
-    ## Tile min lat/lon from clicking the center of Burlington City Hall Park in Google Maps
-    lat = 44.476527
-    lon = -73.215716
-    
-    # tile hash from ll2tilehash
-    hash="S2_2/0.0.0/0.1.0/1.1.0/0.1.0/1.1.0/0.1.0/0.1.0/0.1.0/0.0.0/0.0.0/0.0.0/0.1.0/1.1.0/1.1.0/1.0.0/0.1.0/0.0.0/tileset.json"
-
-    # s2 from s2ll
-    st = (0.3129356130167026, 0.993085899845325)
-    
-
-    s2_face = int(hash[3])
-    xy_only_exp = re.compile(r"(/[01]\.[01])\.-?[0-9]+")
-    raw_bits_ij = [p[1:4:2] for p in xy_only_exp.findall(hash)[1:]]
-    lod = len(raw_bits_ij)# - 5
-    print("Face: {}".format(s2_face))
-    print("LOD: {}".format(lod))
-    #print(raw_bits_ij)
-    bits_ij = zip(*raw_bits_ij)
-    ij = tuple(int("".join(bits_i),2) << (30 - len(bits_i)) for bits_i in bits_ij)
-    for i in range(2):
-        print()
-        print(ij)
-        print("{:016b} {:016b}".format(*ij))
-        ij_manual_id = s2_face_ij_to_cell_id(s2_face, ij, lod)
-        print("{:064b} {}".format(ij_manual_id, cell_id_to_token(ij_manual_id)))
-        # using the for loop as a macro to copy-paste is a criminal hack
-        # please don't do this in real code
-        ij = (int(st[0] * (1 << 30)), int(st[1] * (1 << 30)))
-
-    print()
-    ij_derived_id = lat_lon_to_cell_id(lat, lon, lod, debug=True)
-    print("{:064b} {}".format(ij_derived_id, cell_id_to_token(ij_derived_id)))
