@@ -241,6 +241,7 @@ def _s2_face_uv_to_xyz(  # pylint: disable=invalid-name
 
     return s2_point
 
+
 def _s2_init_lookups() -> None:
     """
     Initialise the S2 lookups in global vars _S2_LOOKUP_POS and _S2_LOOKUP_IJ.
