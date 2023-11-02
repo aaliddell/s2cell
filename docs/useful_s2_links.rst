@@ -33,10 +33,7 @@ Visualisations
 
 Mapping and visualisation tools for S2 cells.
 
-- `Region Coverer <http://s2.sidewalklabs.com/regioncoverer/>`__: Interactive S2 cell covering
-  calculator.
-- `Planetary View  <http://s2.sidewalklabs.com/planetaryview/>`__: Interactive 3D globe view of the
-  S2 cell cube mapping.
+- `S2 Region Coverer Online Viewer <https://igorgatis.github.io/ws2/>`: Interactive S2 cell covering calculator.
 
 
 Implementations

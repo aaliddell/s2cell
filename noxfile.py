@@ -8,7 +8,7 @@ nox.options.sessions = ['coverage', 'docs', 'flake8', 'pylint', 'pydocstyle']
 
 @nox.session()
 def coverage(session):
-    session.install('.[dev]')
+    session.install('-e', '.[dev]')  # -e needed for coverage in newer pytest...
     session.run(
         'pytest', '--import-mode=importlib', '--cov=s2cell', '--cov-report', 'term-missing',
         '--cov-branch', '--cov-fail-under=100', '-n', 'auto', '--instafail', *session.posargs
@@ -16,22 +16,22 @@ def coverage(session):
 
 @nox.session()
 def flake8(session):
-    session.install('.[dev]')
+    session.install('-e', '.[dev]')
     session.run('flake8', 's2cell', 'tests', *session.posargs)
 
 @nox.session()
 def pylint(session):
-    session.install('.[dev]')
+    session.install('-e', '.[dev]')
     session.run('pylint', 's2cell', *session.posargs)
 
 @nox.session()
 def pydocstyle(session):
-    session.install('.[dev]')
+    session.install('-e', '.[dev]')
     session.run('pydocstyle', 's2cell', *session.posargs)
 
 @nox.session()
 def test(session):
-    session.install('.[dev]')
+    session.install('-e', '.[dev]')
     session.run('pytest', '--import-mode=importlib', '-n', 'auto', '--instafail', *session.posargs)
 
 @nox.session()
@@ -41,7 +41,7 @@ def build_wheel(session):
 
 @nox.session()
 def docs(session):
-    session.install('.[dev]')
+    session.install('-e', '.[dev]')
     session.run(
         'python', '-m', 'sphinx',
         '-c', 'docs/',
