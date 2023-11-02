@@ -145,6 +145,7 @@ def _s2_si_ti_to_st(component: int) -> float:
     """
     return (1.0 / _S2_MAX_SI_TI) * component
 
+
 def _s2_get_face(p: tuple[float, float, float]) -> int:
     # Get cube face
     # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L380-L384
@@ -162,6 +163,7 @@ def _s2_get_face(p: tuple[float, float, float]) -> int:
     if p[face] < 0.0:
         face += 3
     return face
+
 
 def _s2_xyz_to_face_uv(s2_point: tuple[float, float, float]) -> tuple[int, float, float]:
     # Convert face + XYZ to cube-space face + UV
@@ -197,6 +199,7 @@ def _s2_xyz_to_face_uv(s2_point: tuple[float, float, float]) -> tuple[int, float
     if face in (2, 4, 5):
         uv = (uv[0], -uv[1])  # Negate V  # pylint: disable=invalid-name
     return face, uv[0], uv[1]
+
 
 def _s2_face_uv_to_xyz(  # pylint: disable=invalid-name
         face: int, uv: Tuple[float, float]
@@ -300,7 +303,6 @@ def _s2_init_lookups() -> None:
                 # Write lookups
                 _S2_LOOKUP_POS[ij | base_orientation] = pos | orientation
                 _S2_LOOKUP_IJ[pos | base_orientation] = ij | orientation
-
 
 
 def _s2_to_face_ij_orientation(cell_id: int) -> tuple[int, int, int]:
