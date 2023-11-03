@@ -146,6 +146,61 @@ def _s2_si_ti_to_st(component: int) -> float:
     return (1.0 / _S2_MAX_SI_TI) * component
 
 
+def _s2_get_face(p: tuple[float, float, float]) -> int:
+    # Get cube face
+    # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L380-L384
+    #
+    # The face is determined by the largest XYZ component of the S2Point vector. When the component
+    # is negative, the second set of three faces is used.
+    # Largest component -> face:
+    # +x -> 0
+    # +y -> 1
+    # +z -> 2
+    # -x -> 3
+    # -y -> 4
+    # -z -> 5
+    face = max(enumerate(p), key=lambda p: abs(p[1]))[0]  # Largest absolute component
+    if p[face] < 0.0:
+        face += 3
+    return face
+
+
+def _s2_xyz_to_face_uv(s2_point: tuple[float, float, float]) -> tuple[int, float, float]:
+    # Convert face + XYZ to cube-space face + UV
+    # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L366-L372
+    #
+    # The faces are oriented to ensure continuity of curve.
+    # Face -> UV components -> indices with negation (without divisor, which is always the remaining
+    # component (index: face % 3)):
+    # 0 -> ( y,  z) -> ( 1,  2)
+    # 1 -> (-x,  z) -> (-0,  2)
+    # 2 -> (-x, -y) -> (-0, -1) <- -1 here means -1 times the value in index 1, not index -1
+    # 3 -> ( z,  y) -> ( 2,  1)
+    # 4 -> ( z, -x) -> ( 2, -0)
+    # 5 -> (-y, -x) -> (-1, -0)
+    #
+    # For a compiled language, a switch statement on face is preferable as it will be more easily
+    # optimised as a jump table etc; but in Python the indexing method is more concise.
+    #
+    # The index selection can be reduced to some bit magic:
+    # U: 1 - ((face + 1) >> 1)
+    # V: 2 - (face >> 1)
+    #
+    # The negation of the the two components is then selected:
+    # U: (face in [1, 2, 5]) ? -1: 1
+    # V: (face in [2, 4, 5])) ? -1: 1
+    face = _s2_get_face(s2_point)
+    uv = (  # pylint: disable=invalid-name
+        s2_point[1 - ((face + 1) >> 1)] / s2_point[face % 3],  # U
+        s2_point[2 - (face >> 1)] / s2_point[face % 3]         # V
+    )
+    if face in (1, 2, 5):
+        uv = (-uv[0], uv[1])  # Negate U  # pylint: disable=invalid-name
+    if face in (2, 4, 5):
+        uv = (uv[0], -uv[1])  # Negate V  # pylint: disable=invalid-name
+    return face, uv[0], uv[1]
+
+
 def _s2_face_uv_to_xyz(  # pylint: disable=invalid-name
         face: int, uv: Tuple[float, float]
 ) -> Tuple[float, float, float]:
@@ -250,6 +305,143 @@ def _s2_init_lookups() -> None:
                 _S2_LOOKUP_IJ[pos | base_orientation] = ij | orientation
 
 
+def _s2_to_face_ij_orientation(cell_id: int) -> tuple[int, int, int]:
+    # Populate _S2_LOOKUP_IJ on first run.
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109
+    # This table takes 10 bits of curve position and orientation and returns 10 bits of I and J and
+    # new orientation
+    if _S2_LOOKUP_IJ is None:  # pragma: no cover
+        _s2_init_lookups()
+
+    # Extract face + IJ from cell ID
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L312-L367
+    #
+    # This is done by looking up 8 bits of curve position at a time in the lookup table, along with
+    # two bits of orientation (swap (1) and invert (2)). This gives back 8 bits of I and J (4 each)
+    # and two new orientation bits for the curve within the sub-cells in the next step.
+    #
+    # The swap bit swaps I and J with each other
+    # The invert bit inverts the bits of I and J, which means axes are negated
+    #
+    # In the first loop (most significant bits), the 3 bits occupied by the face need to be masked
+    # out, since these are not set in the IJ to cell ID during encoding.
+    #
+    # The I and J returned here are of one of the two leaf (level 30) cells that are located
+    # diagonally closest to the cell center. This happens because repeated ..00.. will select the
+    # 'lower left' (for nominally oriented Hilbert curve segments) of the sub-cells. The ..10..
+    # arising from the trailing bit, prior to the repeated ..00.. bits, ensures we first pick the
+    # 'upper right' of the cell, then iterate in to lower left until we hit the leaf cell. This
+    # means we pick the leaf cell to the north east of the parent cell center (again for nominal
+    # orientation).
+    # However, in the case of the swapped and inverted curve segment (4th sub-curve segment), the
+    # ..10.. will select the 'lower left' and then iterate to the 'upper right' with each ..00..
+    # following. In that case, we will be offset left and down by one leaf cell in each of I and J,
+    # which needs to be fixed to have a consistent mapping. This is detectable by seeing that the
+    # final bit of I or J is 1 (i.e we have picked an odd row/column, which will happen concurrently
+    # in both I and J, so we only need to check one), except in case of level 29 where the logic is
+    # inverted and the correction needs to be applied when we pick an even row/column (i.e I/J ends
+    # in 0), since there are no trailing ..00..  available after the ``..10..`` when we are at level
+    # 29+.
+    #
+    # This behaviour can be captured in the expression:
+    # apply_correction = not leaf and (i ^ (is level 29)) & 1
+    # apply_correction = not leaf and (i ^ (cell_id >> 2)) & 1
+    #
+    # We check for level 29 by looking for the trailing 1 in the third LSB, when we already know
+    # that we are not a leaf cell (which could give false positive) by the initial check in the
+    # expression.
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.h#L503-L529
+    #
+    face = cell_id >> _S2_POS_BITS
+    bits = face & _S2_SWAP_MASK  # ppppppppoo. Initially set by by face
+    lookup_mask = (1 << _S2_LOOKUP_BITS) - 1  # Mask of 4 one bits: 0b1111
+    i = 0
+    j = 0
+    for k in range(7, -1, -1):
+        # Pull out 8 bits of cell ID, except in first loop where we pull out only 4
+        n_bits = (_S2_MAX_LEVEL - 7 * _S2_LOOKUP_BITS) if k == 7 else _S2_LOOKUP_BITS
+        extract_mask = (1 << (2 * n_bits)) - 1  # 8 (or 4) one bits
+        bits += (
+            (cell_id >> (k * 2 * _S2_LOOKUP_BITS + 1)) & extract_mask
+        ) << 2
+
+        # Map bits from ppppppppoo to iiiijjjjoo using lookup table
+        bits = _S2_LOOKUP_IJ[bits]
+
+        # Extract I and J bits
+        offset = k * _S2_LOOKUP_BITS
+        i += (bits >> (_S2_LOOKUP_BITS + 2)) << offset  # Don't need lookup mask here
+        j += ((bits >> 2) & lookup_mask) << offset
+
+        # Remove I and J bits, leaving just new swap and invert bits for the next round
+        bits &= _S2_SWAP_MASK | _S2_INVERT_MASK  # Mask: 0b11
+
+    return face, i, j
+
+
+def _s2_from_face_ij(face: int, i: int, j: int, level: int) -> int:
+    # Populate _S2_LOOKUP_POS on first run.
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109
+    #
+    # This table takes 10 bits of I and J and orientation and returns 10 bits of curve position and
+    # new orientation
+    if _S2_LOOKUP_POS is None:  # pragma: no cover
+        _s2_init_lookups()
+
+    # Convert face + IJ to cell ID
+    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L256-L298
+    #
+    # This is done by looking up 8 bits of I and J (4 each) at a time in the lookup table, along
+    # with two bits of orientation (swap (1) and invert (2)). This gives back 8 bits of position
+    # along the curve and two new orientation bits for the curve within the sub-cells in the next
+    # step.
+    #
+    # The swap bit swaps I and J with each other
+    # The invert bit inverts the bits of I and J, which means axes are negated
+    #
+    # Compared to the standard versions, we check the required number of steps we need to do for the
+    # requested level and don't perform steps that will be completely overwritten in the truncation
+    # below, rather than always doing every step. Each step does 4 bits each of I and J, which is 4
+    # levels, so the required number of steps is ceil((level + 2) / 4), when level is > 0. The
+    # additional 2 levels added are required to account for the top 3 bits (4 before right shift)
+    # that are occupied by the face bits.
+    bits = face & _S2_SWAP_MASK  # iiiijjjjoo. Initially set by by face
+    cell_id = face << (_S2_POS_BITS - 1)  # Insert face at second most signficant bits
+    lookup_mask = (1 << int(_S2_LOOKUP_BITS)) - 1  # Mask of 4 one bits: 0b1111
+    required_steps = math.ceil((level + 2) / 4) if level > 0 else 0
+    for k in range(7, 7 - required_steps, -1):
+        # Grab 4 bits of each of I and J
+        offset = k * _S2_LOOKUP_BITS
+        bits += ((i >> offset) & lookup_mask) << (_S2_LOOKUP_BITS + 2)
+        bits += ((j >> offset) & lookup_mask) << 2
+
+        # Map bits from iiiijjjjoo to ppppppppoo using lookup table
+        bits = _S2_LOOKUP_POS[bits]
+
+        # Insert position bits into cell ID
+        cell_id |= (bits >> 2) << (k * 2 * _S2_LOOKUP_BITS)
+
+        # Remove position bits, leaving just new swap and invert bits for the next round
+        bits &= _S2_SWAP_MASK | _S2_INVERT_MASK  # Mask: 0b11
+
+    # Left shift and add trailing bit
+    # The trailing bit addition is disabled, as we are overwriting this below in the truncation
+    # anyway. This line is kept as an example of the full method for S2 cell ID creation as is done
+    # in the standard library versions.
+    cell_id = cell_id << 1  # + 1
+
+    # Truncate to desired level
+    # This is done by finding the mask of the trailing 1 bit for the specified level, then zeroing
+    # out all bits less significant than this, then finally setting the trailing 1 bit. This is
+    # still necessary to do even after a reduced number of steps `required_steps` above, since each
+    # step contains multiple levels that may need partial overwrite. Additionally, we need to add
+    # the trailing 1 bit, which is not yet set above.
+    least_significant_bit_mask = 1 << (2 * (_S2_MAX_LEVEL - level))
+    cell_id = (cell_id & -least_significant_bit_mask) | least_significant_bit_mask
+
+    return cell_id
+
+
 #
 # Cell ID <-> Token translation functions
 #
@@ -350,14 +542,6 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     if not isinstance(level, int) or level < 0 or level > _S2_MAX_LEVEL:
         raise ValueError('S2 level must be integer >= 0 and <= 30')
 
-    # Populate _S2_LOOKUP_POS on first run.
-    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109
-    #
-    # This table takes 10 bits of I and J and orientation and returns 10 bits of curve position and
-    # new orientation
-    if _S2_LOOKUP_POS is None:  # pragma: no cover
-        _s2_init_lookups()
-
     # Reuse constant expressions
     lat_rad = math.radians(lat)
     lon_rad = math.radians(lon)
@@ -374,114 +558,17 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
         sin_lat_rad                 # Z
     )
 
-    # Get cube face
-    # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L380-L384
-    #
-    # The face is determined by the largest XYZ component of the S2Point vector. When the component
-    # is negative, the second set of three faces is used.
-    # Largest component -> face:
-    # +x -> 0
-    # +y -> 1
-    # +z -> 2
-    # -x -> 3
-    # -y -> 4
-    # -z -> 5
-    face = max(enumerate(s2_point), key=lambda p: abs(p[1]))[0]  # Largest absolute component
-    if s2_point[face] < 0.0:
-        face += 3
-
-    # Convert face + XYZ to cube-space face + UV
-    # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L366-L372
-    #
-    # The faces are oriented to ensure continuity of curve.
-    # Face -> UV components -> indices with negation (without divisor, which is always the remaining
-    # component (index: face % 3)):
-    # 0 -> ( y,  z) -> ( 1,  2)
-    # 1 -> (-x,  z) -> (-0,  2)
-    # 2 -> (-x, -y) -> (-0, -1) <- -1 here means -1 times the value in index 1, not index -1
-    # 3 -> ( z,  y) -> ( 2,  1)
-    # 4 -> ( z, -x) -> ( 2, -0)
-    # 5 -> (-y, -x) -> (-1, -0)
-    #
-    # For a compiled language, a switch statement on face is preferable as it will be more easily
-    # optimised as a jump table etc; but in Python the indexing method is more concise.
-    #
-    # The index selection can be reduced to some bit magic:
-    # U: 1 - ((face + 1) >> 1)
-    # V: 2 - (face >> 1)
-    #
-    # The negation of the the two components is then selected:
-    # U: (face in [1, 2, 5]) ? -1: 1
-    # V: (face in [2, 4, 5])) ? -1: 1
-    uv = (  # pylint: disable=invalid-name
-        s2_point[1 - ((face + 1) >> 1)] / s2_point[face % 3],  # U
-        s2_point[2 - (face >> 1)] / s2_point[face % 3]         # V
-    )
-    if face in (1, 2, 5):
-        uv = (-uv[0], uv[1])  # Negate U  # pylint: disable=invalid-name
-    if face in (2, 4, 5):
-        uv = (uv[0], -uv[1])  # Negate V  # pylint: disable=invalid-name
+    face, u, v = _s2_xyz_to_face_uv(s2_point)
 
     # Project cube-space UV to cell-space ST
     # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L317-L320
-    st = (_s2_uv_to_st(uv[0]), _s2_uv_to_st(uv[1]))  # pylint: disable=invalid-name
+    s, t = _s2_uv_to_st(u), _s2_uv_to_st(v)  # pylint: disable=invalid-name
 
     # Convert ST to IJ integers
     # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L333-L336
-    ij = (_s2_st_to_ij(st[0]), _s2_st_to_ij(st[1]))  # pylint: disable=invalid-name
+    i, j = (_s2_st_to_ij(s), _s2_st_to_ij(t))  # pylint: disable=invalid-name
 
-    # Convert face + IJ to cell ID
-    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L256-L298
-    #
-    # This is done by looking up 8 bits of I and J (4 each) at a time in the lookup table, along
-    # with two bits of orientation (swap (1) and invert (2)). This gives back 8 bits of position
-    # along the curve and two new orientation bits for the curve within the sub-cells in the next
-    # step.
-    #
-    # The swap bit swaps I and J with each other
-    # The invert bit inverts the bits of I and J, which means axes are negated
-    #
-    # Compared to the standard versions, we check the required number of steps we need to do for the
-    # requested level and don't perform steps that will be completely overwritten in the truncation
-    # below, rather than always doing every step. Each step does 4 bits each of I and J, which is 4
-    # levels, so the required number of steps is ceil((level + 2) / 4), when level is > 0. The
-    # additional 2 levels added are required to account for the top 3 bits (4 before right shift)
-    # that are occupied by the face bits.
-    bits = face & _S2_SWAP_MASK  # iiiijjjjoo. Initially set by by face
-    cell_id = face << (_S2_POS_BITS - 1)  # Insert face at second most signficant bits
-    lookup_mask = (1 << int(_S2_LOOKUP_BITS)) - 1  # Mask of 4 one bits: 0b1111
-    required_steps = math.ceil((level + 2) / 4) if level > 0 else 0
-    for k in range(7, 7 - required_steps, -1):
-        # Grab 4 bits of each of I and J
-        offset = k * _S2_LOOKUP_BITS
-        bits += ((ij[0] >> offset) & lookup_mask) << (_S2_LOOKUP_BITS + 2)
-        bits += ((ij[1] >> offset) & lookup_mask) << 2
-
-        # Map bits from iiiijjjjoo to ppppppppoo using lookup table
-        bits = _S2_LOOKUP_POS[bits]
-
-        # Insert position bits into cell ID
-        cell_id |= (bits >> 2) << (k * 2 * _S2_LOOKUP_BITS)
-
-        # Remove position bits, leaving just new swap and invert bits for the next round
-        bits &= _S2_SWAP_MASK | _S2_INVERT_MASK  # Mask: 0b11
-
-    # Left shift and add trailing bit
-    # The trailing bit addition is disabled, as we are overwriting this below in the truncation
-    # anyway. This line is kept as an example of the full method for S2 cell ID creation as is done
-    # in the standard library versions.
-    cell_id = cell_id << 1  # + 1
-
-    # Truncate to desired level
-    # This is done by finding the mask of the trailing 1 bit for the specified level, then zeroing
-    # out all bits less significant than this, then finally setting the trailing 1 bit. This is
-    # still necessary to do even after a reduced number of steps `required_steps` above, since each
-    # step contains multiple levels that may need partial overwrite. Additionally, we need to add
-    # the trailing 1 bit, which is not yet set above.
-    least_significant_bit_mask = 1 << (2 * (_S2_MAX_LEVEL - level))
-    cell_id = (cell_id & -least_significant_bit_mask) | least_significant_bit_mask
-
-    return cell_id
+    return _s2_from_face_ij(face, i, j, level)
 
 
 def lat_lon_to_token(lat: float, lon: float, level: int = 30) -> str:
@@ -536,75 +623,7 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
     if not cell_id_is_valid(cell_id):
         raise InvalidCellID('Cannot decode invalid S2 cell ID: {}'.format(cell_id))
 
-    # Populate _S2_LOOKUP_IJ on first run.
-    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109
-    # This table takes 10 bits of curve position and orientation and returns 10 bits of I and J and
-    # new orientation
-    if _S2_LOOKUP_IJ is None:  # pragma: no cover
-        _s2_init_lookups()
-
-    # Extract face + IJ from cell ID
-    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L312-L367
-    #
-    # This is done by looking up 8 bits of curve position at a time in the lookup table, along with
-    # two bits of orientation (swap (1) and invert (2)). This gives back 8 bits of I and J (4 each)
-    # and two new orientation bits for the curve within the sub-cells in the next step.
-    #
-    # The swap bit swaps I and J with each other
-    # The invert bit inverts the bits of I and J, which means axes are negated
-    #
-    # In the first loop (most significant bits), the 3 bits occupied by the face need to be masked
-    # out, since these are not set in the IJ to cell ID during encoding.
-    #
-    # The I and J returned here are of one of the two leaf (level 30) cells that are located
-    # diagonally closest to the cell center. This happens because repeated ..00.. will select the
-    # 'lower left' (for nominally oriented Hilbert curve segments) of the sub-cells. The ..10..
-    # arising from the trailing bit, prior to the repeated ..00.. bits, ensures we first pick the
-    # 'upper right' of the cell, then iterate in to lower left until we hit the leaf cell. This
-    # means we pick the leaf cell to the north east of the parent cell center (again for nominal
-    # orientation).
-    # However, in the case of the swapped and inverted curve segment (4th sub-curve segment), the
-    # ..10.. will select the 'lower left' and then iterate to the 'upper right' with each ..00..
-    # following. In that case, we will be offset left and down by one leaf cell in each of I and J,
-    # which needs to be fixed to have a consistent mapping. This is detectable by seeing that the
-    # final bit of I or J is 1 (i.e we have picked an odd row/column, which will happen concurrently
-    # in both I and J, so we only need to check one), except in case of level 29 where the logic is
-    # inverted and the correction needs to be applied when we pick an even row/column (i.e I/J ends
-    # in 0), since there are no trailing ..00..  available after the ``..10..`` when we are at level
-    # 29+.
-    #
-    # This behaviour can be captured in the expression:
-    # apply_correction = not leaf and (i ^ (is level 29)) & 1
-    # apply_correction = not leaf and (i ^ (cell_id >> 2)) & 1
-    #
-    # We check for level 29 by looking for the trailing 1 in the third LSB, when we already know
-    # that we are not a leaf cell (which could give false positive) by the initial check in the
-    # expression.
-    # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.h#L503-L529
-    #
-    face = cell_id >> _S2_POS_BITS
-    bits = face & _S2_SWAP_MASK  # ppppppppoo. Initially set by by face
-    lookup_mask = (1 << _S2_LOOKUP_BITS) - 1  # Mask of 4 one bits: 0b1111
-    i = 0
-    j = 0
-    for k in range(7, -1, -1):
-        # Pull out 8 bits of cell ID, except in first loop where we pull out only 4
-        n_bits = (_S2_MAX_LEVEL - 7 * _S2_LOOKUP_BITS) if k == 7 else _S2_LOOKUP_BITS
-        extract_mask = (1 << (2 * n_bits)) - 1  # 8 (or 4) one bits
-        bits += (
-            (cell_id >> (k * 2 * _S2_LOOKUP_BITS + 1)) & extract_mask
-        ) << 2
-
-        # Map bits from ppppppppoo to iiiijjjjoo using lookup table
-        bits = _S2_LOOKUP_IJ[bits]
-
-        # Extract I and J bits
-        offset = k * _S2_LOOKUP_BITS
-        i += (bits >> (_S2_LOOKUP_BITS + 2)) << offset  # Don't need lookup mask here
-        j += ((bits >> 2) & lookup_mask) << offset
-
-        # Remove I and J bits, leaving just new swap and invert bits for the next round
-        bits &= _S2_SWAP_MASK | _S2_INVERT_MASK  # Mask: 0b11
+    face, i, j = _s2_to_face_ij_orientation(cell_id)
 
     # Resolve the center of the cell. For leaf cells, we add half the leaf cell size. For non-leaf
     # cells, we currently have one of either two cells diagonally around the cell center and want
