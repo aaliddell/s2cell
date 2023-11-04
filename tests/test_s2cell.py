@@ -336,3 +336,70 @@ def test_token_to_parent_token_compat():
                 else:
                     with pytest.raises(ValueError, match=re.escape('Cannot get level {} parent cell ID of cell ID with level {}'.format(other_level, level))):
                         s2cell.token_to_parent_token(levels_dict[level], other_level)
+
+
+def test_s2_get_edge_neighbors():
+    # s2geometry/blob/7773d518b1f29caa1c2045eb66ec519e025be108/src/python/s2geometry_test.py#L66-L73
+    cell = 0x466d319000000000
+    expected_neighbors = sorted([0x466d31b000000000,
+                                 0x466d317000000000,
+                                 0x466d323000000000,
+                                 0x466d31f000000000])
+    neighbors = sorted(s2cell.get_neighbor_cell_ids(cell))
+    assert len(neighbors) == len(expected_neighbors)
+    for i in range(len(neighbors)):
+        assert neighbors[i] == expected_neighbors[i]
+
+
+def test_s2_get_edge_neighbors_all_neighbors():
+    # s2geometry/blob/7773d518b1f29caa1c2045eb66ec519e025be108/src/python/s2geometry_test.py#L86-L99
+    cell = 0x466d319000000000
+    expected_neighbors = sorted([0x466d31d000000000,
+                                 0x466d311000000000,
+                                 0x466d31b000000000,
+                                 0x466d323000000000,
+                                 0x466d31f000000000,
+                                 0x466d317000000000,
+                                 0x466d321000000000,
+                                 0x466d33d000000000])
+    assert s2cell.cell_id_to_level(cell) == 12
+    neighbors = sorted(s2cell.get_neighbor_cell_ids(cell, corners=True))
+    assert len(neighbors) == len(expected_neighbors)
+    for i in range(len(neighbors)):
+        assert neighbors[i] == expected_neighbors[i]
+
+    # s2geometry/blob/7773d518b1f29caa1c2045eb66ec519e025be108/src/python/s2geometry_test.py#L146-L157
+    cell = 0x6aa7590000000000
+    expected_neighbors = sorted([0x2ab3530000000000,
+                                 0x2ab34b0000000000,
+                                 0x2ab34d0000000000,
+                                 0x6aa75b0000000000,
+                                 0x6aa7570000000000,
+                                 0x6aa75f0000000000,
+                                 0x6aa7510000000000,
+                                 0x6aa75d0000000000])
+    neighbors = sorted(s2cell.get_neighbor_cell_ids(cell, corners=True))
+    assert len(neighbors) == len(expected_neighbors)
+    for i in range(len(neighbors)):
+        assert neighbors[i] == expected_neighbors[i]
+
+
+def test_s2_get_edge_neighbors_at_cube_corner():
+    cell = 0x4aac000000000000
+
+    expected_neighbors = sorted([0x0aac000000000000,
+                                 0x4aa4000000000000,
+                                 0x4ab4000000000000,
+                                 0x8aac000000000000])
+    neighbors = sorted(s2cell.get_neighbor_cell_ids(cell, edge=True, corners=False))
+    assert len(neighbors) == len(expected_neighbors)
+    for i in range(len(neighbors)):
+        assert neighbors[i] == expected_neighbors[i]
+
+    expected_neighbors = sorted([0x0ab4000000000000,
+                                 0x4abc000000000000,
+                                 0x8aa4000000000000])
+    neighbors = sorted(s2cell.get_neighbor_cell_ids(cell, edge=False, corners=True))
+    assert len(neighbors) == len(expected_neighbors)
+    for i in range(len(neighbors)):
+        assert neighbors[i] == expected_neighbors[i]

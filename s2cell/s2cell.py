@@ -18,6 +18,7 @@ import math
 import re
 from typing import Optional, Tuple
 
+# pylint: disable=too-many-lines
 
 #
 # s2cell exceptions
@@ -144,6 +145,11 @@ def _s2_si_ti_to_st(component: int) -> float:
 
     """
     return (1.0 / _S2_MAX_SI_TI) * component
+
+
+def _s2_get_size_ij(level: int) -> int:
+    # s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2cell_id.h#L561-L563
+    return 1 << (_S2_MAX_LEVEL - level)
 
 
 def _s2_get_face(p: tuple[float, float, float]) -> int:
@@ -440,6 +446,26 @@ def _s2_from_face_ij(face: int, i: int, j: int, level: int) -> int:
     cell_id = (cell_id & -least_significant_bit_mask) | least_significant_bit_mask
 
     return cell_id
+
+
+def _s2_from_face_ij_wrap(face: int, i: int, j: int, level: int) -> int:
+    i_same = 0 <= i < _S2_MAX_SIZE
+    j_same = 0 <= j < _S2_MAX_SIZE
+    if i_same and j_same:
+        return _s2_from_face_ij(face, i, j, level)
+    if (not i_same) and (not j_same):
+        return 0
+
+    # s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2cell_id.cc#L446-L477
+    scale = 1.0 / _S2_MAX_SIZE
+    limit = math.nextafter(1, 2)
+    u = max(-limit, min(limit, scale * ((2 * i) + 1 - _S2_MAX_SIZE)))
+    v = max(-limit, min(limit, scale * ((2 * j) + 1 - _S2_MAX_SIZE)))
+
+    face, u, v = _s2_xyz_to_face_uv(_s2_face_uv_to_xyz(face, (u, v)))
+    return _s2_from_face_ij(
+        face, _s2_st_to_ij(0.5 * (u + 1)), _s2_st_to_ij(0.5 * (v + 1)), level
+    )
 
 
 #
@@ -964,3 +990,40 @@ def token_to_parent_token(token: str, level: Optional[int] = None) -> str:
 
     # Convert to cell ID and get parent and convert back to token
     return cell_id_to_token(cell_id_to_parent_cell_id(token_to_cell_id(token), level))
+
+
+def get_neighbor_cell_ids(
+    cell_id: int, edge: bool = True, corners: bool = False
+) -> list[int]:
+    """
+    Lists neighbor cells for input cell.
+
+    There are two types of neighbors: edge neighbors and corner neighbors.
+    By default, only edge neighbors are returned. If corners is True, corner
+    neighbors are also added. Normally, there are 4 corner neighbors and 4 edge
+    neighbors. However, at cube corners, there are only 3 corner neighbors.
+
+    See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2cell_id.cc#L545-L586
+
+    Args:
+        cell_id: The S2 cell ID integer.
+        edge: If True, add edge neighbors (default is True).
+        corners: If True, add corner neighbors (default is False).
+
+    Returns:
+       List of neighbor S2 cell IDs.
+    """
+    level = cell_id_to_level(cell_id)
+    size = _s2_get_size_ij(level)
+    face, i, j = _s2_to_face_ij_orientation(cell_id)
+    neighbors = []
+    if edge:
+        for di, dj in [(0, -size), (size, 0), (0, size), (-size, 0)]:
+            neighbors.append(_s2_from_face_ij_wrap(face, i + di, j + dj, level))
+    if corners:
+        for di in (-size, size):
+            for dj in (-size, size):
+                neighbor = _s2_from_face_ij_wrap(face, i + di, j + dj, level)
+                if neighbor > 0:
+                    neighbors.append(neighbor)
+    return neighbors
