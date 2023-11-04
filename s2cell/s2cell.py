@@ -997,7 +997,7 @@ def get_neighbor_cell_ids(
     cell_id: int, edge: bool = True, corners: bool = False
 ) -> list[int]:
     """
-    Lists neighbor cells for input cell.
+    List neighbor cells for input cell.
 
     There are two types of neighbors: edge neighbors and corner neighbors.
     By default, only edge neighbors are returned. If corners is True, corner
