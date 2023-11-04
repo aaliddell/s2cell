@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pylint: disable=too-many-lines
+
 """Minimal Python S2 Geometry cell ID, token and lat/lon conversion library."""
 
 import math
 import re
 from typing import Optional, Tuple
 
-# pylint: disable=too-many-lines
 
 #
 # s2cell exceptions
