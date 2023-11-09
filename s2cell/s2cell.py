@@ -526,12 +526,10 @@ def _s2_face_ij_to_wrapped_cell_id(face: int, i: int, j: int, level: int) -> int
     # Check if I and J are on the face provided by ensuring they are in the valid range. If both are
     # then no wrapping is needed and it's quicker to just use _s2_face_ij_to_cell_id immediately and
     # avoid the projection/unprojection
-    i_same = 0 <= i < _S2_MAX_SIZE
-    j_same = 0 <= j < _S2_MAX_SIZE
-    if i_same and j_same:
+    i_on_same_face = 0 <= i < _S2_MAX_SIZE
+    j_on_same_face = 0 <= j < _S2_MAX_SIZE
+    if i_on_same_face and j_on_same_face:
         return _s2_face_ij_to_cell_id(face, i, j, level)
-    if not i_same and not j_same:
-        return 0
 
     # Convert IJ to UV using the linear mapping function and clamp such that UV can only be
     # marginally outside of the face (-1 to 1)
@@ -1088,13 +1086,14 @@ def cell_id_to_neighbor_cell_ids(
     there are 4 corner neighbors and 4 edge neighbors for each cell. However, at
     cube face corners, there are only 3 corner neighbors as there is not cell
     beyond the corner vertex that isn't already represented by an edge neighbor.
-    
+
     By default, only edge neighbors are returned from this function, unless
     corner is True.
 
-    If only edge neighbors are requested, the order of the returned cell IDs is
-    guaranteed to be in the order down, right, up, left from the input cell ID,
-    to match the behaviour of s2geometry GetEdgeNeighbors().
+    The order of the returned cell IDs is guaranteed to be in the order down,
+    right, up, left from the input cell ID, If corner neighbors are requested,
+    they will be interleaved correctly in that order. Note that face orientation
+    may mean these directions are not where you expect on a globe.
 
     See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2cell_id.cc#L545-L586
 
@@ -1112,18 +1111,31 @@ def cell_id_to_neighbor_cell_ids(
     face, i, j = _s2_cell_id_to_face_ij(cell_id)
     neighbors = []
 
-    # Find edge neighbors by offsetting I & J by the cell size in each of the down, right, up, left
-    # directions
-    if edge:
-        for di, dj in [(0, -size), (size, 0), (0, size), (-size, 0)]:
+    # Define offsets for each potentially neighboring cell, along with a flag indicating if the cell
+    # would be a corner neighbor
+    offsets = [
+        (0, -size, False),  # Down edge
+        (size, -size, True),  # Down right corner
+        (size, 0, False),  # Right edge
+        (size, size, True),  # Up right corner
+        (0, size, False),  # Up edge
+        (-size, size, True),  # Up left corner
+        (-size, 0, False),  # Left edge
+        (-size, -size, True),  # Down left corner
+    ]
+
+    for di, dj, is_corner in offsets:
+        # All edge neighbors are always inluded
+        if not is_corner and edge:
             neighbors.append(_s2_face_ij_to_wrapped_cell_id(face, i + di, j + dj, level))
 
-    # Find corner neighbors
-    if corner:
-        for di in (-size, size):
-            for dj in (-size, size):
-                neighbor = _s2_face_ij_to_wrapped_cell_id(face, i + di, j + dj, level)
-                if neighbor > 0:
-                    neighbors.append(neighbor)
+        # For corner neighbors, we need to check if we are trying to look for a neighbor off the
+        # current face in both I and J (i.e off the face corner), in which case there is no valid
+        # neighbor
+        if is_corner and corner:
+            i_on_same_face = 0 <= (i + di) < _S2_MAX_SIZE
+            j_on_same_face = 0 <= (j + dj) < _S2_MAX_SIZE
+            if i_on_same_face or j_on_same_face:
+                neighbors.append(_s2_face_ij_to_wrapped_cell_id(face, i + di, j + dj, level))
 
     return neighbors

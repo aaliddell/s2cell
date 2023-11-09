@@ -341,7 +341,7 @@ def test_token_to_parent_token_compat():
 def test_s2_cell_id_to_neighbor_cell_ids_edge():
     # s2geometry/blob/7773d518b1f29caa1c2045eb66ec519e025be108/src/python/s2geometry_test.py#L66-L73
     cell = 0x466d319000000000
-    expected_neighbors = [  # Order is guaranteed for edge only
+    expected_neighbors = [
         0x466d31b000000000,
         0x466d317000000000,
         0x466d323000000000,
@@ -354,51 +354,51 @@ def test_s2_cell_id_to_neighbor_cell_ids_edge():
 def test_s2_cell_id_to_neighbor_cell_ids_all():
     # s2geometry/blob/7773d518b1f29caa1c2045eb66ec519e025be108/src/python/s2geometry_test.py#L86-L99
     cell = 0x466d319000000000
-    expected_neighbors = {  # Order is not guaranteed for non-edge only
-        0x466d31d000000000,
-        0x466d311000000000,
-        0x466d31b000000000,
-        0x466d323000000000,
-        0x466d31f000000000,
-        0x466d317000000000,
-        0x466d321000000000,
-        0x466d33d000000000,
-    }
+    expected_neighbors = [
+        5074766987100422144,
+        5074766299905654784,
+        5074766712222515200,
+        5074769323562631168,
+        5074767536856236032,
+        5074767399417282560,
+        5074767261978329088,
+        5074767124539375616,
+    ]
     assert s2cell.cell_id_to_level(cell) == 12
-    neighbors = set(s2cell.cell_id_to_neighbor_cell_ids(cell, corner=True))
+    neighbors = s2cell.cell_id_to_neighbor_cell_ids(cell, corner=True)
     assert neighbors == expected_neighbors
 
     # s2geometry/blob/7773d518b1f29caa1c2045eb66ec519e025be108/src/python/s2geometry_test.py#L146-L157
     cell = 0x6aa7590000000000
-    expected_neighbors = {  # Order is not guaranteed for non-edge only
-        0x2ab3530000000000,
-        0x2ab34b0000000000,
-        0x2ab34d0000000000,
-        0x6aa75b0000000000,
-        0x6aa7570000000000,
-        0x6aa75f0000000000,
-        0x6aa7510000000000,
-        0x6aa75d0000000000,
-    }
-    neighbors = sorted(s2cell.cell_id_to_neighbor_cell_ids(cell, corner=True))
+    expected_neighbors = [
+        3076887632819519488,
+        3076885433796263936,
+        7685215742735679488,
+        7685213543712423936,
+        7685211344689168384,
+        7685200349572890624,
+        7685206946642657280,
+        3076894229889286144,
+    ]
+    neighbors = s2cell.cell_id_to_neighbor_cell_ids(cell, corner=True)
     assert neighbors == expected_neighbors
 
 
 def test_s2_cell_id_to_neighbor_cell_ids_at_cube_corner():
     cell = 0x4aac000000000000
-    expected_neighbors = [  # Order is guaranteed for edge only
-        0x0aac000000000000,
+    expected_neighbors = [
         0x4aa4000000000000,
         0x4ab4000000000000,
         0x8aac000000000000,
+        0x0aac000000000000,
     ]
     neighbors = s2cell.cell_id_to_neighbor_cell_ids(cell, edge=True, corner=False)
     assert neighbors == expected_neighbors
 
-    expected_neighbors = {
-        0x0ab4000000000000,
-        0x4abc000000000000,
-        0x8aa4000000000000,
-    }
-    neighbors = set(s2cell.cell_id_to_neighbor_cell_ids(cell, edge=False, corner=True))
+    expected_neighbors = [
+        5385179254428270592,
+        9990109873414602752,
+        771241436187197440,
+    ]
+    neighbors = s2cell.cell_id_to_neighbor_cell_ids(cell, edge=False, corner=True)
     assert neighbors == expected_neighbors
