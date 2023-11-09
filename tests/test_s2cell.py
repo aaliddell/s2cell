@@ -345,7 +345,7 @@ def test_s2_get_edge_neighbors():
                                  0x466d317000000000,
                                  0x466d323000000000,
                                  0x466d31f000000000])
-    neighbors = sorted(s2cell.get_neighbor_cell_ids(cell))
+    neighbors = sorted(s2cell.cell_id_to_neighbor_cell_ids(cell))
     assert len(neighbors) == len(expected_neighbors)
     for i in range(len(neighbors)):
         assert neighbors[i] == expected_neighbors[i]
@@ -363,7 +363,7 @@ def test_s2_get_edge_neighbors_all_neighbors():
                                  0x466d321000000000,
                                  0x466d33d000000000])
     assert s2cell.cell_id_to_level(cell) == 12
-    neighbors = sorted(s2cell.get_neighbor_cell_ids(cell, corners=True))
+    neighbors = sorted(s2cell.cell_id_to_neighbor_cell_ids(cell, corner=True))
     assert len(neighbors) == len(expected_neighbors)
     for i in range(len(neighbors)):
         assert neighbors[i] == expected_neighbors[i]
@@ -378,7 +378,7 @@ def test_s2_get_edge_neighbors_all_neighbors():
                                  0x6aa75f0000000000,
                                  0x6aa7510000000000,
                                  0x6aa75d0000000000])
-    neighbors = sorted(s2cell.get_neighbor_cell_ids(cell, corners=True))
+    neighbors = sorted(s2cell.cell_id_to_neighbor_cell_ids(cell, corner=True))
     assert len(neighbors) == len(expected_neighbors)
     for i in range(len(neighbors)):
         assert neighbors[i] == expected_neighbors[i]
@@ -391,7 +391,7 @@ def test_s2_get_edge_neighbors_at_cube_corner():
                                  0x4aa4000000000000,
                                  0x4ab4000000000000,
                                  0x8aac000000000000])
-    neighbors = sorted(s2cell.get_neighbor_cell_ids(cell, edge=True, corners=False))
+    neighbors = sorted(s2cell.cell_id_to_neighbor_cell_ids(cell, edge=True, corner=False))
     assert len(neighbors) == len(expected_neighbors)
     for i in range(len(neighbors)):
         assert neighbors[i] == expected_neighbors[i]
@@ -399,7 +399,7 @@ def test_s2_get_edge_neighbors_at_cube_corner():
     expected_neighbors = sorted([0x0ab4000000000000,
                                  0x4abc000000000000,
                                  0x8aa4000000000000])
-    neighbors = sorted(s2cell.get_neighbor_cell_ids(cell, edge=False, corners=True))
+    neighbors = sorted(s2cell.cell_id_to_neighbor_cell_ids(cell, edge=False, corner=True))
     assert len(neighbors) == len(expected_neighbors)
     for i in range(len(neighbors)):
         assert neighbors[i] == expected_neighbors[i]

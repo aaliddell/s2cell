@@ -148,15 +148,35 @@ def _s2_si_ti_to_st(component: int) -> float:
     return (1.0 / _S2_MAX_SI_TI) * component
 
 
-def _s2_get_size_ij(level: int) -> int:
-    # s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2cell_id.h#L561-L563
+def _s2_level_to_size_ij(level: int) -> int:
+    """
+    Get the size of the cell in IJ based on its level.
+
+    See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2cell_id.h#L561-L563
+
+    Args:
+        level: The S2 cell level.
+
+    Returns:
+        The S2 cell size in IJ.
+
+    """
     return 1 << (_S2_MAX_LEVEL - level)
 
 
-def _s2_get_face(p: tuple[float, float, float]) -> int:
-    # Get cube face
-    # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L380-L384
-    #
+def _s2_point_to_face(s2_point: tuple[float, float, float]) -> int:
+    """
+    Get the face containing a specific S2Point vector.
+
+    See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L380-L384
+
+    Args:
+        s2_point: The S2Point vector.
+
+    Returns:
+        The face containing the S2Point vector.
+
+    """
     # The face is determined by the largest XYZ component of the S2Point vector. When the component
     # is negative, the second set of three faces is used.
     # Largest component -> face:
@@ -166,13 +186,26 @@ def _s2_get_face(p: tuple[float, float, float]) -> int:
     # -x -> 3
     # -y -> 4
     # -z -> 5
-    face = max(enumerate(p), key=lambda p: abs(p[1]))[0]  # Largest absolute component
-    if p[face] < 0.0:
+    face = max(enumerate(s2_point), key=lambda p: abs(p[1]))[0]  # Largest absolute component
+    if s2_point[face] < 0.0:
         face += 3
     return face
 
 
 def _s2_xyz_to_face_uv(s2_point: tuple[float, float, float]) -> tuple[int, float, float]:
+    """
+    Convert S2Point XYZ to face + UV.
+
+    Args:
+        s2_point: The S2Point to convert.
+
+    Returns:
+        Tuple containing face, U and V.
+
+    """
+    # Get face for S2Point XYZ
+    face = _s2_point_to_face(s2_point)
+
     # Convert face + XYZ to cube-space face + UV
     # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L366-L372
     #
@@ -196,7 +229,6 @@ def _s2_xyz_to_face_uv(s2_point: tuple[float, float, float]) -> tuple[int, float
     # The negation of the the two components is then selected:
     # U: (face in [1, 2, 5]) ? -1: 1
     # V: (face in [2, 4, 5])) ? -1: 1
-    face = _s2_get_face(s2_point)
     uv = (  # pylint: disable=invalid-name
         s2_point[1 - ((face + 1) >> 1)] / s2_point[face % 3],  # U
         s2_point[2 - (face >> 1)] / s2_point[face % 3]         # V
@@ -312,7 +344,17 @@ def _s2_init_lookups() -> None:
                 _S2_LOOKUP_IJ[pos | base_orientation] = ij | orientation
 
 
-def _s2_to_face_ij_orientation(cell_id: int) -> tuple[int, int, int]:
+def _s2_cell_id_to_face_ij(cell_id: int) -> tuple[int, int, int]:
+    """
+    Convert S2 cell ID to face + IJ.
+
+    Args:
+        cell_id: The S2 cell ID integer.
+
+    Returns:
+        Tuple containing the face and IJ coordinates.
+
+    """
     # Populate _S2_LOOKUP_IJ on first run.
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109
     # This table takes 10 bits of curve position and orientation and returns 10 bits of I and J and
@@ -386,7 +428,20 @@ def _s2_to_face_ij_orientation(cell_id: int) -> tuple[int, int, int]:
     return face, i, j
 
 
-def _s2_from_face_ij(face: int, i: int, j: int, level: int) -> int:
+def _s2_face_ij_to_cell_id(face: int, i: int, j: int, level: int) -> int:
+    """
+    Convert face + IJ to S2 cell ID.
+
+    Args:
+        face: The cell ID face.
+        i: The I component on the face.
+        j: The J component on the face.
+        level: The level of the resulting S2 cell ID.
+
+    Returns:
+        The S2 cell ID integer.
+
+    """
     # Populate _S2_LOOKUP_POS on first run.
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109
     #
@@ -449,22 +504,47 @@ def _s2_from_face_ij(face: int, i: int, j: int, level: int) -> int:
     return cell_id
 
 
-def _s2_from_face_ij_wrap(face: int, i: int, j: int, level: int) -> int:
+def _s2_face_ij_to_wrapped_cell_id(face: int, i: int, j: int, level: int) -> int:
+    """
+    Convert face + IJ to S2 cell ID, allowing for wrapping across faces.
+
+    This is done by converting back into S2Point XYZ, which will then land on another face and then
+    mapping that XYZ back to new face + IJ that can be used to contstruct the cell ID as normal.
+
+    See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2cell_id.cc#L446-L477
+
+    Args:
+        face: The cell ID face.
+        i: The I component on the face.
+        j: The J component on the face.
+        level: The level of the resulting S2 cell ID.
+
+    Returns:
+        The S2 cell ID integer.
+
+    """
+    # Check if I and J are on the face provided by ensuring they are in the valid range. If both are
+    # then no wrapping is needed and it's quicker to just use _s2_face_ij_to_cell_id immediately and
+    # avoid the projection/unprojection
     i_same = 0 <= i < _S2_MAX_SIZE
     j_same = 0 <= j < _S2_MAX_SIZE
     if i_same and j_same:
-        return _s2_from_face_ij(face, i, j, level)
-    if (not i_same) and (not j_same):
+        return _s2_face_ij_to_cell_id(face, i, j, level)
+    if not i_same and not j_same:
         return 0
 
-    # s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2cell_id.cc#L446-L477
+    # Convert IJ to UV using the linear mapping function and clamp such that UV can only be
+    # marginally outside of the face (-1 to 1)
     scale = 1.0 / _S2_MAX_SIZE
-    limit = math.nextafter(1, 2)
+    limit = math.nextafter(1, 2)  # Next floating point number above 1, towards 2
     u = max(-limit, min(limit, scale * ((2 * i) + 1 - _S2_MAX_SIZE)))
     v = max(-limit, min(limit, scale * ((2 * j) + 1 - _S2_MAX_SIZE)))
 
+    # Convert to XYZ and back, to get new face + UV
     face, u, v = _s2_xyz_to_face_uv(_s2_face_uv_to_xyz(face, (u, v)))
-    return _s2_from_face_ij(
+
+    # Project UV back to IJ and build cell ID using new face
+    return _s2_face_ij_to_cell_id(
         face, _s2_st_to_ij(0.5 * (u + 1)), _s2_st_to_ij(0.5 * (v + 1)), level
     )
 
@@ -595,7 +675,7 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
     # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L333-L336
     i, j = (_s2_st_to_ij(s), _s2_st_to_ij(t))  # pylint: disable=invalid-name
 
-    return _s2_from_face_ij(face, i, j, level)
+    return _s2_face_ij_to_cell_id(face, i, j, level)
 
 
 def lat_lon_to_token(lat: float, lon: float, level: int = 30) -> str:
@@ -650,7 +730,7 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
     if not cell_id_is_valid(cell_id):
         raise InvalidCellID('Cannot decode invalid S2 cell ID: {}'.format(cell_id))
 
-    face, i, j = _s2_to_face_ij_orientation(cell_id)
+    face, i, j = _s2_cell_id_to_face_ij(cell_id)
 
     # Resolve the center of the cell. For leaf cells, we add half the leaf cell size. For non-leaf
     # cells, we currently have one of either two cells diagonally around the cell center and want
@@ -993,38 +1073,53 @@ def token_to_parent_token(token: str, level: Optional[int] = None) -> str:
     return cell_id_to_token(cell_id_to_parent_cell_id(token_to_cell_id(token), level))
 
 
-def get_neighbor_cell_ids(
-    cell_id: int, edge: bool = True, corners: bool = False
+#
+# Neighbor functions
+#
+
+def cell_id_to_neighbor_cell_ids(
+    cell_id: int, edge: bool = True, corner: bool = False
 ) -> list[int]:
     """
-    List neighbor cells for input cell.
+    Get neighbor S2 cell ID for a given S2 cell ID.
 
-    There are two types of neighbors: edge neighbors and corner neighbors.
-    By default, only edge neighbors are returned. If corners is True, corner
-    neighbors are also added. Normally, there are 4 corner neighbors and 4 edge
-    neighbors. However, at cube corners, there are only 3 corner neighbors.
+    There are two types of neighbors: edge neighbors and corner neighbors, which
+    share either an edge or corner with the input cell respectively. Normally,
+    there are 4 corner neighbors and 4 edge neighbors for each cell. However, at
+    cube face corners, there are only 3 corner neighbors as there is not cell
+    beyond the corner vertex that isn't already represented by an edge neighbor.
+    
+    By default, only edge neighbors are returned from this function, unless
+    corner is True.
 
     See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2cell_id.cc#L545-L586
 
     Args:
         cell_id: The S2 cell ID integer.
-        edge: If True, add edge neighbors (default is True).
-        corners: If True, add corner neighbors (default is False).
+        edge: If True, return edge neighbors in list.
+        corner: If True, return corner neighbors in list.
 
     Returns:
        List of neighbor S2 cell IDs.
+
     """
     level = cell_id_to_level(cell_id)
-    size = _s2_get_size_ij(level)
-    face, i, j = _s2_to_face_ij_orientation(cell_id)
+    size = _s2_level_to_size_ij(level)
+    face, i, j = _s2_cell_id_to_face_ij(cell_id)
     neighbors = []
+
+    # Find edge neighbors by offsetting I & J by the cell size in each of the down, right, up, left
+    # directions
     if edge:
         for di, dj in [(0, -size), (size, 0), (0, size), (-size, 0)]:
-            neighbors.append(_s2_from_face_ij_wrap(face, i + di, j + dj, level))
-    if corners:
+            neighbors.append(_s2_face_ij_to_wrapped_cell_id(face, i + di, j + dj, level))
+
+    # Find corner neighbors
+    if corner:
         for di in (-size, size):
             for dj in (-size, size):
-                neighbor = _s2_from_face_ij_wrap(face, i + di, j + dj, level)
+                neighbor = _s2_face_ij_to_wrapped_cell_id(face, i + di, j + dj, level)
                 if neighbor > 0:
                     neighbors.append(neighbor)
+
     return neighbors
