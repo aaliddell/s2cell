@@ -1092,6 +1092,10 @@ def cell_id_to_neighbor_cell_ids(
     By default, only edge neighbors are returned from this function, unless
     corner is True.
 
+    If only edge neighbors are requested, the order of the returned cell IDs is
+    guaranteed to be in the order down, right, up, left from the input cell ID,
+    to match the behaviour of s2geometry GetEdgeNeighbors().
+
     See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2cell_id.cc#L545-L586
 
     Args:
