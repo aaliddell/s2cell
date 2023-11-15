@@ -5,6 +5,16 @@
 Changelog
 =========
 
+1.7.0
+-----
+
+- Added support for finding neighbors of a cell ID
+- Updated useful S2 links in docs
+- Updated testing for Python 3.11 and 3.12
+- Dropped testing of Python versions 3.7 and 3.8. These versions will likely continue to function
+  but are no longer explicitly supported
+
+
 1.6.0
 -----
 
