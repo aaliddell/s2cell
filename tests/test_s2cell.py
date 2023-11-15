@@ -351,7 +351,7 @@ def test_s2_cell_id_to_neighbor_cell_ids_edge():
     assert neighbors == expected_neighbors
 
 
-def test_s2_cell_id_to_neighbor_cell_ids_all():
+def test_cell_id_to_neighbor_cell_ids_all():
     # s2geometry/blob/7773d518b1f29caa1c2045eb66ec519e025be108/src/python/s2geometry_test.py#L86-L99
     cell = 0x466d319000000000
     expected_neighbors = [
@@ -384,7 +384,7 @@ def test_s2_cell_id_to_neighbor_cell_ids_all():
     assert neighbors == expected_neighbors
 
 
-def test_s2_cell_id_to_neighbor_cell_ids_at_cube_corner():
+def test_cell_id_to_neighbor_cell_ids_at_cube_corner():
     cell = 0x4aac000000000000
     expected_neighbors = [
         0x4aa4000000000000,
@@ -402,3 +402,14 @@ def test_s2_cell_id_to_neighbor_cell_ids_at_cube_corner():
     ]
     neighbors = s2cell.cell_id_to_neighbor_cell_ids(cell, edge=False, corner=True)
     assert neighbors == expected_neighbors
+
+
+def test_cell_id_to_neighbor_cell_ids_compat():
+    # Check against generated S2 tests
+    encode_file = pathlib.Path(__file__).parent / 's2_neighbor_corpus.csv.gz'
+    with gzip.open(str(encode_file), 'rt') as f:
+        for row in csv.DictReader(f):
+            edge_neighbors = {int(cell_id) for cell_id in row['edge_neighbors'].split(':')}
+            all_neighbors = {int(cell_id) for cell_id in row['all_neighbors'].split(':')}
+            assert set(s2cell.cell_id_to_neighbor_cell_ids(int(row['cell_id']))) == edge_neighbors
+            assert set(s2cell.cell_id_to_neighbor_cell_ids(int(row['cell_id']), corner=True)) == all_neighbors

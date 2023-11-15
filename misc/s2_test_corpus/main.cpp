@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <numeric>
 #include <iostream>
 #include <fstream>
 #include "s2/s2cell_id.h"
 #include "s2/s2latlng.h"
 
 
-// This writes two files that contain a set of test data from the reference C++ S2 implementation:
+// This writes three files that contain a set of test data from the reference C++ S2 implementation:
 //
 // - s2_encode_corpus.csv:
 //   lat, lon, level, encoded cell ID
@@ -26,20 +27,29 @@
 // - s2_decode_corpus.csv:
 //   cell_id, decoded lat, decoded lon, decoded level
 //
+// - s2_neighbor_corpus.csv:
+//   cell_id,neighbors
+//
 int main(int argc, char **argv) {
     // Config
     int steps = 60;
 
     // Open files
-    std::ofstream encode_file{}, decode_file{};
+    std::ofstream encode_file{}, decode_file{}, neighbor_file{};
+
     encode_file.open("s2_encode_corpus.csv");
     encode_file.precision(17);
     encode_file << "lat,lon,level,cell_id,token\n";
+
     decode_file.open("s2_decode_corpus.csv");
     decode_file.precision(17);
     decode_file << "cell_id,token,lat,lon,level\n";
 
-    // Generate encode corpus
+    neighbor_file.open("s2_neighbor_corpus.csv");
+    neighbor_file.precision(17);
+    neighbor_file << "cell_id,edge_neighbors,all_neighbors\n";
+
+    // Generate data
     for (int lat_idx = 0; lat_idx < steps; lat_idx++) {
         for (int lon_idx = 0; lon_idx < steps; lon_idx++) {
             // Create S2LatLng and leaf cell
@@ -61,6 +71,25 @@ int main(int argc, char **argv) {
                 auto dlon = decoded_latlon.lng().degrees();
                 auto dlevel = level_cell.level();
                 decode_file << cell_id << "," << token << "," << dlat << "," << dlon << "," << dlevel << "\n";
+            
+                // Find cell neighbors
+                S2CellId edge_neighbors[4];
+                level_cell.GetEdgeNeighbors(edge_neighbors);
+
+                std::vector<S2CellId> all_neighbors;
+                level_cell.AppendAllNeighbors(level, &all_neighbors);
+
+                neighbor_file << cell_id << "," << std::accumulate(
+                    std::begin(edge_neighbors), std::end(edge_neighbors), std::string{},
+                    [](std::string &s, S2CellId neigh_cell) {
+                        if (!s.empty()) s += ":";
+                        return s + std::to_string(neigh_cell.id());
+                    }) << "," << std::accumulate(
+                    std::begin(all_neighbors), std::end(all_neighbors), std::string{},
+                    [](std::string &s, S2CellId neigh_cell) {
+                        if (!s.empty()) s += ":";
+                        return s + std::to_string(neigh_cell.id());
+                    }) << "\n";
             }
         }
     }
@@ -68,6 +97,7 @@ int main(int argc, char **argv) {
     // Close files
     encode_file.close();
     decode_file.close();
+    neighbor_file.close();
 
     return 0;
 }

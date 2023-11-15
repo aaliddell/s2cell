@@ -1125,7 +1125,7 @@ def cell_id_to_neighbor_cell_ids(
     ]
 
     for di, dj, is_corner in offsets:
-        # All edge neighbors are always inluded
+        # All edge neighbors are always included when requested
         if not is_corner and edge:
             neighbors.append(_s2_face_ij_to_wrapped_cell_id(face, i + di, j + dj, level))
 
