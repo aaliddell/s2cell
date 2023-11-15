@@ -1105,6 +1105,10 @@ def cell_id_to_neighbor_cell_ids(
     Returns:
        List of neighbor S2 cell IDs.
 
+    Raises:
+        TypeError: If the cell_id is not int.
+        InvalidCellID: If the cell_id is invalid.
+
     """
     level = cell_id_to_level(cell_id)
     size = _s2_level_to_size_ij(level)
