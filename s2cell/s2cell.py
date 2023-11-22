@@ -164,7 +164,7 @@ def _s2_level_to_size_ij(level: int) -> int:
     return 1 << (_S2_MAX_LEVEL - level)
 
 
-def _s2_point_to_face(s2_point: tuple[float, float, float]) -> int:
+def _s2_point_to_face(s2_point: Tuple[float, float, float]) -> int:
     """
     Get the face containing a specific S2Point vector.
 
@@ -192,7 +192,7 @@ def _s2_point_to_face(s2_point: tuple[float, float, float]) -> int:
     return face
 
 
-def _s2_xyz_to_face_uv(s2_point: tuple[float, float, float]) -> tuple[int, float, float]:
+def _s2_xyz_to_face_uv(s2_point: Tuple[float, float, float]) -> Tuple[int, float, float]:
     """
     Convert S2Point XYZ to face + UV.
 
@@ -344,7 +344,7 @@ def _s2_init_lookups() -> None:
                 _S2_LOOKUP_IJ[pos | base_orientation] = ij | orientation
 
 
-def _s2_cell_id_to_face_ij(cell_id: int) -> tuple[int, int, int]:
+def _s2_cell_id_to_face_ij(cell_id: int) -> Tuple[int, int, int]:
     """
     Convert S2 cell ID to face + IJ.
 
