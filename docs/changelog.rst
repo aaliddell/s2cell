@@ -5,6 +5,12 @@
 Changelog
 =========
 
+1.7.1
+-----
+
+- Fixed type hinting to prevent unnecessary compatibility break with Python 3.8
+
+
 1.7.0
 -----
 
