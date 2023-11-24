@@ -8,6 +8,7 @@ Changelog
 1.7.2
 -----
 
+- Replaced pylint and flake8 with ruff
 - Further fixed type hinting to prevent unnecessary compatibility break with Python 3.8
 
 
