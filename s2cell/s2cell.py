@@ -18,7 +18,7 @@
 
 import math
 import re
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 
 #
@@ -1077,7 +1077,7 @@ def token_to_parent_token(token: str, level: Optional[int] = None) -> str:
 
 def cell_id_to_neighbor_cell_ids(
     cell_id: int, edge: bool = True, corner: bool = False
-) -> list[int]:
+) -> List[int]:
     """
     Get neighbor S2 cell ID for a given S2 cell ID.
 
