@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        python-version: [3.9, '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
 
     steps:
       - uses: actions/checkout@v4
@@ -40,9 +40,5 @@ jobs:
           python-version: '3.11'
       - name: Install nox
         run: pip install nox
-      - name: Run flake8
-        run: nox -s flake8
-      - name: Run pylint
-        run: nox -s pylint
-      - name: Run pydocstyle
-        run: nox -s pydocstyle
+      - name: Run Ruff
+        run: nox -s ruff

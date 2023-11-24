@@ -14,6 +14,6 @@
 
 """Minimal Python S2 Geometry cell ID, token and lat/lon conversion library."""
 
-from .s2cell import *
+from .s2cell import *  # noqa: F403
 
 __version__ = '1.7.1'

@@ -3,7 +3,7 @@ import nox
 
 nox.options.error_on_external_run = True
 nox.options.reuse_existing_virtualenvs = True
-nox.options.sessions = ['coverage', 'docs', 'flake8', 'pylint', 'pydocstyle']
+nox.options.sessions = ['coverage', 'docs', 'ruff']
 
 
 @nox.session()
@@ -15,19 +15,9 @@ def coverage(session):
     )
 
 @nox.session()
-def flake8(session):
-    session.install('-e', '.[dev]')
-    session.run('flake8', 's2cell', 'tests', *session.posargs)
-
-@nox.session()
-def pylint(session):
-    session.install('-e', '.[dev]')
-    session.run('pylint', 's2cell', *session.posargs)
-
-@nox.session()
-def pydocstyle(session):
-    session.install('-e', '.[dev]')
-    session.run('pydocstyle', 's2cell', *session.posargs)
+def ruff(session):
+    session.install('.[dev]')
+    session.run('ruff', 'check', 's2cell', 'tests', *session.posargs)
 
 @nox.session()
 def test(session):

@@ -1,0 +1,51 @@
+line-length = 100
+
+extend-select = [
+    "E", "F", "B", "Q", "D", "N", "ASYNC", "BLE", "B", "A", "C4", "DTZ", "ISC", "T20",
+    "RSE", "RET", "SLF", "SLOT", "SIM", "TID", "ARG", "PTH", "NPY", "PERF", "LOG", "RUF", "W",
+]
+extend-ignore = [
+    # Ignore 'Multi-line docstring summary should start at the first line'
+    "D212",
+
+    # Allow elif after return/raise/continue
+    "RET505", "RET506", "RET507",
+
+    # Allow 'return None'
+    "RET501",
+
+    # Ignore warnings.warn missing stacklevel arg
+    "B028",
+]
+
+extend-exclude = [".ipynb_checkpoints"]
+
+[extend-per-file-ignores]
+"__init__.py" = ["F401"]  # Ignore unused imports in __init__.py files
+"test_*.py" = [
+    # Ignore line too long in tests
+    "E501",
+
+    # Ignore pydocstyle in tests
+    "D100", "D101", "D102", "D103",
+
+    # Ignore use of assert in tests
+    "S101",
+
+    # Allow tests to access private members
+    "SLF001",
+
+    # Allow tests to have unused args
+    "ARG001", "ARG004",
+]
+"conftest.py" = ["E501"]  # Ignore line too long in tests setup
+
+[pydocstyle]
+convention = "google"
+
+[flake8-quotes]
+inline-quotes = "single"
+multiline-quotes = "single"
+
+[isort]
+force-single-line = true  # Match pre-commit behaviour

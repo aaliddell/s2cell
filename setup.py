@@ -32,15 +32,13 @@ setuptools.setup(
     install_requires=[],
     extras_require={
         'dev': [
-            'flake8~=6.1.0',
             'furo==2023.9.10',
             'nox~=2023.4.22',
-            'pydocstyle~=6.3.0',
-            'pylint~=3.0.2',
             'pytest~=7.4.3',
             'pytest-cov~=4.1.0',
             'pytest-instafail~=0.5.0',
             'pytest-xdist~=3.3.1',
+            'ruff~=0.1.6',
             'Sphinx~=7.2.6',
             'sphinx-notfound-page~=1.0.0',
             'sphinx-sitemap==2.5.1',

@@ -209,7 +209,7 @@ def test_invalid_cell_id_to_level():
     with pytest.raises(TypeError, match=re.escape("Cannot decode S2 cell ID from type: <class 'float'>")):
         s2cell.cell_id_to_level(1.0)
 
-    with pytest.raises(s2cell.InvalidCellID, match=re.escape("Cannot decode invalid S2 cell ID: 0")):
+    with pytest.raises(s2cell.InvalidCellID, match=re.escape('Cannot decode invalid S2 cell ID: 0')):
         s2cell.cell_id_to_level(0)
 
 

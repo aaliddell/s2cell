@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=too-many-lines
-
 """Minimal Python S2 Geometry cell ID, token and lat/lon conversion library."""
 
 import math
@@ -25,11 +23,11 @@ from typing import List, Optional, Tuple
 # s2cell exceptions
 #
 
-class InvalidCellID(Exception):
+class InvalidCellID(Exception):  # noqa: N818
     """Exception type for invalid cell IDs."""
 
 
-class InvalidToken(Exception):
+class InvalidToken(Exception):  # noqa: N818
     """Exception type for invalid tokens."""
 
 
@@ -229,18 +227,18 @@ def _s2_xyz_to_face_uv(s2_point: Tuple[float, float, float]) -> Tuple[int, float
     # The negation of the the two components is then selected:
     # U: (face in [1, 2, 5]) ? -1: 1
     # V: (face in [2, 4, 5])) ? -1: 1
-    uv = (  # pylint: disable=invalid-name
+    uv = (
         s2_point[1 - ((face + 1) >> 1)] / s2_point[face % 3],  # U
         s2_point[2 - (face >> 1)] / s2_point[face % 3]         # V
     )
     if face in (1, 2, 5):
-        uv = (-uv[0], uv[1])  # Negate U  # pylint: disable=invalid-name
+        uv = (-uv[0], uv[1])  # Negate U
     if face in (2, 4, 5):
-        uv = (uv[0], -uv[1])  # Negate V  # pylint: disable=invalid-name
+        uv = (uv[0], -uv[1])  # Negate V
     return face, uv[0], uv[1]
 
 
-def _s2_face_uv_to_xyz(  # pylint: disable=invalid-name
+def _s2_face_uv_to_xyz(
         face: int, uv: Tuple[float, float]
 ) -> Tuple[float, float, float]:
     """
@@ -299,7 +297,7 @@ def _s2_init_lookups() -> None:
     See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2cell_id.cc#L75-L109
 
     """
-    global _S2_LOOKUP_POS, _S2_LOOKUP_IJ  # pylint: disable=global-statement
+    global _S2_LOOKUP_POS, _S2_LOOKUP_IJ
     if _S2_LOOKUP_POS is None or _S2_LOOKUP_IJ is None:  # pragma: no branch
         # Initialise empty lookup tables
         lookup_length = 1 << int(2 * _S2_LOOKUP_BITS + 2)  # = 1024
@@ -314,7 +312,7 @@ def _s2_init_lookups() -> None:
             # the fastest since it does not reuse the common ancestor of neighbouring positions, but
             # is simpler to read
             for pos in range(4 ** 4):  # 4 levels of sub-divisions
-                ij = 0  # Has pattern iiiijjjj, not ijijijij  # pylint: disable=invalid-name
+                ij = 0  # Has pattern iiiijjjj, not ijijijij
                 orientation = base_orientation
 
                 # Walk the pairs of bits of pos, from most significant to least, getting IJ and
@@ -326,7 +324,7 @@ def _s2_init_lookups() -> None:
                     # Get the I and J for the sub-cell index. These need to be spread into iiiijjjj
                     # by inserting as bit positions 4 and 0
                     ij_bits = _S2_POS_TO_IJ[orientation][bit_pair]
-                    ij = (  # pylint: disable=invalid-name
+                    ij = (
                         (ij << 1)  # Free up position 4 and 0 from old IJ
                         | ((ij_bits & 2) << 3)  # I bit in position 4
                         | (ij_bits & 1)  # J bit in position 0
@@ -336,7 +334,7 @@ def _s2_init_lookups() -> None:
                     orientation = orientation ^ _S2_POS_TO_ORIENTATION_MASK[bit_pair]
 
                 # Shift IJ and position to allow orientation bits in LSBs of lookup
-                ij <<= 2  # pylint: disable=invalid-name
+                ij <<= 2
                 pos <<= 2
 
                 # Write lookups
@@ -501,7 +499,7 @@ def _s2_face_ij_to_cell_id(face: int, i: int, j: int, level: int) -> int:
     least_significant_bit_mask = 1 << (2 * (_S2_MAX_LEVEL - level))
     cell_id = (cell_id & -least_significant_bit_mask) | least_significant_bit_mask
 
-    return cell_id
+    return cell_id  # noqa: RET504
 
 
 def _s2_face_ij_to_wrapped_cell_id(face: int, i: int, j: int, level: int) -> int:
@@ -624,7 +622,7 @@ def token_to_cell_id(token: str) -> int:
 # Encode functions
 #
 
-def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
+def lat_lon_to_cell_id(
         lat: float, lon: float, level: int = 30
 ) -> int:
     """
@@ -667,11 +665,11 @@ def lat_lon_to_cell_id(  # pylint: disable=too-many-locals
 
     # Project cube-space UV to cell-space ST
     # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L317-L320
-    s, t = _s2_uv_to_st(u), _s2_uv_to_st(v)  # pylint: disable=invalid-name
+    s, t = _s2_uv_to_st(u), _s2_uv_to_st(v)
 
     # Convert ST to IJ integers
     # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L333-L336
-    i, j = (_s2_st_to_ij(s), _s2_st_to_ij(t))  # pylint: disable=invalid-name
+    i, j = (_s2_st_to_ij(s), _s2_st_to_ij(t))
 
     return _s2_face_ij_to_cell_id(face, i, j, level)
 
@@ -707,7 +705,7 @@ def lat_lon_to_token(lat: float, lon: float, level: int = 30) -> str:
 # Decode functions
 #
 
-def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
+def cell_id_to_lat_lon(
     cell_id: int
 ) -> Tuple[float, float]:
     """
@@ -741,16 +739,16 @@ def cell_id_to_lat_lon(  # pylint: disable=too-many-locals
     is_leaf = bool(cell_id & 1)  # Cell is leaf cell when trailing one bit is in LSB
     apply_correction = not is_leaf and ((i ^ (cell_id >> 2)) & 1)
     correction_delta = 1 if is_leaf else (2 if apply_correction else 0)
-    si = (i << 1) + correction_delta  # pylint: disable=invalid-name
-    ti = (j << 1) + correction_delta  # pylint: disable=invalid-name
+    si = (i << 1) + correction_delta
+    ti = (j << 1) + correction_delta
 
     # Convert integer si/ti to double ST
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L338-L341
-    st = (_s2_si_ti_to_st(si), _s2_si_ti_to_st(ti))  # pylint: disable=invalid-name
+    st = (_s2_si_ti_to_st(si), _s2_si_ti_to_st(ti))
 
     # Project cell-space ST to cube-space UV
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L312-L315
-    uv = (_s2_st_to_uv(st[0]), _s2_st_to_uv(st[1]))  # pylint: disable=invalid-name
+    uv = (_s2_st_to_uv(st[0]), _s2_st_to_uv(st[1]))
 
     # Convert face + UV to S2Point XYZ
     # See s2geometry/blob/c59d0ca01ae3976db7f8abdc83fcc871a3a95186/src/s2/s2coords.h#L348-L357
@@ -874,7 +872,7 @@ def cell_id_is_valid(cell_id: int) -> bool:
 
     # Check trailing 1 bit is in one of the even bit positions allowed for the 30 levels, using the
     # mask: 0b0001010101010101010101010101010101010101010101010101010101010101 = 0x1555555555555555
-    lowest_set_bit = cell_id & (~cell_id + 1)  # pylint: disable=invalid-unary-operand-type
+    lowest_set_bit = cell_id & (~cell_id + 1)
     if not lowest_set_bit & 0x1555555555555555:
         return False
 
@@ -1037,7 +1035,7 @@ def cell_id_to_parent_cell_id(
     least_significant_bit_mask = 1 << (2 * (_S2_MAX_LEVEL - level))
     cell_id = (cell_id & -least_significant_bit_mask) | least_significant_bit_mask
 
-    return cell_id
+    return cell_id  # noqa: RET504
 
 
 def token_to_parent_token(token: str, level: Optional[int] = None) -> str:
