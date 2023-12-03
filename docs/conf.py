@@ -83,7 +83,7 @@ html_logo = 'static/logo.min.svg'
 html_favicon = 'static/logo-64.png'
 
 # Base URL for docs
-html_baseurl = 'https://docs.s2cell.aliddell.com'
+html_baseurl = 'https://docs.s2cell.aliddell.com/'
 
 # Extra vars to provide to templating
 html_context = {
