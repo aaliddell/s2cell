@@ -33,7 +33,7 @@ Visualisations
 
 Mapping and visualisation tools for S2 cells.
 
-- `S2 Region Coverer Online Viewer <https://igorgatis.github.io/ws2/>`: Interactive S2 cell covering calculator.
+- `S2 Region Coverer Online Viewer <https://igorgatis.github.io/ws2/>`__: Interactive S2 cell covering calculator.
 
 
 Implementations
