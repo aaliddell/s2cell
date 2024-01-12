@@ -5,6 +5,12 @@
 Changelog
 =========
 
+1.7.3
+-----
+
+- Fixed doc links and sitemaps
+
+
 1.7.2
 -----
 
