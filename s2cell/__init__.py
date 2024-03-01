@@ -16,4 +16,4 @@
 
 from .s2cell import *  # noqa: F403
 
-__version__ = '1.7.3'
+__version__ = '1.8.0'

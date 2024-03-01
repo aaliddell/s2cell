@@ -5,6 +5,12 @@
 Changelog
 =========
 
+1.8.0
+-----
+
+- Exposed IJ to cell ID conversion functions as publicly available
+
+
 1.7.3
 -----
 
