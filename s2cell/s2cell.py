@@ -342,7 +342,7 @@ def _s2_init_lookups() -> None:
                 _S2_LOOKUP_IJ[pos | base_orientation] = ij | orientation
 
 
-def _s2_cell_id_to_face_ij(cell_id: int) -> Tuple[int, int, int]:
+def s2_cell_id_to_face_ij(cell_id: int) -> Tuple[int, int, int]:
     """
     Convert S2 cell ID to face + IJ.
 
@@ -426,7 +426,7 @@ def _s2_cell_id_to_face_ij(cell_id: int) -> Tuple[int, int, int]:
     return face, i, j
 
 
-def _s2_face_ij_to_cell_id(face: int, i: int, j: int, level: int) -> int:
+def s2_face_ij_to_cell_id(face: int, i: int, j: int, level: int) -> int:
     """
     Convert face + IJ to S2 cell ID.
 
@@ -522,12 +522,12 @@ def _s2_face_ij_to_wrapped_cell_id(face: int, i: int, j: int, level: int) -> int
 
     """
     # Check if I and J are on the face provided by ensuring they are in the valid range. If both are
-    # then no wrapping is needed and it's quicker to just use _s2_face_ij_to_cell_id immediately and
+    # then no wrapping is needed and it's quicker to just use s2_face_ij_to_cell_id immediately and
     # avoid the projection/unprojection
     i_on_same_face = 0 <= i < _S2_MAX_SIZE
     j_on_same_face = 0 <= j < _S2_MAX_SIZE
     if i_on_same_face and j_on_same_face:
-        return _s2_face_ij_to_cell_id(face, i, j, level)
+        return s2_face_ij_to_cell_id(face, i, j, level)
 
     # Convert IJ to UV using the linear mapping function and clamp such that UV can only be
     # marginally outside of the face (-1 to 1)
@@ -540,7 +540,7 @@ def _s2_face_ij_to_wrapped_cell_id(face: int, i: int, j: int, level: int) -> int
     face, u, v = _s2_xyz_to_face_uv(_s2_face_uv_to_xyz(face, (u, v)))
 
     # Project UV back to IJ and build cell ID using new face
-    return _s2_face_ij_to_cell_id(
+    return s2_face_ij_to_cell_id(
         face, _s2_st_to_ij(0.5 * (u + 1)), _s2_st_to_ij(0.5 * (v + 1)), level
     )
 
@@ -671,7 +671,7 @@ def lat_lon_to_cell_id(
     # See s2geometry/blob/2c02e21040e0b82aa5719e96033d02b8ce7c0eff/src/s2/s2coords.h#L333-L336
     i, j = (_s2_st_to_ij(s), _s2_st_to_ij(t))
 
-    return _s2_face_ij_to_cell_id(face, i, j, level)
+    return s2_face_ij_to_cell_id(face, i, j, level)
 
 
 def lat_lon_to_token(lat: float, lon: float, level: int = 30) -> str:
@@ -726,7 +726,7 @@ def cell_id_to_lat_lon(
     if not cell_id_is_valid(cell_id):
         raise InvalidCellID('Cannot decode invalid S2 cell ID: {}'.format(cell_id))
 
-    face, i, j = _s2_cell_id_to_face_ij(cell_id)
+    face, i, j = s2_cell_id_to_face_ij(cell_id)
 
     # Resolve the center of the cell. For leaf cells, we add half the leaf cell size. For non-leaf
     # cells, we currently have one of either two cells diagonally around the cell center and want
@@ -1110,7 +1110,7 @@ def cell_id_to_neighbor_cell_ids(
     """
     level = cell_id_to_level(cell_id)
     size = _s2_level_to_size_ij(level)
-    face, i, j = _s2_cell_id_to_face_ij(cell_id)
+    face, i, j = s2_cell_id_to_face_ij(cell_id)
     neighbors = []
 
     # Define offsets for each potentially neighboring cell, along with a flag indicating if the cell
